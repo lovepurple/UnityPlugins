@@ -1,0 +1,24 @@
+{
+    "configurations": [
+        {
+            "name": "Win32",
+            "includePath": [
+                "${workspaceRoot}",
+                "D:\\DevEnvironment\\arduino-1.8.9\\tools\\**",
+                "D:\\DevEnvironment\\arduino-1.8.9\\libraries\\**",
+                "D:\\DevEnvironment\\arduino-1.8.9\\hardware\\**",
+                "C:\\Users\\Administrator\\Documents\\Arduino\\hardware\\tools\\**",
+                "C:\\Users\\Administrator\\Documents\\Arduino\\libraries\\**",
+                "D:\\DevEnvironment\\arduino-1.8.9\\hardware\\arduino\\avr\\**"
+            ],
+            "forcedInclude": [
+                "D:\\DevEnvironment\\arduino-1.8.9\\hardware\\arduino\\avr\\cores\\arduino\\Arduino.h"
+            ],
+            "intelliSenseMode": "clang-x64",
+            "compilerPath": "D:/Softwares/Microsoft Visual Studio/2019/Professional/VC/Tools/MSVC/14.22.27905/bin/Hostx64/x64/cl.exe",
+            "cStandard": "c11",
+            "cppStandard": "c++17"
+        }
+    ],
+    "version": 4
+}

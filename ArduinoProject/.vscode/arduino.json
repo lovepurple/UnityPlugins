@@ -1,0 +1,5 @@
+{
+    "sketch": "SkateBoardDriver\\SkateBoardDriver.ino",
+    "board": "arduino:avr:uno",
+    "port": "COM3"
+}
