@@ -4,6 +4,8 @@
 
 #pragma once
 
+#ifdef __cplusplus
+
 #ifndef ARDUINOJSON_DEBUG
 #ifdef __clang__
 #pragma clang system_header
@@ -11,11 +13,10 @@
 #pragma GCC system_header
 #endif
 #endif
-
-#define ARDUINOJSON_VERSION "6.11.4"
+#define ARDUINOJSON_VERSION "6.11.5"
 #define ARDUINOJSON_VERSION_MAJOR 6
 #define ARDUINOJSON_VERSION_MINOR 11
-#define ARDUINOJSON_VERSION_REVISION 4
+#define ARDUINOJSON_VERSION_REVISION 5
 #if defined(_MSC_VER)
 #define ARDUINOJSON_HAS_INT64 1
 #else
@@ -145,7 +146,6 @@
       ARDUINOJSON_USE_DOUBLE, ARDUINOJSON_DECODE_UNICODE,                \
       ARDUINOJSON_ENABLE_NAN, ARDUINOJSON_ENABLE_INFINITY,               \
       ARDUINOJSON_ENABLE_PROGMEM)
-
 #ifdef ARDUINOJSON_DEBUG
 #include <assert.h>
 #define ARDUINOJSON_ASSERT(X) assert(X)
@@ -846,6 +846,56 @@ inline ArduinoStringAdapter adaptString(const ::String& str) {
 }  // namespace ARDUINOJSON_NAMESPACE
 #endif
 #if ARDUINOJSON_ENABLE_PROGMEM
+namespace ARDUINOJSON_NAMESPACE {
+struct pgm_p {
+  pgm_p(const char* p) : address(p) {}
+  const char* address;
+};
+}  // namespace ARDUINOJSON_NAMESPACE
+#ifndef strlen_P
+inline size_t strlen_P(ARDUINOJSON_NAMESPACE::pgm_p s) {
+  const char* p = s.address;
+  while (pgm_read_byte(p)) p++;
+  return size_t(p - s.address);
+}
+#endif
+#ifndef strncmp_P
+inline int strncmp_P(const char* a, ARDUINOJSON_NAMESPACE::pgm_p b, size_t n) {
+  const char* s1 = a;
+  const char* s2 = b.address;
+  while (n-- > 0) {
+    char c1 = *s1++;
+    char c2 = static_cast<char>(pgm_read_byte(s2++));
+    if (c1 < c2) return -1;
+    if (c1 > c2) return 1;
+    if (c1 == 0 /* and c2 as well */) return 0;
+  }
+  return 0;
+}
+#endif
+#ifndef strcmp_P
+inline int strcmp_P(const char* a, ARDUINOJSON_NAMESPACE::pgm_p b) {
+  const char* s1 = a;
+  const char* s2 = b.address;
+  for (;;) {
+    char c1 = *s1++;
+    char c2 = static_cast<char>(pgm_read_byte(s2++));
+    if (c1 < c2) return -1;
+    if (c1 > c2) return 1;
+    if (c1 == 0 /* and c2 as well */) return 0;
+  }
+}
+#endif
+#ifndef memcpy_P
+inline void* memcpy_P(void* dst, ARDUINOJSON_NAMESPACE::pgm_p src, size_t n) {
+  uint8_t* d = reinterpret_cast<uint8_t*>(dst);
+  const char* s = src.address;
+  while (n-- > 0) {
+    *d++ = pgm_read_byte(s++);
+  }
+  return dst;
+}
+#endif
 namespace ARDUINOJSON_NAMESPACE {
 class FlashStringAdapter {
  public:
@@ -2953,7 +3003,6 @@ class ObjectRef : public ObjectRefBase<CollectionData>,
   MemoryPool* _pool;
 };
 }  // namespace ARDUINOJSON_NAMESPACE
-
 namespace ARDUINOJSON_NAMESPACE {
 class ArrayRef;
 class ObjectRef;
@@ -3536,7 +3585,6 @@ class StaticJsonDocument : public JsonDocument {
   char _buffer[_capacity];
 };
 }  // namespace ARDUINOJSON_NAMESPACE
-
 namespace ARDUINOJSON_NAMESPACE {
 template <typename TArray>
 inline ArrayRef ArrayShortcuts<TArray>::createNestedArray() const {
@@ -4045,7 +4093,6 @@ inline VariantRef VariantRef::getOrAddMember(const TString &key) const {
   return VariantRef(_pool, variantGetOrCreate(_data, key, _pool));
 }
 }  // namespace ARDUINOJSON_NAMESPACE
-
 namespace ARDUINOJSON_NAMESPACE {
 class StringBuilder {
  public:
@@ -4306,7 +4353,7 @@ class UnsafeFlashStringReader {
   explicit UnsafeFlashStringReader(const __FlashStringHelper* ptr)
       : _ptr(reinterpret_cast<const char*>(ptr)) {}
   int read() {
-    return pgm_read_byte_near(_ptr++);
+    return pgm_read_byte(_ptr++);
   }
 };
 class SafeFlashStringReader {
@@ -4317,7 +4364,7 @@ class SafeFlashStringReader {
       : _ptr(reinterpret_cast<const char*>(ptr)), _end(_ptr + size) {}
   int read() {
     if (_ptr < _end)
-      return pgm_read_byte_near(_ptr++);
+      return pgm_read_byte(_ptr++);
     else
       return -1;
   }
@@ -5658,7 +5705,6 @@ inline size_t measureMsgPack(const TSource& source) {
   return measure<MsgPackSerializer>(source);
 }
 }  // namespace ARDUINOJSON_NAMESPACE
-
 #ifdef __GNUC__
 #define ARDUINOJSON_PRAGMA(x) _Pragma(#x)
 #define ARDUINOJSON_COMPILE_ERROR(msg) ARDUINOJSON_PRAGMA(GCC error msg)
@@ -5670,7 +5716,6 @@ inline size_t measureMsgPack(const TSource& source) {
 #define JsonBuffer ARDUINOJSON_DEPRECATION_ERROR(JsonBuffer, class)
 #define RawJson ARDUINOJSON_DEPRECATION_ERROR(RawJson, function)
 #endif
-
 namespace ArduinoJson {
 typedef ARDUINOJSON_NAMESPACE::ArrayConstRef JsonArrayConst;
 typedef ARDUINOJSON_NAMESPACE::ArrayRef JsonArray;
@@ -5696,8 +5741,15 @@ using ARDUINOJSON_NAMESPACE::serializeJson;
 using ARDUINOJSON_NAMESPACE::serializeJsonPretty;
 using ARDUINOJSON_NAMESPACE::serializeMsgPack;
 using ARDUINOJSON_NAMESPACE::StaticJsonDocument;
-
 namespace DeserializationOption {
 using ARDUINOJSON_NAMESPACE::NestingLimit;
 }
 }  // namespace ArduinoJson
+
+using namespace ArduinoJson;
+
+#else
+
+#error ArduinoJson requires a C++ compiler, please change file extension to .cc or .cpp
+
+#endif
