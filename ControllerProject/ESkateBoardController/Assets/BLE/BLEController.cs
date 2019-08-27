@@ -125,6 +125,7 @@
             {
                 System.Action<string> callback = ((string message) =>
                 {
+                    Debug.Log(message);
                     BLEControllerEventHandler.OnBleDidCompletePeripheralScan(message);
                 });
                 PluginInstance.Call("_ScanForPeripherals", new object[] { new UnityCallback(callback) });
