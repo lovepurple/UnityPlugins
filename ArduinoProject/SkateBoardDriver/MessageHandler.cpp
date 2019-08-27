@@ -10,10 +10,11 @@ MessageHandler::MessageHandler(uint8_t rx,uint8_t tx,uint16_t bandRate = 9600){
 
 void MessageHandler::Tick()
 {
+    char tempBuffer[64];
     while(this->m_bluetooth->available() > 0){
         Serial.print(m_bluetooth->read());
     }
-    Serial.println("--------------------");
+    
 }
 
 void MessageHandler::SendMessage(char* sendBuffer){
@@ -27,14 +28,17 @@ void MessageHandler::SendMessage(char* sendBuffer){
         index++;
     }
     this->m_bluetooth->write("\r\n");
-    
-
-    // for(int i= 0;i < sizeof(sendBuffer);++i)
-    //     
-    
-    // this->m_serial->write("\r\n");
 }
 
 NeoSWSerial* MessageHandler::GetBluetoothSerial(){
     return this->m_bluetooth;
+}
+
+
+void MessageHandler::SetMotorController(MotorController* motorController){
+    this->m_motorColtroller = motorController;
+}
+
+MotorController* MessageHandler::GetMotorController(){
+    return this->m_motorColtroller;
 }

@@ -2,6 +2,7 @@
 //todo? 消息是\0结尾，每次发送新行，换行符 \n
 
 #include "MessageHandler.h"
+#include "MotorController.h"
 
 //蓝牙模块引脚
 #define BLUETOOTH_RX 2
@@ -10,6 +11,7 @@
 //电调控制引脚（使用TimerOne）
 #define ESC_A 9
 #define ECS_B 10
+#define MOTOR_POWER_PIN 7       //一个引脚可以控制两个引脚
 
 // size_t bufferSize =0;
 // char* sendBuffer = new char[128];
@@ -22,6 +24,7 @@
 // AltSoftSerial altSerial(2,4);
 
 MessageHandler *pMessageHandler = nullptr;
+MotorController* pMotorController = nullptr;
 
 void setup()
 {
@@ -31,22 +34,30 @@ void setup()
     while (!Serial)
     {
     }
+
+    pMotorController = new MotorController(MOTOR_POWER_PIN,ESC_A,ECS_B);
     
 
 }
 
 void loop()
 {
-
-    if (pMessageHandler != nullptr)
-        pMessageHandler->Tick();
-
     delay(1000);
-    char buffer[16];
-    ltoa(millis(),buffer,10);
-    pMessageHandler->SendMessage(buffer);
-    Serial.println("sending ...");
-    Serial.println(buffer);
+    Serial.println("Power ON");
+    pMotorController->PowerOn();
+
+    delay(500);
+    pMotorController->PowerOff();
+    delay(500);
+    // if (pMessageHandler != nullptr)
+    //     pMessageHandler->Tick();
+
+    // delay(1000);
+    // char buffer[16];
+    // ltoa(millis(),buffer,10);
+    // pMessageHandler->SendMessage(buffer);
+    // Serial.println("sending ...");
+    // Serial.println(buffer);
 
     // while(pBluetooth->available() >0)
     // {

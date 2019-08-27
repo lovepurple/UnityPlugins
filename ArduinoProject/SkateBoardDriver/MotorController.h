@@ -3,14 +3,20 @@
 */
 #ifndef MOTORCONTROLLER_H
 #define MOTORCONTROLLER_H
+#include <Arduino.h>
 
 class MotorController
 {
 private:
-    /* data */
+    uint8_t m_motorPowerPin;
+
 public:
-    MotorController(/* args */);
+    MotorController(uint8_t motorPowerPin,uint8_t ecsPinA,uint8_t ecsPinB)
     ~MotorController();
+
+    void PowerOn();
+
+    void PowerOff();
 };
 
 #endif
