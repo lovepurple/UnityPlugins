@@ -3,8 +3,13 @@
 
 #include "MessageHandler.h"
 
+//蓝牙模块引脚
 #define BLUETOOTH_RX 2
 #define BLUETOOTH_TX 4
+
+//电调控制引脚（使用TimerOne）
+#define ESC_A 9
+#define ECS_B 10
 
 // size_t bufferSize =0;
 // char* sendBuffer = new char[128];

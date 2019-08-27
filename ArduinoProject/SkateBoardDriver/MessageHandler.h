@@ -1,4 +1,6 @@
-
+/*
+    消息处理中心
+*/
 #ifndef MESSAGEHANDLER_H
 #define MESSAGEHANDLER_H
 
