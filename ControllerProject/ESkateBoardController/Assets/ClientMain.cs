@@ -19,6 +19,6 @@ public class ClientMain : MonoBehaviour
 
     private void OnBtnSendClick(GameObject btn)
     {
-        Debug.Log("nidaye");
+        
     }
 }

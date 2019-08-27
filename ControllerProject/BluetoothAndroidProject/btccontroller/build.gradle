@@ -1,0 +1,29 @@
+apply plugin: 'com.android.library'     //com.android.application 生成的是apk   如果生成.arr 需要改成com.android.library
+android {
+    compileSdkVersion 29
+    buildToolsVersion "29.0.2"
+
+
+    defaultConfig {
+//        applicationId "com.lovepurple.btccontroller"    arr不需要
+        minSdkVersion 21
+        targetSdkVersion 29
+        versionCode 1
+        versionName "1.0"
+
+//        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"  test不需要
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+}
+
+dependencies {
+    implementation files('libs/classes.jar')
+    implementation files('libs/gson-2.8.5.jar')
+}

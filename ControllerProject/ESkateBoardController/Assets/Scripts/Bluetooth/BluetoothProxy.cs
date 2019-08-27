@@ -16,7 +16,7 @@ public class BluetoothProxy
         switch (Application.platform)
         {
             case RuntimePlatform.Android:
-                m_device = new AndroidBluetoothDevice();
+                m_device = new AndroidBluetoothClassicDevice();
                 break;
             default:
                 throw new System.Exception($"Platform{Application.platform.ToString()} BluetoothDevice Not Implememt");
@@ -25,7 +25,7 @@ public class BluetoothProxy
     }
 
 
-
+    public IBluetoothDevice BluetoothDevice => this.m_device;
 
     public static BluetoothProxy Intance => m_instance ?? (m_instance = new BluetoothProxy());  //??初始化的写法
 }
