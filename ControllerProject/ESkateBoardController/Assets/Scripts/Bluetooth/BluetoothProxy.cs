@@ -8,7 +8,6 @@ public class BluetoothProxy
 
     private IBluetoothDevice m_device;
 
-
     private BluetoothProxy() { }
 
     public void InitializeBluetoothProxy()
@@ -22,6 +21,9 @@ public class BluetoothProxy
                 throw new System.Exception($"Platform{Application.platform.ToString()} BluetoothDevice Not Implememt");
 
         }
+
+        if (m_device != null)
+            m_device.InitializeBluetoothDevice();
     }
 
 

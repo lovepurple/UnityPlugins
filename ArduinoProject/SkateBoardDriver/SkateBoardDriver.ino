@@ -13,16 +13,6 @@
 #define ECS_B 10
 #define MOTOR_POWER_PIN 7       //一个引脚可以控制两个引脚
 
-// size_t bufferSize =0;
-// char* sendBuffer = new char[128];
-
-//C++ 中，如果成员需要在其它位置初始化（这里只是个引用），需要用指针
-// SoftwareSerial *pBluetooth = &(SoftwareSerial(BLUETOOTH_RX, BLUETOOTH_TX));
-// MessageHandler *pMessageHandler = nullptr;
-// SoftwareSerial bluetooth(BLUETOOTH_RX, BLUETOOTH_TX);
-
-// AltSoftSerial altSerial(2,4);
-
 MessageHandler *pMessageHandler = nullptr;
 MotorController* pMotorController = nullptr;
 
@@ -37,25 +27,20 @@ void setup()
 
     pMotorController = new MotorController(MOTOR_POWER_PIN,ESC_A,ECS_B);
     
+    pMessageHandler->SetMotorController(pMotorController);
 
 }
 
 void loop()
 {
+    if (pMessageHandler != nullptr)
+        pMessageHandler->Tick();
+
+    
     delay(1000);
-    Serial.println("Power ON");
-    pMotorController->PowerOn();
-
-    delay(500);
-    pMotorController->PowerOff();
-    delay(500);
-    // if (pMessageHandler != nullptr)
-    //     pMessageHandler->Tick();
-
-    // delay(1000);
-    // char buffer[16];
-    // ltoa(millis(),buffer,10);
-    // pMessageHandler->SendMessage(buffer);
+    char buffer[16];
+    ltoa(millis(),buffer,10);
+    pMessageHandler->SendMessage(buffer);
     // Serial.println("sending ...");
     // Serial.println(buffer);
 
@@ -65,24 +50,3 @@ void loop()
     // }
 
 }
-
-// #include "SoftwareSerial.h"
-
-// SoftwareSerial* pBluetooth;
-// void setup() {
-// 	pBluetooth = new SoftwareSerial(2, 4);
-// 	pBluetooth->begin(38400);
-
-// 	Serial.begin(9600);
-// }
-
-// // the loop function runs over and over again until power down or reset
-// void loop() {
-// 	while (pBluetooth->available() > 0)
-// 	{
-// 		Serial.print((char)pBluetooth->read());
-// 	}
-// 	delay(5000);
-
-// 	Serial.println("--------------");
-// }

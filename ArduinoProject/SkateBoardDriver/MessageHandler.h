@@ -8,7 +8,6 @@
 #include "NeoSWSerial.h"
 
 #include "MotorController.h"
-
 #include "MessageDefine.h"
 
 
@@ -19,9 +18,11 @@ private:
      uint8_t m_rxPin;           //uinit_8 = char
      uint8_t m_txPin;
 
+     byte m_tempBuffer[64];
+
      MotorController* m_motorColtroller;
 
-     void OnHandleMessage(EMessageDefine messageID,char* messageBuffer);
+     void OnHandleMessage(EMessageDefine messageID,byte* messageBuffer);
 
 public:
     MessageHandler(uint8_t rx,uint8_t tx,uint16_t baudRate = 9600);
@@ -36,5 +37,7 @@ public:
 
     MotorController* GetMotorController();
 
+    //消息结束标识
+    static char Message_End_Flag;
 };
 #endif

@@ -207,6 +207,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9bf2e4629add951419105610324c1fc1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  MAC: 98:D3:31:F5:8B:1A
 --- !u!1 &1489408294
 GameObject:
   m_ObjectHideFlags: 0
@@ -217,6 +218,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1489408296}
   - component: {fileID: 1489408295}
+  - component: {fileID: 1489408297}
   m_Layer: 0
   m_Name: Directional Light
   m_TagString: Untagged
@@ -276,3 +278,21 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
+--- !u!114 &1489408297
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1489408294}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4088264df255144f857d4e261d2ff17, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  toggleKey: 9
+  openOnStart: 0
+  shakeToOpen: 1
+  shakeAcceleration: 10
+  restrictLogCount: 0
+  maxLogCount: 1000

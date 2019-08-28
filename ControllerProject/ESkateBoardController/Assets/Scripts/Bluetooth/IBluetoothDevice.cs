@@ -10,6 +10,17 @@ public interface IBluetoothDevice
     /// </summary>
     event Action<Byte[]> OnReceiveDataEvent;
 
+    /// <summary>
+    /// 出错
+    /// </summary>
+    event Action<string> OnErrorEvent;
+
+    /// <summary>
+    /// 连接成功事件
+    /// </summary>
+    event Action OnConnectedEvent;
+
+
     void InitializeBluetoothDevice();
 
     bool IsBluetoothEnabled();
@@ -28,5 +39,20 @@ public interface IBluetoothDevice
     /// <param name="sendBuffer"></param>
     void SendData(byte[] sendBuffer);
 
+    /// <summary>
+    /// 获取客户端蓝牙状态
+    /// </summary>
+    /// <returns></returns>
+    BluetoothStatus GetBluetoothDeviceStatus();
 
+    /// <summary>
+    /// 连接到设备
+    /// </summary>
+    /// <param name="remoteDeviceMacAddress"></param>
+    void ConnectToDevice(string remoteDeviceMacAddress);
+
+    /// <summary>
+    /// 断开连接
+    /// </summary>
+    void Disconnect();
 }
