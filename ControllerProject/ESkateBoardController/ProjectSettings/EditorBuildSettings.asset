@@ -5,7 +5,10 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
+  - enabled: 0
+    path: Assets/Tes.unity
+    guid: b487ca31d995da54890b65d2cf9fdb21
   - enabled: 1
-    path: Assets/TestScene.unity
-    guid: c908e65b1bc65f7419a936818f58c75c
+    path: Assets/Scenes/ESkateBoardMain.unity
+    guid: 67ac48c68e2840242950481df25eb0d8
   m_configObjects: {}

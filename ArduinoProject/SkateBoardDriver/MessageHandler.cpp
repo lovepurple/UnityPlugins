@@ -12,21 +12,35 @@ MessageHandler::MessageHandler(uint8_t rx, uint8_t tx, uint16_t bandRate = 9600)
 void MessageHandler::Tick()
 {
     int bufferIndex = 0;
+    
     while (this->m_bluetooth->available() > 0)
     {
-
+        Serial.println("^^^^^^^^^^^^^^^^^^^^^^^^^^");
+        Serial.println(bufferIndex);
+        Serial.println("%%%%%%%%%%%%%%%%%%%%%%");
         byte recvByte = m_bluetooth->read();
 
-        Serial.print((char)recvByte);
+        Serial.println(recvByte);
 
         if (recvByte != MessageHandler::Message_End_Flag)
+        {
             m_tempBuffer[bufferIndex++] = recvByte;
+            Serial.println("&&&&&&&&&&&&&&&&&&&&");
+            Serial.println(bufferIndex);
+            Serial.println("*********************");
+        }
         else
         {
+            Serial.println("---------------");
+            Serial.println(bufferIndex);
+             Serial.println("+++++++++++");
             //无效消息
             if (bufferIndex > 0)
             {
+                Serial.println(m_tempBuffer[0]);
                 EMessageDefine messageType = (EMessageDefine)m_tempBuffer[0];
+                Serial.println("---------------");
+                Serial.println(messageType);
                 byte messageBuffer[bufferIndex];
                 memcpy(messageBuffer, m_tempBuffer + 1, sizeof(byte) * bufferIndex);
 
@@ -68,7 +82,7 @@ void MessageHandler::OnHandleMessage(EMessageDefine messageID, byte *messageBuff
         this->m_motorColtroller->MotorMaxPower();
         break;
     case E_C2D_MOTOR_MIN_POWER:
-        this->m_motorController->MotorMinPower();
+        this->m_motorColtroller->MotorMinPower();
         break;
     case E_C2D_MOTOR_DRIVE:
         break;

@@ -17,8 +17,8 @@
     <application
         android:allowBackup="true"
         android:supportsRtl="true" >
-        <activity  >
-            <intent-filter>
+        <activity  android:name="com.lovepurple.btccontroller.MainActivity" >
+            <intent-filter >
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />

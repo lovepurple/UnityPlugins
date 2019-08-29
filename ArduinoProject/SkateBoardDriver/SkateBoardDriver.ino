@@ -28,25 +28,10 @@ void setup()
     pMotorController = new MotorController(MOTOR_POWER_PIN,ESC_A,ECS_B);
     
     pMessageHandler->SetMotorController(pMotorController);
-
 }
 
 void loop()
 {
     if (pMessageHandler != nullptr)
         pMessageHandler->Tick();
-
-    
-    delay(1000);
-    char buffer[16];
-    ltoa(millis(),buffer,10);
-    pMessageHandler->SendMessage(buffer);
-    // Serial.println("sending ...");
-    // Serial.println(buffer);
-
-    // while(pBluetooth->available() >0)
-    // {
-    //     Serial.print((char)pBluetooth->read());
-    // }
-
 }
