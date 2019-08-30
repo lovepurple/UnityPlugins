@@ -1,9 +1,11 @@
 ﻿/**
  *  Android 经典蓝牙2。0通讯
  */
+using Newtonsoft.Json;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class AndroidBluetoothClassicDevice : IBluetoothDevice
@@ -12,6 +14,7 @@ public class AndroidBluetoothClassicDevice : IBluetoothDevice
     private const string NATIVE_PLUGIN_BUNDLE_NAME = "com.lovepurple.btccontroller";
     private const string ANDROID_STRING_CALLBACK_INTERFACE = "com.lovepurple.btccontroller.UnityCallback";
     private const string ANDROID_BYTES_CALLBACK_INTERFACE = "com.lovepurple.btccontroller.UnityBufferCallback";
+    private const string ANDROID_INT_CALLBACK_INTERFACE = "com.lovepurple.btccontroller.UnityIntCallback";
 
     //Unity Native Bridge
     private static AndroidJavaObject m_androidBridgeInstance = null;
@@ -20,6 +23,9 @@ public class AndroidBluetoothClassicDevice : IBluetoothDevice
     public event Action<byte[]> OnReceiveDataEvent;
     public event Action<string> OnErrorEvent;
     public event Action OnConnectedEvent;
+    public event Action<int> OnBluetoothDeviceStateChangedEvent;
+    public event Action<BluetoothDeviceInfo> OnSearchedDeviceEvent;
+    public event Action<List<BluetoothDeviceInfo>> OnSearchFinishEvent;
 
     /// <summary>
     /// 
@@ -35,7 +41,14 @@ public class AndroidBluetoothClassicDevice : IBluetoothDevice
         {
             OnErrorEvent?.Invoke(errorMessage);
         }, ANDROID_STRING_CALLBACK_INTERFACE);
-        AndroidBridgeInstance.Call("initialBTCManager", androidStringCallback);
+
+        AndroidIntCallback androidIntCallback = new AndroidIntCallback(bluetoothStatus =>
+        {
+            OnBluetoothDeviceStateChangedEvent?.Invoke(bluetoothStatus);
+        }, ANDROID_INT_CALLBACK_INTERFACE);
+
+
+        AndroidBridgeInstance.Call("initialBTCManager", androidStringCallback, androidIntCallback);
 
         AndroidBufferCallback onReceiveBufferCallback = new AndroidBufferCallback(bufferData =>
         {
@@ -44,11 +57,15 @@ public class AndroidBluetoothClassicDevice : IBluetoothDevice
         AndroidBridgeInstance.Call("setOnReceiveMessageCallback", onReceiveBufferCallback);
     }
 
-    public void GetPariedDevices(Action<string> OnGetPariedDeviceCallback)
+
+    public List<BluetoothDeviceInfo> GetPariedDevices()
     {
-        AndroidStringCallback androidStringCallback = new AndroidStringCallback(OnGetPariedDeviceCallback, ANDROID_STRING_CALLBACK_INTERFACE);
-        AndroidBridgeInstance.Call("getPariedDevices", androidStringCallback);
+        string bondDeviceList = AndroidBridgeInstance.Call<string>("getPariedDevices");
+        List<BluetoothDeviceInfo> result = JsonConvert.DeserializeObject<List<BluetoothDeviceInfo>>(bondDeviceList);
+
+        return result;
     }
+
 
     public string GetConnectedDeviceName()
     {
@@ -68,15 +85,31 @@ public class AndroidBluetoothClassicDevice : IBluetoothDevice
 
     public void ConnectToDevice(string remoteDeviceMacAddress)
     {
-        AndroidBridgeInstance.Call("conntectDevice", remoteDeviceMacAddress, new AndroidStringCallback((str) =>
-        {
-            OnConnectedEvent.Invoke();
-        }, ANDROID_STRING_CALLBACK_INTERFACE));
+        AndroidBridgeInstance.Call("conntectDevice");
     }
 
     public void Disconnect()
     {
         AndroidBridgeInstance.Call("disconnectDevice");
+    }
+
+    public void SearchDevices()
+    {
+        AndroidStringCallback onSearchDeviceCallback = new AndroidStringCallback(deviceInfo =>
+        {
+            BluetoothDeviceInfo bluetoothDevice = JsonConvert.DeserializeObject<BluetoothDeviceInfo>(deviceInfo);
+            OnSearchedDeviceEvent?.Invoke(bluetoothDevice);
+        }, ANDROID_STRING_CALLBACK_INTERFACE);
+
+        AndroidStringCallback onSearchResultCallback = new AndroidStringCallback(devceInfoList =>
+        {
+            List<BluetoothDeviceInfo> bluetoothDeviceList = JsonConvert.DeserializeObject<List<BluetoothDeviceInfo>>(devceInfoList);
+            OnSearchFinishEvent?.Invoke(bluetoothDeviceList);
+        }, ANDROID_STRING_CALLBACK_INTERFACE);
+
+        AndroidBridgeInstance.Call("setSearchDeviceCallback", onSearchResultCallback, onSearchDeviceCallback);
+
+        AndroidBridgeInstance.Call("searchDevices");
     }
 
     private static AndroidJavaObject AndroidBridgeInstance

@@ -17,3 +17,11 @@ public interface IAndroidByteBufferCallback
 {
     void sendMessageBuffer(byte[] buffer);
 }
+
+/// <summary>
+/// Android到Unity的 int 回调
+/// </summary>
+public interface IAndroidIntCallback
+{
+    void sendMessageInt(int val);
+}

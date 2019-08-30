@@ -1,31 +1,17 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 
-public interface IBluetoothDevice
+public interface IBluetoothDevice : IBluetoothEvents
 {
-    /// <summary>
-    /// 收到数据事件
-    /// </summary>
-    event Action<Byte[]> OnReceiveDataEvent;
-
-    /// <summary>
-    /// 出错
-    /// </summary>
-    event Action<string> OnErrorEvent;
-
-    /// <summary>
-    /// 连接成功事件
-    /// </summary>
-    event Action OnConnectedEvent;
-
-
     void InitializeBluetoothDevice();
 
+    /// <summary>
+    /// 蓝牙是否开启
+    /// </summary>
+    /// <returns></returns>
     bool IsBluetoothEnabled();
 
-    void GetPariedDevices(Action<string> callback);
+    List<BluetoothDeviceInfo> GetPariedDevices();
 
     /// <summary>
     /// 获取已连接的蓝牙设备
@@ -55,4 +41,9 @@ public interface IBluetoothDevice
     /// 断开连接
     /// </summary>
     void Disconnect();
+
+    /// <summary>
+    /// 蓝牙扫描
+    /// </summary>
+    void SearchDevices();
 }

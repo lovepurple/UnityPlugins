@@ -3,11 +3,12 @@ package com.lovepurple.btccontroller;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 
 import com.google.gson.Gson;
-
-import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -15,6 +16,7 @@ import java.io.OutputStream;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Queue;
 import java.util.Set;
 import java.util.UUID;
@@ -35,7 +37,6 @@ public class BTCManager {
 
     private BluetoothAdapter _bluetoothAdapter;
 
-
     private BluetoothSocket _bluetoothSocket;
     private InputStream _bluetoothRecvStream;
     private OutputStream _bluetoothSendStream;
@@ -43,16 +44,18 @@ public class BTCManager {
     private Queue<byte[]> _sendQueue = new LinkedTransferQueue<>();
     private RecvRunable _receiveThread = null;
 
+    //系统广播接受
+    private BroadcastReceiver _systemBroadcastReceiver;
 
     //Unity的事件回调
-    private UnityCallback OnGetPariedDevicesCallback;
     private UnityCallback OnErrorCallback;
     private UnityBufferCallback OnReceivedDataCallback;
-    private UnityCallback OnSearchedDevicesCallback;
-    private UnityCallback OnConnectedCallback;
+    private UnityCallback OnSearchedDevice;                         //扫描到设备
+    private UnityCallback OnSearchedDevicesCallback;                //扫描结束，扫描到的设备列表
+    private UnityIntCallback OnBluetoothStateChangCallback;     //连接状态改变回调
 
-    private Set<BluetoothDevice> _pairedBluetoothDeviceSet = null;
-
+    //扫描到的设备列表
+    private HashMap<String, BluetoothDeviceInfo> _searchedRemoteDeviceMap = new HashMap<>();
 
     //当前蓝牙状态
     private BluetoothStatus _deviceCurrentStatus = BluetoothStatus.FREE;
@@ -68,8 +71,21 @@ public class BTCManager {
      *
      * @param onErrorCallback 出错回调，给Unity使用
      */
-    public void initialBTCManager(UnityCallback onErrorCallback) {
+    public void initialBTCManager(UnityCallback onErrorCallback, UnityIntCallback onBluetoothStateChangCallback) {
         this.OnErrorCallback = onErrorCallback;
+        this.OnBluetoothStateChangCallback = onBluetoothStateChangCallback;
+
+        this._systemBroadcastReceiver = new BluetoothReceiver();
+
+        //注册IntentFilter
+//        IntentFilter filter = new IntentFilter(BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED);
+//        _applicationContext.registerReceiver(_systemBroadcastReceiver, filter);      //Receiver里可进入的事件
+//
+//        IntentFilter filter1 = new IntentFilter(BluetoothDevice.ACTION_FOUND);
+//        _applicationContext.registerReceiver(_systemBroadcastReceiver, filter1);
+//
+//        IntentFilter filter2 = new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
+//        _applicationContext.registerReceiver(_systemBroadcastReceiver, filter2);
     }
 
     /**
@@ -89,28 +105,25 @@ public class BTCManager {
      *
      * @param callback
      */
-    public void getPariedDevices(UnityCallback callback) {
-        this.OnGetPariedDevicesCallback = callback;
+    public String getPariedDevices() {
 
         Gson gson = new Gson();
 
-        _pairedBluetoothDeviceSet = _bluetoothAdapter.getBondedDevices();
         ArrayList<BluetoothDeviceInfo> deviceInfos = new ArrayList<>();
 
-        for (BluetoothDevice bluetoothDevice : _pairedBluetoothDeviceSet) {
-            JSONObject deviceObject = new JSONObject();
+        for (BluetoothDevice bluetoothDevice : _bluetoothAdapter.getBondedDevices()) {
             String address = bluetoothDevice.getAddress();
             String bluetoothDeviceName = bluetoothDevice.getName();
 
             BluetoothDeviceInfo deviceInfo = new BluetoothDeviceInfo();
             deviceInfo.deviceAddress = address;
             deviceInfo.deviceName = bluetoothDeviceName;
+            deviceInfo.deviceBondState = 1;
 
             deviceInfos.add(deviceInfo);
         }
 
-        String resultStr = gson.toJson(deviceInfos);
-        this.OnGetPariedDevicesCallback.sendMessage(resultStr);
+        return gson.toJson(deviceInfos);
     }
 
     /**
@@ -154,11 +167,7 @@ public class BTCManager {
      *
      * @param dstAddress
      */
-    public void conntectDevice(String dstAddress, UnityCallback onConnectedCallback) {
-
-        if (onConnectedCallback != null)
-            this.OnConnectedCallback = onConnectedCallback;
-
+    public void conntectDevice(String dstAddress) {
         try {
             if (_deviceCurrentStatus != BluetoothStatus.CONNECTED) {
 
@@ -221,12 +230,136 @@ public class BTCManager {
     /**
      * 搜索设备
      *
-     * @param onSearchResultCallback
+     * @param
      */
-    public void searchDevices(UnityCallback onSearchResultCallback) {
-        this.OnSearchedDevicesCallback = onSearchResultCallback;
+    public void searchDevices() {
+
+        sendErrorMessage("diao le");
+
+        IntentFilter filterFound = new IntentFilter(BluetoothDevice.ACTION_FOUND);
+        _applicationContext.registerReceiver(mReceiver, filterFound);
+
+        IntentFilter filterStart = new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_STARTED);
+        _applicationContext.registerReceiver(mReceiver, filterStart);
+
+        IntentFilter filterFinish = new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
+        _applicationContext.registerReceiver(mReceiver, filterFinish);
 
 
+        if (_bluetoothAdapter.isDiscovering())
+            _bluetoothAdapter.cancelDiscovery();
+
+        _bluetoothAdapter.startDiscovery();
+
+//        if (this._deviceCurrentStatus == BluetoothStatus.CONNECTED)
+//            sendErrorMessage("bluetooth is connecting ,please disconnect current device");
+//        else {
+//            this._deviceCurrentStatus = BluetoothStatus.DISCOVERING;
+//
+//            if (_bluetoothAdapter.isDiscovering())
+//                _bluetoothAdapter.cancelDiscovery();
+//
+//
+//            _bluetoothAdapter.startDiscovery();
+//        }
+    }
+
+    public void setSearchDeviceCallback(UnityCallback onSearchFinishCallback, UnityCallback onSearchDeviceCallback) {
+        OnSearchedDevice = onSearchDeviceCallback;
+        OnSearchedDevicesCallback = onSearchFinishCallback;
+    }
+
+
+    private BroadcastReceiver mReceiver = new BroadcastReceiver() {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+
+            if (BluetoothAdapter.ACTION_DISCOVERY_STARTED.equals(action)) {
+                sendErrorMessage("开始扫描...");
+            }
+
+            if (BluetoothDevice.ACTION_FOUND.equals(action)) {
+                BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                if (device != null) {
+                    // 添加到ListView的Adapter。
+                    sendErrorMessage("设备名:" + device.getName() + "\n设备地址:" + device.getAddress());
+                }
+            }
+
+            if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
+                sendErrorMessage("扫描结束.");
+            }
+        }
+    };
+
+    /**
+     * 接受系统广播
+     */
+    private class BluetoothReceiver extends BroadcastReceiver {
+
+        //所有指定Context的广播都从这里下发,这里会进入的intent是上面Register的
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+            String actionType = intent.getAction();
+
+            sendErrorMessage(actionType);
+            if (BluetoothAdapter.ACTION_DISCOVERY_STARTED.equals(actionType)) {
+                //开始搜索
+            } else if (BluetoothDevice.ACTION_FOUND.equals(actionType)) {
+
+                sendErrorMessage("jin le   ");
+                //获取扫描出的设备
+                BluetoothDevice remoteDevice = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+
+                if (_searchedRemoteDeviceMap.containsKey(remoteDevice.getAddress()))
+                    return;
+
+                BluetoothDeviceInfo bluetoothDeviceInfo = new BluetoothDeviceInfo();
+                bluetoothDeviceInfo.deviceName = remoteDevice.getName();
+                bluetoothDeviceInfo.deviceAddress = remoteDevice.getAddress();
+
+                sendErrorMessage("name :  " + bluetoothDeviceInfo.deviceName);
+                //新设备
+                if (remoteDevice.getBondState() == BluetoothDevice.BOND_NONE) {
+                    bluetoothDeviceInfo.deviceBondState = 2;
+                } else if (remoteDevice.getBondState() == BluetoothDevice.BOND_BONDED) {
+                    bluetoothDeviceInfo.deviceBondState = 1;
+                } else
+                    return;
+
+                _searchedRemoteDeviceMap.put(bluetoothDeviceInfo.deviceAddress, bluetoothDeviceInfo);
+
+                if (OnSearchedDevice != null)
+                    OnSearchedDevice.sendMessage(bluetoothDeviceInfo.deviceAddress);
+
+            } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(actionType)) {
+                Gson gson = new Gson();
+                String searchResult = gson.toJson(_searchedRemoteDeviceMap.values().toArray());
+
+                //扫描结束，关闭
+                _bluetoothAdapter.cancelDiscovery();
+
+                if (OnSearchedDevicesCallback != null)
+                    OnSearchedDevicesCallback.sendMessage(searchResult);
+
+            } else if (BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED.equals(actionType)) {       //蓝牙状态改变
+                //通过intent.getIntExtra获取状态
+                int bluetoothState = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR);
+
+                if (bluetoothState == BluetoothAdapter.STATE_CONNECTED)
+                    _deviceCurrentStatus = BluetoothStatus.CONNECTED;
+                else if (bluetoothState == BluetoothAdapter.STATE_DISCONNECTING)
+                    _deviceCurrentStatus = BluetoothStatus.DISCOVERING;
+                else
+                    _deviceCurrentStatus = BluetoothStatus.FREE;
+
+                if (OnBluetoothStateChangCallback != null)
+                    OnBluetoothStateChangCallback.sendMessageInt(bluetoothState);
+            }
+        }
     }
 
     /**
@@ -311,12 +444,6 @@ public class BTCManager {
 
                 _receiveThread = new RecvRunable();
                 _executorSerivicePool.submit(_receiveThread);
-
-                _deviceCurrentStatus = BluetoothStatus.CONNECTED;
-                if (OnConnectedCallback != null)
-                    OnConnectedCallback.sendMessage(remoteDevice.getName() + " connect successed");
-
-
             } catch (Exception e) {
                 sendErrorMessage(e.getMessage());
                 _deviceCurrentStatus = BluetoothStatus.FREE;

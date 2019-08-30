@@ -7,7 +7,7 @@ using UnityEngine.UI;
 public class ClientMain : MonoBehaviour
 {
     public string MAC = "98:D3:31:F5:8B:1A";
-
+    //20:16:06:12:28:69
 
     private Text m_receiveMessage = null;
 
@@ -22,6 +22,7 @@ public class ClientMain : MonoBehaviour
     private Button m_btnStop = null;
     private Button m_btnMaxSpeed = null;
     private Button m_btnPowerOff = null;
+    private Button m_btnGetCurrentSpeed = null;
 
     private void Start()
     {
@@ -60,6 +61,8 @@ public class ClientMain : MonoBehaviour
         m_btnPowerOff = transform.Find("GameObject/Button (10)").GetComponent<Button>();
         m_btnPowerOff.AddClickCallback(OnBtnPowerOff);
 
+        m_btnGetCurrentSpeed = transform.Find("GameObject/Button (11)").GetComponent<Button>();
+        m_btnGetCurrentSpeed.AddClickCallback(OnBtnGetCurrentSpeedClick);
 
         BluetoothProxy.Intance.InitializeBluetoothProxy();
     }
@@ -76,11 +79,9 @@ public class ClientMain : MonoBehaviour
 
     private void OnBtnMotorInitClick(GameObject btn)
     {
-        byte[] buffer = new byte[2];
-        
-        buffer[0] = (byte)MessageDefine.E_C2D_MOTOR_INITIALIZE;
-        buffer[1] = (byte)'\n';
+        byte[] buffer = new byte[1];
 
+        buffer[0] = (byte)MessageDefine.E_C2D_MOTOR_INITIALIZE;
         BluetoothProxy.Intance.BluetoothDevice.SendData(buffer);
     }
 
@@ -104,11 +105,10 @@ public class ClientMain : MonoBehaviour
 
         BluetoothProxy.Intance.BluetoothDevice.SendData(buffer);
     }
-    
+
 
     private void OnBtnSpeedupClick(GameObject btn)
     {
-
     }
 
     private void OnBtnSpeedDownClick(GameObject btn)
@@ -118,12 +118,18 @@ public class ClientMain : MonoBehaviour
 
     private void OnBtnStopClick(GameObject btn)
     {
+        byte[] buffer = new byte[1];
+        buffer[0] = (byte)MessageDefine.E_C2D_MOTOR_CORRECT_MIN_POWER;
 
+        BluetoothProxy.Intance.BluetoothDevice.SendData(buffer);
     }
 
     private void OnBtnMaxSpeedClick(GameObject btn)
     {
+        byte[] buffer = new byte[1];
+        buffer[0] = (byte)MessageDefine.E_C2D_MOTOR_CORRECT_MAX_POWER;
 
+        BluetoothProxy.Intance.BluetoothDevice.SendData(buffer);
     }
 
     private void OnBtnPowerOff(GameObject btn)
@@ -132,5 +138,10 @@ public class ClientMain : MonoBehaviour
         buffer[0] = (byte)MessageDefine.E_C2D_MOTOR_POWEROFF;
 
         BluetoothProxy.Intance.BluetoothDevice.SendData(buffer);
+    }
+
+    private void OnBtnGetCurrentSpeedClick(GameObject btn)
+    {
+
     }
 }

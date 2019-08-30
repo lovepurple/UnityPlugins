@@ -9,51 +9,37 @@ MessageHandler::MessageHandler(uint8_t rx, uint8_t tx, uint16_t bandRate = 9600)
     this->m_bluetooth->begin(bandRate);
 }
 
+int m_recvBufferCount = 0;
+
 void MessageHandler::Tick()
 {
-    int bufferIndex = 0;
-    
+    //一次发送有可能avaliable() 与发送过来的数量不同，一个Tick没法接收完整
     while (this->m_bluetooth->available() > 0)
     {
-        Serial.println("^^^^^^^^^^^^^^^^^^^^^^^^^^");
-        Serial.println(bufferIndex);
-        Serial.println("%%%%%%%%%%%%%%%%%%%%%%");
         byte recvByte = m_bluetooth->read();
-
-        Serial.println(recvByte);
 
         if (recvByte != MessageHandler::Message_End_Flag)
         {
-            m_tempBuffer[bufferIndex++] = recvByte;
-            Serial.println("&&&&&&&&&&&&&&&&&&&&");
-            Serial.println(bufferIndex);
-            Serial.println("*********************");
+            m_tempBuffer[m_recvBufferCount++] = recvByte;
         }
         else
         {
-            Serial.println("---------------");
-            Serial.println(bufferIndex);
-             Serial.println("+++++++++++");
-            //无效消息
-            if (bufferIndex > 0)
+            if (m_recvBufferCount > 0)
             {
-                Serial.println(m_tempBuffer[0]);
                 EMessageDefine messageType = (EMessageDefine)m_tempBuffer[0];
-                Serial.println("---------------");
-                Serial.println(messageType);
-                byte messageBuffer[bufferIndex];
-                memcpy(messageBuffer, m_tempBuffer + 1, sizeof(byte) * bufferIndex);
+                byte messageBuffer[m_recvBufferCount];
+                memcpy(messageBuffer, m_tempBuffer + 1, sizeof(byte) * m_recvBufferCount);
 
                 OnHandleMessage(messageType, messageBuffer);
             }
-            break;
+
+            m_recvBufferCount=0;
         }
     }
 }
 
 void MessageHandler::SendMessage(char *sendBuffer)
 {
-
     int index = 0;
     while (sendBuffer[index])
     {
@@ -67,8 +53,8 @@ void MessageHandler::SendMessage(char *sendBuffer)
 
 void MessageHandler::OnHandleMessage(EMessageDefine messageID, byte *messageBuffer)
 {
-    Serial.println("Handle msg");
-    Serial.println(messageID);
+    Serial.println("Handle Message");
+    Serial.println(GetMessageName(messageID));
 
     switch (messageID)
     {

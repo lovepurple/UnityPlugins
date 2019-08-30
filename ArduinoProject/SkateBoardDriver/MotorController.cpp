@@ -18,11 +18,11 @@ MotorController::~MotorController()
 //Static 方法在cpp中不需要加Static
 //一个引脚通过一分二可驱动同时多个信号
 void MotorController::PowerOn(){
-    digitalWrite(this->m_motorPowerPin,HIGH);
+    digitalWrite(this->m_motorPowerPin,MOTOR_POWER_DRIVE_MODE);
 }
 
 void MotorController::PowerOff(){
-    digitalWrite(this->m_motorPowerPin,LOW);
+    digitalWrite(this->m_motorPowerPin,!MOTOR_POWER_DRIVE_MODE);
 }
 
 void MotorController::InitializeESC()

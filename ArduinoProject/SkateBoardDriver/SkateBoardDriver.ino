@@ -3,15 +3,7 @@
 
 #include "MessageHandler.h"
 #include "MotorController.h"
-
-//蓝牙模块引脚
-#define BLUETOOTH_RX 2
-#define BLUETOOTH_TX 4
-
-//电调控制引脚（使用TimerOne）
-#define ESC_A 9
-#define ECS_B 10
-#define MOTOR_POWER_PIN 7       //一个引脚可以控制两个引脚
+#include "GlobalDefine.h"
 
 MessageHandler *pMessageHandler = nullptr;
 MotorController* pMotorController = nullptr;
