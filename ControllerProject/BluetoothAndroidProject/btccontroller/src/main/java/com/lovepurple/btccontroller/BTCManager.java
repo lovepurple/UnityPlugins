@@ -1,5 +1,6 @@
 package com.lovepurple.btccontroller;
 
+import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
@@ -7,6 +8,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 
 import com.google.gson.Gson;
 
@@ -78,14 +80,9 @@ public class BTCManager {
         this._systemBroadcastReceiver = new BluetoothReceiver();
 
         //注册IntentFilter
-//        IntentFilter filter = new IntentFilter(BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED);
-//        _applicationContext.registerReceiver(_systemBroadcastReceiver, filter);      //Receiver里可进入的事件
-//
-//        IntentFilter filter1 = new IntentFilter(BluetoothDevice.ACTION_FOUND);
-//        _applicationContext.registerReceiver(_systemBroadcastReceiver, filter1);
-//
-//        IntentFilter filter2 = new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
-//        _applicationContext.registerReceiver(_systemBroadcastReceiver, filter2);
+        IntentFilter filter = new IntentFilter(BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED);
+
+        _applicationContext.registerReceiver(_systemBroadcastReceiver, filter);      //Receiver里可进入的事件
     }
 
     /**
@@ -102,8 +99,6 @@ public class BTCManager {
 
     /**
      * 获取已配对过的设备列表
-     *
-     * @param callback
      */
     public String getPariedDevices() {
 
@@ -233,35 +228,25 @@ public class BTCManager {
      * @param
      */
     public void searchDevices() {
+        if (this._deviceCurrentStatus == BluetoothStatus.CONNECTED)
+            sendErrorMessage("bluetooth is connecting ,please disconnect current device");
+        else {
+            this._deviceCurrentStatus = BluetoothStatus.DISCOVERING;
+            IntentFilter filter = new IntentFilter();
+            //扫描时，需要定位权限，就算写在Manifest里 有可能也没开，需要判断
+            filter.addAction(BluetoothDevice.ACTION_FOUND);
+//            if (_applicationContext.checkSelfPermission((Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)
+//                sendErrorMessage("permission android.permission.ACCESS_COARSE_LOCATION  deny");
 
-        sendErrorMessage("diao le");
+            filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
+            filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_STARTED);
+            _applicationContext.registerReceiver(mDiscoveryReceiver, filter);
 
-        IntentFilter filterFound = new IntentFilter(BluetoothDevice.ACTION_FOUND);
-        _applicationContext.registerReceiver(mReceiver, filterFound);
+            if (_bluetoothAdapter.isDiscovering())
+                _bluetoothAdapter.cancelDiscovery();
 
-        IntentFilter filterStart = new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_STARTED);
-        _applicationContext.registerReceiver(mReceiver, filterStart);
-
-        IntentFilter filterFinish = new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
-        _applicationContext.registerReceiver(mReceiver, filterFinish);
-
-
-        if (_bluetoothAdapter.isDiscovering())
-            _bluetoothAdapter.cancelDiscovery();
-
-        _bluetoothAdapter.startDiscovery();
-
-//        if (this._deviceCurrentStatus == BluetoothStatus.CONNECTED)
-//            sendErrorMessage("bluetooth is connecting ,please disconnect current device");
-//        else {
-//            this._deviceCurrentStatus = BluetoothStatus.DISCOVERING;
-//
-//            if (_bluetoothAdapter.isDiscovering())
-//                _bluetoothAdapter.cancelDiscovery();
-//
-//
-//            _bluetoothAdapter.startDiscovery();
-//        }
+            _bluetoothAdapter.startDiscovery();
+        }
     }
 
     public void setSearchDeviceCallback(UnityCallback onSearchFinishCallback, UnityCallback onSearchDeviceCallback) {
@@ -270,26 +255,49 @@ public class BTCManager {
     }
 
 
-    private BroadcastReceiver mReceiver = new BroadcastReceiver() {
+    private BroadcastReceiver mDiscoveryReceiver = new BroadcastReceiver() {
 
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
 
+            //开始扫描
             if (BluetoothAdapter.ACTION_DISCOVERY_STARTED.equals(action)) {
-                sendErrorMessage("开始扫描...");
-            }
+            } else if (BluetoothDevice.ACTION_FOUND.equals(action)) {
+                //获取扫描出的设备
+                BluetoothDevice remoteDevice = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
 
-            if (BluetoothDevice.ACTION_FOUND.equals(action)) {
-                BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                if (device != null) {
-                    // 添加到ListView的Adapter。
-                    sendErrorMessage("设备名:" + device.getName() + "\n设备地址:" + device.getAddress());
-                }
-            }
+                if (_searchedRemoteDeviceMap.containsKey(remoteDevice.getAddress()))
+                    return;
 
-            if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
-                sendErrorMessage("扫描结束.");
+                BluetoothDeviceInfo bluetoothDeviceInfo = new BluetoothDeviceInfo();
+                bluetoothDeviceInfo.deviceName = remoteDevice.getName();
+                bluetoothDeviceInfo.deviceAddress = remoteDevice.getAddress();
+
+                //新设备
+                if (remoteDevice.getBondState() == BluetoothDevice.BOND_NONE) {
+                    bluetoothDeviceInfo.deviceBondState = 2;
+                } else if (remoteDevice.getBondState() == BluetoothDevice.BOND_BONDED) {
+                    bluetoothDeviceInfo.deviceBondState = 1;
+                } else
+                    return;
+
+                _searchedRemoteDeviceMap.put(bluetoothDeviceInfo.deviceAddress, bluetoothDeviceInfo);
+
+                if (OnSearchedDevice != null)
+                    OnSearchedDevice.sendMessage(new Gson().toJson(bluetoothDeviceInfo));
+
+            } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
+                Gson gson = new Gson();
+                String searchResult = gson.toJson(_searchedRemoteDeviceMap.values().toArray());
+
+                //扫描结束，关闭
+                _bluetoothAdapter.cancelDiscovery();
+
+                if (OnSearchedDevicesCallback != null)
+                    OnSearchedDevicesCallback.sendMessage(searchResult);
+
+                _applicationContext.unregisterReceiver(mDiscoveryReceiver);
             }
         }
     };
@@ -305,47 +313,7 @@ public class BTCManager {
 
             String actionType = intent.getAction();
 
-            sendErrorMessage(actionType);
-            if (BluetoothAdapter.ACTION_DISCOVERY_STARTED.equals(actionType)) {
-                //开始搜索
-            } else if (BluetoothDevice.ACTION_FOUND.equals(actionType)) {
-
-                sendErrorMessage("jin le   ");
-                //获取扫描出的设备
-                BluetoothDevice remoteDevice = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-
-                if (_searchedRemoteDeviceMap.containsKey(remoteDevice.getAddress()))
-                    return;
-
-                BluetoothDeviceInfo bluetoothDeviceInfo = new BluetoothDeviceInfo();
-                bluetoothDeviceInfo.deviceName = remoteDevice.getName();
-                bluetoothDeviceInfo.deviceAddress = remoteDevice.getAddress();
-
-                sendErrorMessage("name :  " + bluetoothDeviceInfo.deviceName);
-                //新设备
-                if (remoteDevice.getBondState() == BluetoothDevice.BOND_NONE) {
-                    bluetoothDeviceInfo.deviceBondState = 2;
-                } else if (remoteDevice.getBondState() == BluetoothDevice.BOND_BONDED) {
-                    bluetoothDeviceInfo.deviceBondState = 1;
-                } else
-                    return;
-
-                _searchedRemoteDeviceMap.put(bluetoothDeviceInfo.deviceAddress, bluetoothDeviceInfo);
-
-                if (OnSearchedDevice != null)
-                    OnSearchedDevice.sendMessage(bluetoothDeviceInfo.deviceAddress);
-
-            } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(actionType)) {
-                Gson gson = new Gson();
-                String searchResult = gson.toJson(_searchedRemoteDeviceMap.values().toArray());
-
-                //扫描结束，关闭
-                _bluetoothAdapter.cancelDiscovery();
-
-                if (OnSearchedDevicesCallback != null)
-                    OnSearchedDevicesCallback.sendMessage(searchResult);
-
-            } else if (BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED.equals(actionType)) {       //蓝牙状态改变
+            if (BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED.equals(actionType)) {       //蓝牙状态改变
                 //通过intent.getIntExtra获取状态
                 int bluetoothState = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR);
 
