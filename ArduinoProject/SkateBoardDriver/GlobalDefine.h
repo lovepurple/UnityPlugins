@@ -11,3 +11,6 @@
 #define ECS_B 10
 #define MOTOR_POWER_PIN 7               //一个引脚可以控制两个引脚
 #define MOTOR_POWER_DRIVE_MODE  LOW     //电机电调继电器模式（低电平 还是高电平触发）
+#define ECS_FREQUENCY 100               //电调频率
+#define MOTOR_MIN_DUTY 0.05             //电机最小速度的占空比
+#define MOTOR_MAX_DUTY 0.1              //电机最大速度的占空比

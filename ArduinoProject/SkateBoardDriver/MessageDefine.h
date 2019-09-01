@@ -12,6 +12,9 @@ enum EMessageDefine
     E_C2D_MOTOR_DRIVE = 114,        //电机调速
     E_C2D_MOTOR_INITIALIZE = 115,   //电调初始化
     E_C2D_MOTOR_NORMAL_START = 116, //电机正常启动
+
+    E_C2D_MOTOR_GET_SPEED = 117,    //获取电机当前速度
+    E_D2C_MOTOR_SPEED = 118,        //返回电机当前速度
 };
 
 inline const char *GetMessageName(EMessageDefine messageDefineEnum)
@@ -32,16 +35,14 @@ inline const char *GetMessageName(EMessageDefine messageDefineEnum)
         return "E_C2D_MOTOR_INITIALIZE";
     case E_C2D_MOTOR_NORMAL_START:
         return "E_C2D_MOTOR_NORMAL_START";
+    case E_C2D_MOTOR_GET_SPEED:
+        return "E_C2D_MOTOR_GET_SPEED";
+    case E_D2C_MOTOR_SPEED:
+        return "E_D2C_MOTOR_SPEED";
     default:
         break;
     }
     return "";
 }
 
-// static inline char *stringFromFruit(enum fruit f)
-// {
-//     static const char *strings[] = { "apple", "orange", "grape", "banana", /* continue for rest of values */ };
-
-//     return strings[f];
-// }
 #endif

@@ -1,4 +1,6 @@
-﻿using GOGUI;
+﻿using EngineCore;
+using GOGUI;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -23,6 +25,8 @@ public class ClientMain : MonoBehaviour
     private Button m_btnMaxSpeed = null;
     private Button m_btnPowerOff = null;
     private Button m_btnGetCurrentSpeed = null;
+
+    private SkateMessageHandler m_skateMessageHandler = null;
 
     private void Start()
     {
@@ -65,6 +69,14 @@ public class ClientMain : MonoBehaviour
         m_btnGetCurrentSpeed.AddClickCallback(OnBtnGetCurrentSpeedClick);
 
         BluetoothProxy.Intance.InitializeBluetoothProxy();
+        m_skateMessageHandler = new SkateMessageHandler(BluetoothProxy.Intance.BluetoothDevice);
+
+        BluetoothProxy.Intance.BluetoothDevice.OnErrorEvent += (errorMsg) =>
+        {
+            m_receiveMessage.text = errorMsg;
+        };
+
+        MessageHandler.RegisterMessageHandler((int)MessageDefine.E_D2C_MOTOR_SPEED, OnGetMotorSpeedResponse);
     }
 
     private void OnBtnConnectClick(GameObject btn)
@@ -142,6 +154,22 @@ public class ClientMain : MonoBehaviour
 
     private void OnBtnGetCurrentSpeedClick(GameObject btn)
     {
+        byte[] buffer = new byte[1];
+        buffer[0] = (byte)MessageDefine.E_C2D_MOTOR_GET_SPEED;
 
+        BluetoothProxy.Intance.BluetoothDevice.SendData(buffer);
     }
+
+
+
+    private void OnGetMotorSpeedResponse(object data)
+    {
+        byte[] speed = (byte[])data;
+
+        uint speedThound = BitConverter.ToUInt32(speed, 0);
+
+        this.m_receiveMessage.text = $"当前速度：{speedThound}";
+    }
+
+
 }

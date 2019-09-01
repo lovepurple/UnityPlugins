@@ -7,3 +7,5 @@
 /ControllerProject/BluetoothAndroidProject/.idea
 /ControllerProject/BluetoothAndroidProject/btccontroller/build
 /ControllerProject/BluetoothAndroidProject/btccontroller/*.iml
+/ControllerProject/BluetoothAndroidProject/.gradle
+/ControllerProject/BluetoothAndroidProject/local.properties

@@ -27,6 +27,8 @@ public class BluetoothProxy
     }
 
 
+
+
     public IBluetoothDevice BluetoothDevice => this.m_device;
 
     public static BluetoothProxy Intance => m_instance ?? (m_instance = new BluetoothProxy());  //??初始化的写法

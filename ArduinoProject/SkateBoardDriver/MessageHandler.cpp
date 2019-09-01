@@ -36,17 +36,26 @@ void MessageHandler::Tick()
             m_recvBufferCount=0;
         }
     }
+
+    while(m_sendMessageQueue.size() >0)
+    {
+        byte* sendBuffer = m_sendMessageQueue.back();
+        Serial.println("sendMessage");
+        Serial.println(sendBuffer[0]);
+        SendMessageInternal((char*)sendBuffer);
+        m_sendMessageQueue.pop_front();
+    }
 }
 
-void MessageHandler::SendMessage(char *sendBuffer)
+void MessageHandler::SendMessageInternal(char *sendBuffer)
 {
-    int index = 0;
-    while (sendBuffer[index])
+    Serial.println("sending...");
+    while(*sendBuffer)
     {
-        m_bluetooth->write(sendBuffer[index]);
+        m_bluetooth->write(sendBuffer);
 
-        Serial.print(sendBuffer[index]);
-        index++;
+        Serial.print(sendBuffer);
+        sendBuffer++;
     }
     this->m_bluetooth->write(MessageHandler::Message_End_Flag);
 }
@@ -77,6 +86,11 @@ void MessageHandler::OnHandleMessage(EMessageDefine messageID, byte *messageBuff
         break;
     case E_C2D_MOTOR_NORMAL_START:
         break;
+    case E_C2D_MOTOR_GET_SPEED:
+        char resultData[8];
+        byte* responseBuffer = this-> m_motorColtroller->Handle_GetCurrentSpeedMessage(resultData);
+        SendMessage(responseBuffer);
+        break;
     default:
         break;
     }
@@ -96,5 +110,24 @@ MotorController *MessageHandler::GetMotorController()
 {
     return this->m_motorColtroller;
 }
+
+void MessageHandler::SendMessage(byte* messageBuffer)
+{
+    Serial.println("--------------------");
+   
+    byte* tempBuffer = &messageBuffer[0];       //坑！！！！
+    while(*tempBuffer)
+    {
+        Serial.println((char)*tempBuffer);
+        tempBuffer++;
+    }
+
+    this->m_sendMessageQueue.push_back(messageBuffer);
+
+    Serial.println("++++++++++++++++++++++++++++");         
+    Serial.println(*(this->m_sendMessageQueue.back()));
+
+}
+
 
 char MessageHandler::Message_End_Flag = '\n';

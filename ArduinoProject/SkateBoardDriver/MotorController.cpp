@@ -1,14 +1,15 @@
 #include "MotorController.h"
 
-MotorController::MotorController(uint8_t motorPowerPin,uint8_t ecsPinA,uint8_t ecsPinB)
+MotorController::MotorController(uint8_t motorPowerPin, uint8_t ecsPinA, uint8_t ecsPinB)
 {
     this->m_motorPowerPin = motorPowerPin;
     this->m_ecsPinA = ecsPinA;
 
-    pinMode(this->m_motorPowerPin,OUTPUT);
+    pinMode(this->m_motorPowerPin, OUTPUT);
+    PowerOff();
 
     //初始化Timer 50hz = 20000 微秒     占空比 1/20 最低 2/20 最高
-    Timer1.initialize(20000);
+    Timer1.initialize(1000000 / ECS_FREQUENCY);
 }
 
 MotorController::~MotorController()
@@ -17,12 +18,15 @@ MotorController::~MotorController()
 
 //Static 方法在cpp中不需要加Static
 //一个引脚通过一分二可驱动同时多个信号
-void MotorController::PowerOn(){
-    digitalWrite(this->m_motorPowerPin,MOTOR_POWER_DRIVE_MODE);
+void MotorController::PowerOn()
+{
+    digitalWrite(this->m_motorPowerPin, MOTOR_POWER_DRIVE_MODE);
 }
 
-void MotorController::PowerOff(){
-    digitalWrite(this->m_motorPowerPin,!MOTOR_POWER_DRIVE_MODE);
+void MotorController::PowerOff()
+{
+    digitalWrite(this->m_motorPowerPin, !MOTOR_POWER_DRIVE_MODE);
+    Timer1.disablePwm(this->m_ecsPinA);
 }
 
 void MotorController::InitializeESC()
@@ -34,16 +38,53 @@ void MotorController::InitializeESC()
 
 void MotorController::MotorMinPower()
 {
-    Timer1.pwm(m_ecsPinA,0.05 * 1023);
+    SetSpeedByDuty(MOTOR_MIN_DUTY);
 }
 
 void MotorController::MotorMaxPower()
 {
-    Timer1.pwm(m_ecsPinA,0.1 * 1023);
+    SetSpeedByDuty(MOTOR_MAX_DUTY);
 }
 
-void SetMotorController(MotorController* motorController);
+void SetMotorController(MotorController *motorController);
 
-MotorController* GetMotorController();
+MotorController *GetMotorController();
 
+void MotorController::SetMotorSpeedPercentage(const float percentage01)
+{
+    float speedClampPercentage = Utility::Clamp01(percentage01);
+    float speedToPWMDuty = Utility::Lerp(MOTOR_MIN_DUTY, MOTOR_MAX_DUTY, speedClampPercentage);
 
+    SetSpeedByDuty(speedToPWMDuty);
+}
+
+float MotorController::GetCurrentSpeedPercentage()
+{
+    float dutyPercentage01 = Utility::Remap(this->m_currentMotorDuty, MOTOR_MIN_DUTY, MOTOR_MAX_DUTY, 0.0, 1.0);
+    return dutyPercentage01;
+}
+
+void MotorController::SetSpeedByDuty(float pwmDuty)
+{
+    float duty = pwmDuty;
+    if (pwmDuty > MOTOR_MAX_DUTY)
+        duty = MOTOR_MAX_DUTY;
+    else if (pwmDuty < MOTOR_MIN_DUTY)
+        duty = MOTOR_MIN_DUTY;
+
+    this->m_currentMotorDuty = duty;
+
+    Timer1.pwm(m_ecsPinA, duty * 1023);
+}
+
+byte *MotorController::Handle_GetCurrentSpeedMessage(char data[5])
+{
+    int speedThousands = int(GetCurrentSpeedPercentage() * 1000);
+
+    char *pResult;      
+    pResult = &data[0];     //实际内存要外部传入，尽量不在函数内分配    
+    pResult[0] = E_D2C_MOTOR_SPEED;
+    itoa(speedThousands, pResult + 1, 10);
+
+    return (byte *)pResult;
+}

@@ -81,6 +81,7 @@ public class BTCManager {
 
         //注册IntentFilter
         IntentFilter filter = new IntentFilter(BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED);
+        filter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
 
         _applicationContext.registerReceiver(_systemBroadcastReceiver, filter);      //Receiver里可进入的事件
     }
@@ -164,6 +165,11 @@ public class BTCManager {
      */
     public void conntectDevice(String dstAddress) {
         try {
+
+            if (!_bluetoothAdapter.isEnabled()) {
+                sendErrorMessage("local bluetooth not enabled");
+                return;
+            }
             if (_deviceCurrentStatus != BluetoothStatus.CONNECTED) {
 
                 if (!_bluetoothAdapter.checkBluetoothAddress(dstAddress)) {
@@ -212,10 +218,11 @@ public class BTCManager {
      */
     public void sendMessage(byte[] messageBuffer) {
 
-        if (_deviceCurrentStatus != BluetoothStatus.CONNECTED) {
-            sendErrorMessage("Send Error ,Device not Connected");
-            return;
-        }
+//        if (_deviceCurrentStatus != BluetoothStatus.CONNECTED) {
+//            sendErrorMessage("Send Error ,Device not Connected");
+//            return;
+//        }
+
 
         _sendQueue.add(messageBuffer);
         SendRunable sendingThread = new SendRunable();
@@ -313,9 +320,13 @@ public class BTCManager {
 
             String actionType = intent.getAction();
 
+            sendErrorMessage("当前动作：" + actionType);
+
             if (BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED.equals(actionType)) {       //蓝牙状态改变
                 //通过intent.getIntExtra获取状态
                 int bluetoothState = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR);
+
+                sendErrorMessage(("当前状态："+bluetoothState));
 
                 if (bluetoothState == BluetoothAdapter.STATE_CONNECTED)
                     _deviceCurrentStatus = BluetoothStatus.CONNECTED;

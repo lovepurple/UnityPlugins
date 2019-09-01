@@ -85,7 +85,7 @@ public class AndroidBluetoothClassicDevice : IBluetoothDevice
 
     public void ConnectToDevice(string remoteDeviceMacAddress)
     {
-        AndroidBridgeInstance.Call("conntectDevice");
+        AndroidBridgeInstance.Call("conntectDevice",remoteDeviceMacAddress);
     }
 
     public void Disconnect()
