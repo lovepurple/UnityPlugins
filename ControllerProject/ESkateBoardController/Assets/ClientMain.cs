@@ -216,7 +216,7 @@ public class ClientMain : MonoBehaviour
 
             buffer.CopyTo(speedBuffer, 1);
 
-            Debug.Log(buffer);
+            BluetoothProxy.Intance.BluetoothDevice.SendData(buffer);
         }
 
     }
