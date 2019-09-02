@@ -81,7 +81,6 @@ public class ClientMain : MonoBehaviour
         ControllerJoyStick.onMoveStart.AddListener(OnJoyStickMoveStart);
         ControllerJoyStick.onMoveEnd.AddListener(OnJoyStickMoveEnd);
 
-        return;
         BluetoothProxy.Intance.InitializeBluetoothProxy();
         m_skateMessageHandler = new SkateMessageHandler(BluetoothProxy.Intance.BluetoothDevice);
 
@@ -99,12 +98,12 @@ public class ClientMain : MonoBehaviour
 
     private void OnBtnConnectBClick(GameObject btn)
     {
-        BluetoothProxy.Intance.BluetoothDevice.ConnectToDevice(Device_A);
+        BluetoothProxy.Intance.BluetoothDevice.ConnectToDevice(Device_B);
     }
 
     private void OnBtnConnectAClick(GameObject btn)
     {
-        BluetoothProxy.Intance.BluetoothDevice.ConnectToDevice(Device_B);
+        BluetoothProxy.Intance.BluetoothDevice.ConnectToDevice(Device_A);
     }
 
 
