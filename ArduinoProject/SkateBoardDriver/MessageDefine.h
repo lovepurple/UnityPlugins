@@ -42,7 +42,7 @@ inline const char *GetMessageName(EMessageDefine messageDefineEnum)
     default:
         break;
     }
-    return "";
+    return "Unknow Message ID";
 }
 
 #endif
