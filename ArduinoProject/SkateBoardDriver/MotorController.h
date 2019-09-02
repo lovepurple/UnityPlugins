@@ -48,6 +48,9 @@ public:
     //处理获取当前速度消息
     //C++常用的方式，对象内存传入，不在函数内分配新的堆内容
     byte* Handle_GetCurrentSpeedMessage(char data[8]);       
+
+    //设置速度处理
+    void Handle_SetPercentageSpeedMessage(char data[3]);
 };
 
 #endif

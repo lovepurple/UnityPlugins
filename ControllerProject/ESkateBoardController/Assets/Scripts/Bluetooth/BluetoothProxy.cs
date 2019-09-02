@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class BluetoothProxy
 {
@@ -26,10 +24,15 @@ public class BluetoothProxy
             m_device.InitializeBluetoothDevice();
     }
 
+    public void Tick()
+    {
+        if (m_device != null)
+            m_device.Tick();
+    }
 
 
 
     public IBluetoothDevice BluetoothDevice => this.m_device;
 
-    public static BluetoothProxy Intance => m_instance ?? (m_instance = new BluetoothProxy());  //??初始化的写法
+    public static BluetoothProxy Intance => m_instance ?? (m_instance = new BluetoothProxy());
 }

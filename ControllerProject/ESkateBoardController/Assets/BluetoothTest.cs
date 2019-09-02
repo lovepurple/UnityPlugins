@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using EngineCore.Utility;
+using System;
+using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
@@ -16,14 +18,14 @@ public class BluetoothTest : MonoBehaviour
 
     private void Awake()
     {
-        BluetoothProxy.Intance.InitializeBluetoothProxy();
+        //BluetoothProxy.Intance.InitializeBluetoothProxy();
 
-        BluetoothProxy.Intance.BluetoothDevice.OnBluetoothDeviceStateChangedEvent += BluetoothDevice_OnBluetoothDeviceStateChangedEvent;
-        BluetoothProxy.Intance.BluetoothDevice.OnConnectedEvent += BluetoothDevice_OnConnectedEvent;
-        BluetoothProxy.Intance.BluetoothDevice.OnErrorEvent += BluetoothDevice_OnErrorEvent;
-        BluetoothProxy.Intance.BluetoothDevice.OnReceiveDataEvent += BluetoothDevice_OnReceiveDataEvent;
-        BluetoothProxy.Intance.BluetoothDevice.OnSearchedDeviceEvent += BluetoothDevice_OnSearchedDeviceEvent;
-        BluetoothProxy.Intance.BluetoothDevice.OnSearchFinishEvent += BluetoothDevice_OnSearchFinishEvent;
+        //BluetoothProxy.Intance.BluetoothDevice.OnBluetoothDeviceStateChangedEvent += BluetoothDevice_OnBluetoothDeviceStateChangedEvent;
+        //BluetoothProxy.Intance.BluetoothDevice.OnConnectedEvent += BluetoothDevice_OnConnectedEvent;
+        //BluetoothProxy.Intance.BluetoothDevice.OnErrorEvent += BluetoothDevice_OnErrorEvent;
+        //BluetoothProxy.Intance.BluetoothDevice.OnReceiveDataEvent += BluetoothDevice_OnReceiveDataEvent;
+        //BluetoothProxy.Intance.BluetoothDevice.OnSearchedDeviceEvent += BluetoothDevice_OnSearchedDeviceEvent;
+        //BluetoothProxy.Intance.BluetoothDevice.OnSearchFinishEvent += BluetoothDevice_OnSearchFinishEvent;
 
     }
 
@@ -57,39 +59,61 @@ public class BluetoothTest : MonoBehaviour
         DisplayTxt.text = obj.ToString();
     }
 
-    void Start()
+    //void Start()
+    //{
+    //    BtnGetBondDevices.AddClickCallback(go =>
+    //    {
+    //        BluetoothProxy.Intance.BluetoothDevice.GetPariedDevices();
+    //    });
+
+    //    BtnSearch.AddClickCallback(go =>
+    //    {
+    //        BluetoothProxy.Intance.BluetoothDevice.SearchDevices();
+    //    });
+
+    //    BtnGetStatus.AddClickCallback(go =>
+    //    {
+    //        BluetoothProxy.Intance.BluetoothDevice.GetBluetoothDeviceStatus();
+    //    });
+
+    //    BtnGetConnectedName.AddClickCallback(go =>
+    //    {
+    //        BluetoothProxy.Intance.BluetoothDevice.GetConnectedDeviceName();
+    //    });
+
+    //    BtnIsEnable.AddClickCallback(go =>
+    //    {
+    //        BluetoothProxy.Intance.BluetoothDevice.IsBluetoothEnabled();
+    //    });
+
+    //    SendData.AddClickCallback(go =>
+    //    {
+    //        byte[] sendData = Encoding.ASCII.GetBytes("hello nidaye");
+    //        BluetoothProxy.Intance.BluetoothDevice.SendData(sendData);
+    //    });
+
+    //}
+
+    private void OnGUI()
     {
-        BtnGetBondDevices.AddClickCallback(go =>
+        if (GUILayout.Button("add "))
         {
-            BluetoothProxy.Intance.BluetoothDevice.GetPariedDevices();
-        });
+            char[] testarr = new char[] { (char)48, (char)48, (char)48, (char)48 };
 
-        BtnSearch.AddClickCallback(go =>
-        {
-            BluetoothProxy.Intance.BluetoothDevice.SearchDevices();
-        });
-
-        BtnGetStatus.AddClickCallback(go =>
-        {
-            BluetoothProxy.Intance.BluetoothDevice.GetBluetoothDeviceStatus();
-        });
-
-        BtnGetConnectedName.AddClickCallback(go =>
-        {
-            BluetoothProxy.Intance.BluetoothDevice.GetConnectedDeviceName();
-        });
-
-        BtnIsEnable.AddClickCallback(go =>
-        {
-            BluetoothProxy.Intance.BluetoothDevice.IsBluetoothEnabled();
-        });
-
-        SendData.AddClickCallback(go =>
-        {
-            byte[] sendData = Encoding.ASCII.GetBytes("hello nidaye");
-            BluetoothProxy.Intance.BluetoothDevice.SendData(sendData);
-        });
-
+            //int val = BitConverter.ToInt32(testarr as byte[], 0);
+            int val = (int)DigitUtility.GetUInt32(testarr);
+            Debug.Log(val);
+        }
     }
 
+    private Queue<byte[]> m_data = new Queue<byte[]>();
+
+    private void Update()
+    {
+        while (m_data.Count > 0)
+        {
+            m_data.Dequeue();
+        }
+
+    }
 }

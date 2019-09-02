@@ -74,7 +74,6 @@ public class AppControllerBehaviour : MonoBehaviour
 	
 	void OnEnable()
 	{
-		SearchBLEDevicesBehaviour.SearchBLEDevicesEvent += HandleSearchBLEDevicesEvent;
         DisconnectButtonBehaviour.DisconnectButtonEvent += HandleDisconnectButtonEvent;
 		BleDeviceConnectButtonBehaviour.BleDevicesListButtonConnectEvent += HandleBleDevicesListButtonConnectEvent;
 		BLEControllerEventHandler.OnBleDidCompletePeripheralScanEvent += HandleOnBleDidCompletePeripheralScanEvent;
@@ -173,7 +172,6 @@ public class AppControllerBehaviour : MonoBehaviour
 	
 	void OnDisable()
 	{
-		SearchBLEDevicesBehaviour.SearchBLEDevicesEvent -= HandleSearchBLEDevicesEvent;
         DisconnectButtonBehaviour.DisconnectButtonEvent -= HandleDisconnectButtonEvent;
         BleDeviceConnectButtonBehaviour.BleDevicesListButtonConnectEvent -= HandleBleDevicesListButtonConnectEvent;
 		BLEControllerEventHandler.OnBleDidCompletePeripheralScanEvent -= HandleOnBleDidCompletePeripheralScanEvent;

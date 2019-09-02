@@ -1,5 +1,6 @@
 ﻿using EngineCore;
 using System.Linq;
+using System.Text;
 
 public class SkateMessageHandler
 {
@@ -16,9 +17,9 @@ public class SkateMessageHandler
         if (obj.Length > 0)
         {
             MessageDefine messageID = (MessageDefine)obj[0];
-            byte[] messageBody = null;
+            char[] messageBody = null;
             if (obj.Length > 2)
-                messageBody = obj.Skip(1).ToArray();
+                messageBody = Encoding.ASCII.GetChars(obj.Skip(1).ToArray());
 
             MessageHandler.Call((int)messageID, messageBody);
         }

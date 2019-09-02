@@ -11,6 +11,7 @@ MotorController *pMotorController = nullptr;
 void setup()
 {
     Serial.begin(9600);
+
     pMessageHandler = new MessageHandler(BLUETOOTH_RX, BLUETOOTH_TX);
 
     while (!Serial)

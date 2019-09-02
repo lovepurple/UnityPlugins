@@ -1,6 +1,5 @@
 package com.lovepurple.btccontroller;
 
-import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
@@ -8,7 +7,9 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.PackageManager;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 
 import com.google.gson.Gson;
 
@@ -62,11 +63,17 @@ public class BTCManager {
     //当前蓝牙状态
     private BluetoothStatus _deviceCurrentStatus = BluetoothStatus.FREE;
 
+    //线程通讯，子线程通过handler
+    private Handler _mainThreadHandler = null;
+
 
     private BTCManager(Context context) {
         this._applicationContext = context.getApplicationContext();         //获取应用的上下文，生命周期是整个应用
         this._bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+
+        _mainThreadHandler = new MainThreadMessageHandler(this._applicationContext.getMainLooper());
     }
+
 
     /**
      * 初始化蓝牙管理器
@@ -193,7 +200,7 @@ public class BTCManager {
      */
     public void disconnectDevice() {
         try {
-            if (_deviceCurrentStatus == BluetoothStatus.CONNECTED) {
+//            if (_deviceCurrentStatus == BluetoothStatus.CONNECTED) {
 
                 if (_bluetoothSocket != null && _bluetoothSocket.isConnected()) {
                     _bluetoothSocket.close();
@@ -205,7 +212,7 @@ public class BTCManager {
                     }
                     _deviceCurrentStatus = BluetoothStatus.FREE;
                 }
-            }
+//            }
         } catch (Exception e) {
             sendErrorMessage(e.getMessage());
         }
@@ -261,7 +268,7 @@ public class BTCManager {
         OnSearchedDevicesCallback = onSearchFinishCallback;
     }
 
-
+    //todo 线程问题后续修改 2019-09-02 15:35:37
     private BroadcastReceiver mDiscoveryReceiver = new BroadcastReceiver() {
 
         @Override
@@ -319,14 +326,10 @@ public class BTCManager {
         public void onReceive(Context context, Intent intent) {
 
             String actionType = intent.getAction();
-
-            sendErrorMessage("当前动作：" + actionType);
-
+            sendErrorMessage("jin le " + actionType);
             if (BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED.equals(actionType)) {       //蓝牙状态改变
                 //通过intent.getIntExtra获取状态
                 int bluetoothState = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR);
-
-                sendErrorMessage(("当前状态："+bluetoothState));
 
                 if (bluetoothState == BluetoothAdapter.STATE_CONNECTED)
                     _deviceCurrentStatus = BluetoothStatus.CONNECTED;
@@ -443,7 +446,7 @@ public class BTCManager {
                 _bluetoothSendStream.write('\n');
                 _bluetoothSendStream.flush();
             } catch (IOException e) {
-                sendErrorMessage(e.getMessage());
+                sendErrorMessageToMainThread(e.getMessage());
             }
 
 
@@ -455,26 +458,35 @@ public class BTCManager {
      */
     private class RecvRunable implements Runnable {
         private boolean isRuning = true;
+        private byte[] _recvBuffer = new byte[64];
+        private int _recvBufferCount = 0;
 
         @Override
         public void run() {
             while (isRuning) {
-                if (_deviceCurrentStatus != BluetoothStatus.CONNECTED || _bluetoothRecvStream == null) {
-                    continue;
-                }
+//                if (_deviceCurrentStatus != BluetoothStatus.CONNECTED || _bluetoothRecvStream == null) {
+//                    continue;     //todo:state 需要再整理一下
+//                }
 
                 try {
-                    byte[] buffer = new byte[64];
-                    int bufferIndex = 0;
+                    //蓝牙模块有可能一次发不出所有内容，分两次发出
                     while (_bluetoothRecvStream.available() > 0) {
                         byte recvByte = (byte) _bluetoothRecvStream.read();
 
                         if (recvByte == '\n') {
-                            byte[] recvMessageBuffer = Arrays.copyOfRange(buffer, 0, bufferIndex);
-                            OnReveiveBuffer(recvMessageBuffer);
-                            bufferIndex = 0;
+
+                            if (_recvBufferCount > 0) {
+                                //会有线程问题，当前线程属于子线程，直接返回到Unity 也是子线程，如果使用
+                                byte[] recvMessageBuffer = Arrays.copyOfRange(_recvBuffer, 0, _recvBufferCount);        //[from,to)
+                                Message msg = new Message();
+                                msg.arg1 = 1;
+                                msg.obj = recvMessageBuffer;
+                                _mainThreadHandler.sendMessage(msg);
+                            }
+
+                            _recvBufferCount = 0;
                         } else {
-                            buffer[bufferIndex++] = recvByte;
+                            _recvBuffer[_recvBufferCount++] = recvByte;
                         }
                     }
                 } catch (IOException e) {
@@ -486,5 +498,36 @@ public class BTCManager {
         public void KillRecv() {
             this.isRuning = false;
         }
+    }
+
+    private void sendErrorMessageToMainThread(String errorMessage) {
+        Message msg = new Message();
+        msg.arg1 = 0;
+        msg.obj = errorMessage;
+        _mainThreadHandler.sendMessage(msg);
+    }
+
+    /**
+     * 主线程消息处理（子线程与主线程通讯）
+     */
+    private class MainThreadMessageHandler extends Handler {
+
+        public MainThreadMessageHandler(Looper looper) {
+            super(looper);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.arg1) {
+                case 0:     //出错
+                    sendErrorMessage(msg.obj.toString());
+                    break;
+                case 1:     //接收到新消息
+                    OnReveiveBuffer((byte[]) msg.obj);
+                    break;
+            }
+
+        }
+
     }
 }

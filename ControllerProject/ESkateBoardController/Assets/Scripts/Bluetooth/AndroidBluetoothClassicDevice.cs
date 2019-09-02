@@ -27,6 +27,8 @@ public class AndroidBluetoothClassicDevice : IBluetoothDevice
     public event Action<BluetoothDeviceInfo> OnSearchedDeviceEvent;
     public event Action<List<BluetoothDeviceInfo>> OnSearchFinishEvent;
 
+    private Queue<byte[]> m_recvMessageQueue = new Queue<byte[]>();
+
     /// <summary>
     /// 
     /// </summary>
@@ -52,7 +54,7 @@ public class AndroidBluetoothClassicDevice : IBluetoothDevice
 
         AndroidBufferCallback onReceiveBufferCallback = new AndroidBufferCallback(bufferData =>
         {
-            OnReceiveDataEvent?.Invoke(bufferData);
+            this.m_recvMessageQueue.Enqueue(bufferData);
         }, ANDROID_BYTES_CALLBACK_INTERFACE);
         AndroidBridgeInstance.Call("setOnReceiveMessageCallback", onReceiveBufferCallback);
     }
@@ -85,7 +87,7 @@ public class AndroidBluetoothClassicDevice : IBluetoothDevice
 
     public void ConnectToDevice(string remoteDeviceMacAddress)
     {
-        AndroidBridgeInstance.Call("conntectDevice",remoteDeviceMacAddress);
+        AndroidBridgeInstance.Call("conntectDevice", remoteDeviceMacAddress);
     }
 
     public void Disconnect()
@@ -110,6 +112,16 @@ public class AndroidBluetoothClassicDevice : IBluetoothDevice
         AndroidBridgeInstance.Call("setSearchDeviceCallback", onSearchResultCallback, onSearchDeviceCallback);
 
         AndroidBridgeInstance.Call("searchDevices");
+    }
+
+    public void Tick()
+    {
+        //主线程中处理消息
+        while (this.m_recvMessageQueue.Count > 0)
+        {
+            byte[] recvMessageBuffer = this.m_recvMessageQueue.Dequeue();
+            OnReceiveDataEvent?.Invoke(recvMessageBuffer);
+        }
     }
 
     private static AndroidJavaObject AndroidBridgeInstance

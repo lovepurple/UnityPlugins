@@ -82,9 +82,15 @@ byte *MotorController::Handle_GetCurrentSpeedMessage(char data[5])
     int speedThousands = int(GetCurrentSpeedPercentage() * 1000);
 
     char *pResult;      
-    pResult = &data[0];     //实际内存要外部传入，尽量不在函数内分配    
+    pResult = &data[0];     
     pResult[0] = E_D2C_MOTOR_SPEED;
     itoa(speedThousands, pResult + 1, 10);
 
     return (byte *)pResult;
+}
+
+void MotorController::Handle_SetPercentageSpeedMessage(char data[3])
+{
+    int speedThousand = atoi(data);
+    this->SetMotorSpeedPercentage(speedThousand / 1000.0f);
 }

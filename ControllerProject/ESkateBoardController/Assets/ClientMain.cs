@@ -1,19 +1,22 @@
 ﻿using EngineCore;
+using EngineCore.Utility;
 using GOGUI;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class ClientMain : MonoBehaviour
 {
-    public string MAC = "98:D3:31:F5:8B:1A";
-    //20:16:06:12:28:69
+    private const string Device_A = "98:D3:31:F5:8B:1A";
+    private const string Device_B = "20:16:06:12:28:69";
 
     private Text m_receiveMessage = null;
 
-    private Button m_btnConnect = null;
+    private Button m_btnConnectA = null;
+    private Button m_btnConnectB = null;
     private Button m_btnDisconnect = null;
     private Button m_btnCurrentStatus = null;
     private Button m_btnMotorInit = null;
@@ -28,12 +31,17 @@ public class ClientMain : MonoBehaviour
 
     private SkateMessageHandler m_skateMessageHandler = null;
 
+    public ETCJoystick ControllerJoyStick;
+
     private void Start()
     {
         m_receiveMessage = transform.Find("Text").GetComponent<Text>();
 
-        m_btnConnect = transform.Find("GameObject/Button").GetComponent<Button>();
-        m_btnConnect.AddClickCallback(OnBtnConnectClick);
+        m_btnConnectA = transform.Find("GameObject/Button (12)").GetComponent<Button>();
+        m_btnConnectA.AddClickCallback(OnBtnConnectAClick);
+
+        m_btnConnectB = transform.Find("GameObject/Button (13)").GetComponent<Button>();
+        m_btnConnectB.AddClickCallback(OnBtnConnectBClick);
 
         m_btnDisconnect = transform.Find("GameObject/Button (1)").GetComponent<Button>();
         m_btnDisconnect.AddClickCallback(OnBtnDisconnectClick);
@@ -68,6 +76,12 @@ public class ClientMain : MonoBehaviour
         m_btnGetCurrentSpeed = transform.Find("GameObject/Button (11)").GetComponent<Button>();
         m_btnGetCurrentSpeed.AddClickCallback(OnBtnGetCurrentSpeedClick);
 
+        ControllerJoyStick.onMove.AddListener(OnJoyStickMove);
+        ControllerJoyStick.onMoveSpeed.AddListener(OnJoyStickMoveSpeed);
+        ControllerJoyStick.onMoveStart.AddListener(OnJoyStickMoveStart);
+        ControllerJoyStick.onMoveEnd.AddListener(OnJoyStickMoveEnd);
+
+        return;
         BluetoothProxy.Intance.InitializeBluetoothProxy();
         m_skateMessageHandler = new SkateMessageHandler(BluetoothProxy.Intance.BluetoothDevice);
 
@@ -77,12 +91,22 @@ public class ClientMain : MonoBehaviour
         };
 
         MessageHandler.RegisterMessageHandler((int)MessageDefine.E_D2C_MOTOR_SPEED, OnGetMotorSpeedResponse);
+
+
+
+
     }
 
-    private void OnBtnConnectClick(GameObject btn)
+    private void OnBtnConnectBClick(GameObject btn)
     {
-        BluetoothProxy.Intance.BluetoothDevice.ConnectToDevice(MAC);
+        BluetoothProxy.Intance.BluetoothDevice.ConnectToDevice(Device_A);
     }
+
+    private void OnBtnConnectAClick(GameObject btn)
+    {
+        BluetoothProxy.Intance.BluetoothDevice.ConnectToDevice(Device_B);
+    }
+
 
     private void OnBtnDisconnectClick(GameObject btn)
     {
@@ -164,12 +188,52 @@ public class ClientMain : MonoBehaviour
 
     private void OnGetMotorSpeedResponse(object data)
     {
-        byte[] speed = (byte[])data;
+        char[] speed = (char[])data;
 
-        uint speedThound = BitConverter.ToUInt32(speed, 0);
+        this.m_receiveMessage.text = $"当前速度：{DigitUtility.GetUInt32(speed) / 1000.0f}";
+    }
 
-        this.m_receiveMessage.text = $"当前速度：{speedThound}";
+    private void Update()
+    {
+        BluetoothProxy.Intance.Tick();
     }
 
 
+    /****************************************/
+    private void OnJoyStickMove(Vector2 delta)
+    {
+        //todo:之后考虑差值
+        //char buffer[]
+        if (delta.y >= 0)
+        {
+            int speedThoudsand = (int)MathUtil.Remap(1, 0, 1, 0, 999);
+
+
+            byte[] speedBuffer = new byte[4];
+            speedBuffer[0] = (byte)MessageDefine.E_C2D_MOTOR_DRIVE;
+
+            char[] a = speedThoudsand.ToString().ToCharArray();
+            byte[] buffer = Encoding.ASCII.GetBytes(a);
+
+            buffer.CopyTo(speedBuffer, 1);
+
+            Debug.Log(buffer);
+        }
+
+    }
+
+    private void OnJoyStickMoveSpeed(Vector2 delta)
+    {
+        Debug.Log("onmove speed : " + delta.ToString());
+    }
+
+    private void OnJoyStickMoveEnd()
+    {
+        Debug.Log("onmove end ");
+    }
+
+    private void OnJoyStickMoveStart()
+    {
+        Debug.Log("onmove start ");
+    }
 }

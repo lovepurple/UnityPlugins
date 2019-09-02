@@ -11,6 +11,10 @@ public interface IBluetoothDevice : IBluetoothEvents
     /// <returns></returns>
     bool IsBluetoothEnabled();
 
+    /// <summary>
+    /// 获取已配对过的设备列表
+    /// </summary>
+    /// <returns></returns>
     List<BluetoothDeviceInfo> GetPariedDevices();
 
     /// <summary>
@@ -46,4 +50,9 @@ public interface IBluetoothDevice : IBluetoothEvents
     /// 蓝牙扫描
     /// </summary>
     void SearchDevices();
+
+    /// <summary>
+    /// Tick
+    /// </summary>
+    void Tick();
 }

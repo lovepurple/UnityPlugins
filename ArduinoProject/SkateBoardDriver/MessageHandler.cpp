@@ -39,7 +39,7 @@ void MessageHandler::Tick()
 
     while(m_sendMessageQueue.size() >0)
     {
-        byte* sendBuffer = m_sendMessageQueue.back();
+        byte* sendBuffer = m_sendMessageQueue.front();
         Serial.println("sendMessage");
         Serial.println(sendBuffer[0]);
         SendMessageInternal((char*)sendBuffer);
@@ -49,12 +49,12 @@ void MessageHandler::Tick()
 
 void MessageHandler::SendMessageInternal(char *sendBuffer)
 {
-    Serial.println("sending...");
+    Serial.println("Send Message:");
+    Serial.println((char)sendBuffer[0]);
     while(*sendBuffer)
     {
         m_bluetooth->write(sendBuffer);
 
-        Serial.print(sendBuffer);
         sendBuffer++;
     }
     this->m_bluetooth->write(MessageHandler::Message_End_Flag);
@@ -80,6 +80,7 @@ void MessageHandler::OnHandleMessage(EMessageDefine messageID, byte *messageBuff
         this->m_motorColtroller->MotorMinPower();
         break;
     case E_C2D_MOTOR_DRIVE:
+        this->m_motorColtroller->Handle_SetPercentageSpeedMessage(&messageBuffer[0]);
         break;
     case E_C2D_MOTOR_INITIALIZE:
         this->m_motorColtroller->InitializeESC();
@@ -113,8 +114,6 @@ MotorController *MessageHandler::GetMotorController()
 
 void MessageHandler::SendMessage(byte* messageBuffer)
 {
-    Serial.println("--------------------");
-   
     byte* tempBuffer = &messageBuffer[0];       //坑！！！！
     while(*tempBuffer)
     {
@@ -123,10 +122,6 @@ void MessageHandler::SendMessage(byte* messageBuffer)
     }
 
     this->m_sendMessageQueue.push_back(messageBuffer);
-
-    Serial.println("++++++++++++++++++++++++++++");         
-    Serial.println(*(this->m_sendMessageQueue.back()));
-
 }
 
 
