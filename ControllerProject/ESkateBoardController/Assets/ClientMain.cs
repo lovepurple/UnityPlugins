@@ -28,6 +28,8 @@ public class ClientMain : MonoBehaviour
     private Button m_btnMaxSpeed = null;
     private Button m_btnPowerOff = null;
     private Button m_btnGetCurrentSpeed = null;
+    private Button m_btnSetLowSpeed = null;
+    private Button m_btnSetHighSpeed = null;
 
     private SkateMessageHandler m_skateMessageHandler = null;
 
@@ -75,6 +77,12 @@ public class ClientMain : MonoBehaviour
 
         m_btnGetCurrentSpeed = transform.Find("GameObject/Button (11)").GetComponent<Button>();
         m_btnGetCurrentSpeed.AddClickCallback(OnBtnGetCurrentSpeedClick);
+
+        m_btnSetLowSpeed = transform.Find("GameObject/Button (14)").GetComponent<Button>();
+        m_btnSetLowSpeed.AddClickCallback(btn=> SetSpeed(0.33f));
+
+        m_btnSetHighSpeed = transform.Find("GameObject/Button (15)").GetComponent<Button>();
+        m_btnSetHighSpeed.AddClickCallback(btn => SetSpeed(0.66f));
 
         ControllerJoyStick.onMove.AddListener(OnJoyStickMove);
         ControllerJoyStick.onMoveSpeed.AddListener(OnJoyStickMoveSpeed);
@@ -189,7 +197,7 @@ public class ClientMain : MonoBehaviour
     {
         char[] speed = (char[])data;
 
-        this.m_receiveMessage.text = $"当前速度：{DigitUtility.GetUInt32(speed) / 1000.0f}";
+        this.m_receiveMessage.text = $"当前速度：{DigitUtility.GetUInt32(speed) / 999.0f}";
     }
 
     private void Update()
@@ -205,7 +213,7 @@ public class ClientMain : MonoBehaviour
         //char buffer[]
         if (delta.y >= 0)
         {
-            int speedThoudsand = (int)MathUtil.Remap(1, 0, 1, 0, 999);
+            int speedThoudsand = (int)MathUtil.Remap(delta.y, 0, 1, 0, 999);
 
 
             byte[] speedBuffer = new byte[4];
@@ -216,9 +224,29 @@ public class ClientMain : MonoBehaviour
 
             buffer.CopyTo(speedBuffer, 1);
 
+            Debug.Log(Encoding.ASCII.GetString(speedBuffer));
+
             BluetoothProxy.Intance.BluetoothDevice.SendData(speedBuffer);
         }
 
+    }
+
+    private void SetSpeed(float percentage01)
+    {
+        int speedThoudsand = (int)MathUtil.Remap(percentage01, 0, 1, 0, 999);
+
+
+        byte[] speedBuffer = new byte[4];
+        speedBuffer[0] = (byte)MessageDefine.E_C2D_MOTOR_DRIVE;
+
+        char[] a = speedThoudsand.ToString().ToCharArray();
+        byte[] buffer = Encoding.ASCII.GetBytes(a);
+
+        buffer.CopyTo(speedBuffer, 1);
+
+        Debug.Log(Encoding.ASCII.GetString(speedBuffer));
+
+        BluetoothProxy.Intance.BluetoothDevice.SendData(speedBuffer);
     }
 
     private void OnJoyStickMoveSpeed(Vector2 delta)
@@ -235,4 +263,5 @@ public class ClientMain : MonoBehaviour
     {
         Debug.Log("onmove start ");
     }
+
 }

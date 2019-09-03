@@ -21,6 +21,7 @@ void MessageHandler::Tick()
         if (recvByte != MessageHandler::Message_End_Flag)
         {
             m_tempBuffer[m_recvBufferCount++] = recvByte;
+            Serial.println(recvByte);
         }
         else
         {
@@ -28,7 +29,23 @@ void MessageHandler::Tick()
             {
                 EMessageDefine messageType = (EMessageDefine)m_tempBuffer[0];
                 byte messageBuffer[m_recvBufferCount];
-                memcpy(messageBuffer, m_tempBuffer + 1, sizeof(byte) * m_recvBufferCount);
+                // memcpy(messageBuffer, m_tempBuffer + 1, sizeof(byte) * (m_recvBufferCount-1));
+                for(int i =1;i<m_recvBufferCount;++i)
+                {
+                    messageBuffer[i-1] = m_tempBuffer[i];
+                }
+                messageBuffer[m_recvBufferCount-1]='\0';
+
+                Serial.println("buffer count");
+                Serial.println(m_recvBufferCount);
+                Serial.println("**************************************");
+                byte* pMessageBuffer = &messageBuffer[0];
+                while(*pMessageBuffer)
+                {
+                    Serial.println(*pMessageBuffer);
+                    pMessageBuffer++;
+                }
+                Serial.println("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
 
                 OnHandleMessage(messageType, messageBuffer);
             }

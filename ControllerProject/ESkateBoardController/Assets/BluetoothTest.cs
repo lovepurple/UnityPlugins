@@ -26,6 +26,9 @@ public class BluetoothTest : MonoBehaviour
         //BluetoothProxy.Intance.BluetoothDevice.OnReceiveDataEvent += BluetoothDevice_OnReceiveDataEvent;
         //BluetoothProxy.Intance.BluetoothDevice.OnSearchedDeviceEvent += BluetoothDevice_OnSearchedDeviceEvent;
         //BluetoothProxy.Intance.BluetoothDevice.OnSearchFinishEvent += BluetoothDevice_OnSearchFinishEvent;
+        char[] test = new char[] { '1', '9', '9' };
+
+        Debug.Log(Convert.ToByte(test[0]));
 
     }
 
