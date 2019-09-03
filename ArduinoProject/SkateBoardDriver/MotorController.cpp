@@ -55,11 +55,11 @@ void MotorController::SetMotorSpeedPercentage(const float percentage01)
     float speedClampPercentage = Utility::Clamp01(percentage01);
     
     float currentPercentageSpeed = GetCurrentSpeedPercentage();
-    // if(abs(currentPercentageSpeed - speedClampPercentage) < 0.01f)
-    // {   
-    //     Serial.println("return le");
-    //     return;
-    // }
+    if(abs(currentPercentageSpeed - speedClampPercentage) < 0.01f)
+    {   
+        Serial.println("Speed Close ");
+        return;
+    }
     float speedToPWMDuty = Utility::Lerp(MOTOR_MIN_DUTY, MOTOR_MAX_DUTY, speedClampPercentage);
 
 
