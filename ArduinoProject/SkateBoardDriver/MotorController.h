@@ -21,6 +21,8 @@ public:
     MotorController(uint8_t motorPowerPin, uint8_t ecsPinA, uint8_t ecsPinB);
     ~MotorController();
 
+    bool IsPowerOn();
+
     void PowerOn();
 
     void PowerOff();

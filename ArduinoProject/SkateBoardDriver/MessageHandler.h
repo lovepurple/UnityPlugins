@@ -29,7 +29,7 @@ private:
     //发送队列
     QList<byte*> m_sendMessageQueue;
 
-    //发消息
+    //发消息  todo：BufferCount 
     void SendMessageInternal(char *sendBuffer);
 
 public:

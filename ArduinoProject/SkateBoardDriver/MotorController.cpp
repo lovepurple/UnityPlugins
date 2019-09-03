@@ -16,6 +16,11 @@ MotorController::~MotorController()
 {
 }
 
+bool MotorController::IsPowerOn()
+{
+    return digitalRead(this->m_motorPowerPin) == HIGH;
+}
+
 //Static 方法在cpp中不需要加Static
 //一个引脚通过一分二可驱动同时多个信号
 void MotorController::PowerOn()
@@ -93,6 +98,10 @@ byte *MotorController::Handle_GetCurrentSpeedMessage(char data[5])
     pResult = &data[0];     
     pResult[0] = E_D2C_MOTOR_SPEED;
     itoa(speedThousands, pResult + 1, 10);
+    pResult[4] = (byte)'\0';
+    Serial.println("current speed");
+    Serial.println(data);
+
 
     return (byte *)pResult;
 }
@@ -104,7 +113,5 @@ void MotorController::Handle_SetPercentageSpeedMessage(MessageBody& messageBody)
         return;
 
     int speedThousand = atoi(messageBody.pMessageBody);
-    Serial.println("current speed");
-    Serial.println(speedThousand);
     this->SetMotorSpeedPercentage(speedThousand / 999.0f);
 }
