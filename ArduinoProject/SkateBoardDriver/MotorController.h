@@ -50,7 +50,7 @@ public:
     byte* Handle_GetCurrentSpeedMessage(char data[8]);       
 
     //设置速度处理
-    void Handle_SetPercentageSpeedMessage(char data[3]);
+    void Handle_SetPercentageSpeedMessage(MessageBody& messageBody);
 };
 
 #endif

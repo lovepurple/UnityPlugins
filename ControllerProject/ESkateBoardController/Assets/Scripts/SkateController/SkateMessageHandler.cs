@@ -1,4 +1,5 @@
 ﻿using EngineCore;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
@@ -23,5 +24,12 @@ public class SkateMessageHandler
 
             MessageHandler.Call((int)messageID, messageBody);
         }
+    }
+
+    public static List<byte> GetSkateMessage(MessageDefine messageName)
+    {
+        List<byte> messageBufferList = new List<byte>() { (byte)messageName };
+
+        return messageBufferList;
     }
 }

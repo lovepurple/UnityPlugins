@@ -13,8 +13,8 @@ enum EMessageDefine
     E_C2D_MOTOR_INITIALIZE = 115,   //电调初始化
     E_C2D_MOTOR_NORMAL_START = 116, //电机正常启动
 
-    E_C2D_MOTOR_GET_SPEED = 117,    //获取电机当前速度
-    E_D2C_MOTOR_SPEED = 118,        //返回电机当前速度
+    E_C2D_MOTOR_GET_SPEED = 117, //获取电机当前速度
+    E_D2C_MOTOR_SPEED = 118,     //返回电机当前速度
 };
 
 inline const char *GetMessageName(EMessageDefine messageDefineEnum)
@@ -44,5 +44,17 @@ inline const char *GetMessageName(EMessageDefine messageDefineEnum)
     }
     return "Unknow Message ID";
 }
+
+struct MessageBody
+{
+    const byte *pMessageBody;
+    const size_t messageSize;
+};
+
+struct Message
+{
+    EMessageDefine messageID;
+    MessageBody messageBody;
+};
 
 #endif

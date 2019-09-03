@@ -13,6 +13,8 @@ public class ClientMain : MonoBehaviour
     private const string Device_A = "98:D3:31:F5:8B:1A";
     private const string Device_B = "20:16:06:12:28:69";
 
+    private const int GearCount = 5; //档位数量
+
     private Text m_receiveMessage = null;
 
     private Button m_btnConnectA = null;
@@ -30,6 +32,8 @@ public class ClientMain : MonoBehaviour
     private Button m_btnGetCurrentSpeed = null;
     private Button m_btnSetLowSpeed = null;
     private Button m_btnSetHighSpeed = null;
+
+    private Button m_btnTestMessage = null;
 
     private SkateMessageHandler m_skateMessageHandler = null;
 
@@ -79,10 +83,14 @@ public class ClientMain : MonoBehaviour
         m_btnGetCurrentSpeed.AddClickCallback(OnBtnGetCurrentSpeedClick);
 
         m_btnSetLowSpeed = transform.Find("GameObject/Button (14)").GetComponent<Button>();
-        m_btnSetLowSpeed.AddClickCallback(btn=> SetSpeed(0.33f));
+        m_btnSetLowSpeed.AddClickCallback(btn => SetSpeed(0.33f));
 
         m_btnSetHighSpeed = transform.Find("GameObject/Button (15)").GetComponent<Button>();
         m_btnSetHighSpeed.AddClickCallback(btn => SetSpeed(0.66f));
+
+        m_btnTestMessage = transform.Find("GameObject/Button (16)").GetComponent<Button>();
+        m_btnTestMessage.AddClickCallback(OnTestMessageClick);
+
 
         ControllerJoyStick.onMove.AddListener(OnJoyStickMove);
         ControllerJoyStick.onMoveSpeed.AddListener(OnJoyStickMoveSpeed);
@@ -94,7 +102,8 @@ public class ClientMain : MonoBehaviour
 
         BluetoothProxy.Intance.BluetoothDevice.OnErrorEvent += (errorMsg) =>
         {
-            m_receiveMessage.text = errorMsg;
+            //m_receiveMessage.text = errorMsg;
+            Debug.Log(errorMsg);
         };
 
         MessageHandler.RegisterMessageHandler((int)MessageDefine.E_D2C_MOTOR_SPEED, OnGetMotorSpeedResponse);
@@ -122,10 +131,9 @@ public class ClientMain : MonoBehaviour
 
     private void OnBtnMotorInitClick(GameObject btn)
     {
-        byte[] buffer = new byte[1];
+        List<byte> messageBuffer = SkateMessageHandler.GetSkateMessage(MessageDefine.E_C2D_MOTOR_INITIALIZE);
 
-        buffer[0] = (byte)MessageDefine.E_C2D_MOTOR_INITIALIZE;
-        BluetoothProxy.Intance.BluetoothDevice.SendData(buffer);
+        BluetoothProxy.Intance.BluetoothDevice.SendData(messageBuffer);
     }
 
     private void OnBtnBluetoothStatusClick(GameObject btn)
@@ -135,18 +143,16 @@ public class ClientMain : MonoBehaviour
 
     private void OnBtnMotorMinSpeedClick(GameObject btn)
     {
-        byte[] buffer = new byte[1];
-        buffer[0] = (byte)MessageDefine.E_C2D_MOTOR_CORRECT_MIN_POWER;
+        List<byte> messageBuffer = SkateMessageHandler.GetSkateMessage(MessageDefine.E_C2D_MOTOR_CORRECT_MIN_POWER);
 
-        BluetoothProxy.Intance.BluetoothDevice.SendData(buffer);
+        BluetoothProxy.Intance.BluetoothDevice.SendData(messageBuffer);
     }
 
     private void OnBtnMotorNormalStartClick(GameObject btn)
     {
-        byte[] buffer = new byte[1];
-        buffer[0] = (byte)MessageDefine.E_C2D_MOTOR_NORMAL_START;
+        List<byte> messageBuffer = SkateMessageHandler.GetSkateMessage(MessageDefine.E_C2D_MOTOR_NORMAL_START);
 
-        BluetoothProxy.Intance.BluetoothDevice.SendData(buffer);
+        BluetoothProxy.Intance.BluetoothDevice.SendData(messageBuffer);
     }
 
 
@@ -161,34 +167,40 @@ public class ClientMain : MonoBehaviour
 
     private void OnBtnStopClick(GameObject btn)
     {
-        byte[] buffer = new byte[1];
-        buffer[0] = (byte)MessageDefine.E_C2D_MOTOR_CORRECT_MIN_POWER;
+        List<byte> messageBuffer = SkateMessageHandler.GetSkateMessage(MessageDefine.E_C2D_MOTOR_CORRECT_MIN_POWER);
 
-        BluetoothProxy.Intance.BluetoothDevice.SendData(buffer);
+        BluetoothProxy.Intance.BluetoothDevice.SendData(messageBuffer);
     }
 
     private void OnBtnMaxSpeedClick(GameObject btn)
     {
-        byte[] buffer = new byte[1];
-        buffer[0] = (byte)MessageDefine.E_C2D_MOTOR_CORRECT_MAX_POWER;
+        List<byte> messageBuffer = SkateMessageHandler.GetSkateMessage(MessageDefine.E_C2D_MOTOR_CORRECT_MAX_POWER);
 
-        BluetoothProxy.Intance.BluetoothDevice.SendData(buffer);
+        BluetoothProxy.Intance.BluetoothDevice.SendData(messageBuffer);
     }
 
     private void OnBtnPowerOff(GameObject btn)
     {
-        byte[] buffer = new byte[1];
-        buffer[0] = (byte)MessageDefine.E_C2D_MOTOR_POWEROFF;
+        List<byte> messageBuffer = SkateMessageHandler.GetSkateMessage(MessageDefine.E_C2D_MOTOR_POWEROFF);
 
-        BluetoothProxy.Intance.BluetoothDevice.SendData(buffer);
+        BluetoothProxy.Intance.BluetoothDevice.SendData(messageBuffer);
     }
 
     private void OnBtnGetCurrentSpeedClick(GameObject btn)
     {
-        byte[] buffer = new byte[1];
-        buffer[0] = (byte)MessageDefine.E_C2D_MOTOR_GET_SPEED;
+        List<byte> messageBuffer = SkateMessageHandler.GetSkateMessage(MessageDefine.E_C2D_MOTOR_GET_SPEED);
 
-        BluetoothProxy.Intance.BluetoothDevice.SendData(buffer);
+        BluetoothProxy.Intance.BluetoothDevice.SendData(messageBuffer);
+
+    }
+
+    private void OnTestMessageClick(GameObject btn)
+    {
+        SetSpeed(0.1f);
+        SetSpeed(0.2f);
+        SetSpeed(0.3f);
+        SetSpeed(0.4f);
+        SetSpeed(0.5f);
     }
 
 
@@ -213,20 +225,11 @@ public class ClientMain : MonoBehaviour
         //char buffer[]
         if (delta.y >= 0)
         {
-            int speedThoudsand = (int)MathUtil.Remap(delta.y, 0, 1, 0, 999);
+            //0.1为一档
+            //四舍五入
+            float gear = Mathf.RoundToInt(delta.y * GearCount) * 1.0f / GearCount;        //Shader中常用方法
 
-
-            byte[] speedBuffer = new byte[4];
-            speedBuffer[0] = (byte)MessageDefine.E_C2D_MOTOR_DRIVE;
-
-            char[] a = speedThoudsand.ToString().ToCharArray();
-            byte[] buffer = Encoding.ASCII.GetBytes(a);
-
-            buffer.CopyTo(speedBuffer, 1);
-
-            Debug.Log(Encoding.ASCII.GetString(speedBuffer));
-
-            BluetoothProxy.Intance.BluetoothDevice.SendData(speedBuffer);
+            SetSpeed(gear);
         }
 
     }
@@ -235,33 +238,23 @@ public class ClientMain : MonoBehaviour
     {
         int speedThoudsand = (int)MathUtil.Remap(percentage01, 0, 1, 0, 999);
 
+        List<byte> messageBuffer = SkateMessageHandler.GetSkateMessage(MessageDefine.E_C2D_MOTOR_DRIVE);
 
-        byte[] speedBuffer = new byte[4];
-        speedBuffer[0] = (byte)MessageDefine.E_C2D_MOTOR_DRIVE;
+        messageBuffer.AddRange(Encoding.ASCII.GetBytes(speedThoudsand.ToString()));
 
-        char[] a = speedThoudsand.ToString().ToCharArray();
-        byte[] buffer = Encoding.ASCII.GetBytes(a);
-
-        buffer.CopyTo(speedBuffer, 1);
-
-        Debug.Log(Encoding.ASCII.GetString(speedBuffer));
-
-        BluetoothProxy.Intance.BluetoothDevice.SendData(speedBuffer);
+        BluetoothProxy.Intance.BluetoothDevice.SendData(messageBuffer);
     }
 
     private void OnJoyStickMoveSpeed(Vector2 delta)
     {
-        Debug.Log("onmove speed : " + delta.ToString());
     }
 
     private void OnJoyStickMoveEnd()
     {
-        Debug.Log("onmove end ");
     }
 
     private void OnJoyStickMoveStart()
     {
-        Debug.Log("onmove start ");
     }
 
 }

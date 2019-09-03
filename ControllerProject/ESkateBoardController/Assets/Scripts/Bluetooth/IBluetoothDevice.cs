@@ -27,7 +27,7 @@ public interface IBluetoothDevice : IBluetoothEvents
     /// 发送数据
     /// </summary>
     /// <param name="sendBuffer"></param>
-    void SendData(byte[] sendBuffer);
+    void SendData(List<byte> sendBuffer);
 
     /// <summary>
     /// 获取客户端蓝牙状态

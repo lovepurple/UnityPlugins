@@ -12,7 +12,7 @@ void setup()
 {
     Serial.begin(9600);
 
-    pMessageHandler = new MessageHandler(BLUETOOTH_RX, BLUETOOTH_TX);
+    pMessageHandler = new MessageHandler(BLUETOOTH_RX, BLUETOOTH_TX,9600);
 
     while (!Serial)
     {
@@ -21,6 +21,7 @@ void setup()
     pMotorController = new MotorController(MOTOR_POWER_PIN, ESC_A, ECS_B);
 
     pMessageHandler->SetMotorController(pMotorController);
+
 }
 
 void loop()

@@ -20,6 +20,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Queue;
 import java.util.Set;
 import java.util.UUID;
@@ -46,6 +47,7 @@ public class BTCManager {
     private ExecutorService _executorSerivicePool = Executors.newCachedThreadPool();        //线程池
     private Queue<byte[]> _sendQueue = new LinkedTransferQueue<>();
     private RecvRunable _receiveThread = null;
+    private SendRunable _sendThread = null;
 
     //系统广播接受
     private BroadcastReceiver _systemBroadcastReceiver;
@@ -202,16 +204,22 @@ public class BTCManager {
         try {
 //            if (_deviceCurrentStatus == BluetoothStatus.CONNECTED) {
 
-                if (_bluetoothSocket != null && _bluetoothSocket.isConnected()) {
-                    _bluetoothSocket.close();
-                    _bluetoothSocket = null;
+            if (_bluetoothSocket != null && _bluetoothSocket.isConnected()) {
+                _bluetoothSocket.close();
+                _bluetoothSocket = null;
 
-                    if (_receiveThread != null) {
-                        _receiveThread.KillRecv();
-                        _receiveThread = null;
-                    }
-                    _deviceCurrentStatus = BluetoothStatus.FREE;
+                if (_receiveThread != null) {
+                    _receiveThread.KillRecv();
+                    _receiveThread = null;
                 }
+
+                if (_sendThread != null) {
+                    _sendThread.killSend();
+                    _sendThread = null;
+                }
+
+                _deviceCurrentStatus = BluetoothStatus.FREE;
+            }
 //            }
         } catch (Exception e) {
             sendErrorMessage(e.getMessage());
@@ -225,15 +233,32 @@ public class BTCManager {
      */
     public void sendMessage(byte[] messageBuffer) {
 
+
 //        if (_deviceCurrentStatus != BluetoothStatus.CONNECTED) {
 //            sendErrorMessage("Send Error ,Device not Connected");
 //            return;
 //        }
 
+        //messageBuffer中有可能出现连包(发送密集的情况下,messageBuffer可能为两条消息合并在一起)的情况 需要分开
+//        String[] chunkStrArray = messageBuffer.toString().split("\n");
+//        for (String chunkStr : chunkStrArray) {
+//            sendErrorMessage("cout :" + chunkStr);
+//        }
+
+//        List<byte[]> bufferList = ArrayUtility.split(messageBuffer, (byte) '\n');
+//        for (byte[] buffer : bufferList) {
+//            _sendQueue.add(buffer);
+//        }
+//
+//        sendErrorMessageToMainThread("count :" + bufferList.size());
+//
+//        if (bufferList.size() > 0) {
+//            SendRunable sendingThread = new SendRunable();
+//            _executorSerivicePool.submit(sendingThread);
+//        }
 
         _sendQueue.add(messageBuffer);
-        SendRunable sendingThread = new SendRunable();
-        _executorSerivicePool.submit(sendingThread);
+
     }
 
     /**
@@ -424,8 +449,14 @@ public class BTCManager {
                 if (_receiveThread != null)
                     _receiveThread.KillRecv();
 
+                if (_sendThread != null)
+                    _sendThread.killSend();
+
                 _receiveThread = new RecvRunable();
                 _executorSerivicePool.submit(_receiveThread);
+
+                _sendThread = new SendRunable();
+                _executorSerivicePool.submit(_sendThread);
             } catch (Exception e) {
                 sendErrorMessage(e.getMessage());
                 _deviceCurrentStatus = BluetoothStatus.FREE;
@@ -438,18 +469,33 @@ public class BTCManager {
      */
     private class SendRunable implements Runnable {
 
+        private boolean isRunning = true;
+
         @Override
         public void run() {
-            try {
-                byte[] sendingBuffer = _sendQueue.poll();
-                _bluetoothSendStream.write(sendingBuffer);
-                _bluetoothSendStream.write('\n');
-                _bluetoothSendStream.flush();
-            } catch (IOException e) {
-                sendErrorMessageToMainThread(e.getMessage());
+            while (isRunning) {
+                try {
+                    int messageCount = _sendQueue.size();
+                    //合包发送
+                    for (int i = 0; i < _sendQueue.size(); ++i) {
+                        byte[] messageBuffer = _sendQueue.poll();
+                        _bluetoothSendStream.write(messageBuffer);
+
+                        if (messageBuffer[messageBuffer.length - 1] != '\n')
+                            _bluetoothSendStream.write('\n');
+                    }
+
+                    if (messageCount > 0)
+                        _bluetoothSendStream.flush();
+
+                } catch (IOException e) {
+                    sendErrorMessageToMainThread(e.getMessage());
+                }
             }
+        }
 
-
+        public void killSend() {
+            this.isRunning = false;
         }
     }
 

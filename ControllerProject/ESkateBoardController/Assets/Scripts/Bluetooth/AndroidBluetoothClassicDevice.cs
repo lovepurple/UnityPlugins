@@ -74,9 +74,12 @@ public class AndroidBluetoothClassicDevice : IBluetoothDevice
         return AndroidBridgeInstance.Call<string>("getConnectedDeviceName");
     }
 
-    public void SendData(byte[] sendBuffer)
+    public void SendData(List<byte> sendBuffer)
     {
-        AndroidBridgeInstance.Call("sendMessage", sendBuffer);
+        if (sendBuffer.Last() != '\n')
+            sendBuffer.Add(Convert.ToByte('\n'));
+
+        AndroidBridgeInstance.Call("sendMessage", sendBuffer.ToArray());
     }
 
     public BluetoothStatus GetBluetoothDeviceStatus()
