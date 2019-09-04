@@ -74,8 +74,7 @@ void MessageHandler::SendMessageInternal(char *sendBuffer)
     Serial.println((char)sendBuffer[0]);
     while (*sendBuffer)
     {
-        m_bluetooth->write(sendBuffer);
-
+        m_bluetooth->write(*sendBuffer);
         sendBuffer++;
     }
     this->m_bluetooth->write(MessageHandler::Message_End_Flag);

@@ -3,7 +3,7 @@ package com.lovepurple.btccontroller;
 /**
  * Unity的回调
  */
-public interface UnityCallback {
+public interface UnityStringCallback {
     /**
      * 发送消息到Unity
      * @param msg

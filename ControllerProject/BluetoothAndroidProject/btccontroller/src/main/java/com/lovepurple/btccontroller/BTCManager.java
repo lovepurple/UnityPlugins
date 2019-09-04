@@ -7,9 +7,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
 
 import com.google.gson.Gson;
 
@@ -20,7 +17,6 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Queue;
 import java.util.Set;
 import java.util.UUID;
@@ -53,11 +49,7 @@ public class BTCManager {
     private BroadcastReceiver _systemBroadcastReceiver;
 
     //Unity的事件回调
-    private UnityCallback OnErrorCallback;
-    private UnityBufferCallback OnReceivedDataCallback;
-    private UnityCallback OnSearchedDevice;                         //扫描到设备
-    private UnityCallback OnSearchedDevicesCallback;                //扫描结束，扫描到的设备列表
-    private UnityIntCallback OnBluetoothStateChangCallback;     //连接状态改变回调
+    private UnityStringCallback OnSendMessageToUnityHandler;         //发消息到Unity
 
     //扫描到的设备列表
     private HashMap<String, BluetoothDeviceInfo> _searchedRemoteDeviceMap = new HashMap<>();
@@ -65,32 +57,27 @@ public class BTCManager {
     //当前蓝牙状态
     private BluetoothStatus _deviceCurrentStatus = BluetoothStatus.FREE;
 
-    //线程通讯，子线程通过handler
-    private Handler _mainThreadHandler = null;
-
-
     private BTCManager(Context context) {
         this._applicationContext = context.getApplicationContext();         //获取应用的上下文，生命周期是整个应用
         this._bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-
-        _mainThreadHandler = new MainThreadMessageHandler(this._applicationContext.getMainLooper());
     }
 
 
     /**
      * 初始化蓝牙管理器
      *
-     * @param onErrorCallback 出错回调，给Unity使用
+     * @param onSendMessageToUnityCallback 出错回调，给Unity使用
      */
-    public void initialBTCManager(UnityCallback onErrorCallback, UnityIntCallback onBluetoothStateChangCallback) {
-        this.OnErrorCallback = onErrorCallback;
-        this.OnBluetoothStateChangCallback = onBluetoothStateChangCallback;
+    public void initialBTCManager(UnityStringCallback onSendMessageToUnityCallback) {
+        this.OnSendMessageToUnityHandler = onSendMessageToUnityCallback;
 
         this._systemBroadcastReceiver = new BluetoothReceiver();
 
         //注册IntentFilter
-        IntentFilter filter = new IntentFilter(BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED);
-        filter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
+        //Android坑爹 ACTION_CONNECTION)STATE_CHANGE 不好用
+        IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_ACL_CONNECTED);
+        filter.addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED);
+//        filter.addAction(BluetoothDevice.ACTION_ACL_DISCONNECT_REQUESTED);        //远程设备请求断开，不需要
 
         _applicationContext.registerReceiver(_systemBroadcastReceiver, filter);      //Receiver里可进入的事件
     }
@@ -167,6 +154,33 @@ public class BTCManager {
         return "";
     }
 
+    private void sendMessageToUnity(String jsonMessage) {
+        if (OnSendMessageToUnityHandler != null)
+            OnSendMessageToUnityHandler.sendMessage(jsonMessage);
+    }
+
+    /**
+     * 发送Log到Unity
+     *
+     * @param logType    0:log  1:Error
+     * @param logContent
+     */
+    private void sendLogToUnity(int logType, String logContent) {
+        switch (logType) {
+            case UnityMessageDefine.SEND_LOG:
+            case UnityMessageDefine.SEND_ERROR:
+                UnityMessageAdapter messageAdapter = new UnityMessageAdapter();
+                messageAdapter.mMessageID = logType;
+                messageAdapter.mMessageBody = logContent;
+
+                Gson gson = new Gson();
+                sendMessageToUnity(gson.toJson(messageAdapter));
+                break;
+        }
+
+    }
+
+
     /**
      * 连接到设备
      *
@@ -176,24 +190,24 @@ public class BTCManager {
         try {
 
             if (!_bluetoothAdapter.isEnabled()) {
-                sendErrorMessage("local bluetooth not enabled");
+                sendLogToUnity(UnityMessageDefine.SEND_ERROR, "local bluetooth not enabled");
                 return;
             }
             if (_deviceCurrentStatus != BluetoothStatus.CONNECTED) {
 
                 if (!_bluetoothAdapter.checkBluetoothAddress(dstAddress)) {
-                    sendErrorMessage("mac address is not correct! make sure it's upper case!");
+                    sendLogToUnity(UnityMessageDefine.SEND_ERROR, "mac address is not correct! make sure it's upper case!");
                     return;
                 }
 
                 ConnectDeviceRunnable connectThread = new ConnectDeviceRunnable(dstAddress);
                 _executorSerivicePool.submit(connectThread);
             } else {
-                sendErrorMessage("device is Connected");
+                sendLogToUnity(UnityMessageDefine.SEND_ERROR, "device is Connected");
             }
 
         } catch (Exception e) {
-            sendErrorMessage(e.getMessage());
+            sendLogToUnity(UnityMessageDefine.SEND_ERROR, e.getMessage());
         }
     }
 
@@ -202,27 +216,25 @@ public class BTCManager {
      */
     public void disconnectDevice() {
         try {
-//            if (_deviceCurrentStatus == BluetoothStatus.CONNECTED) {
+            if (checkDeviceAvailable()) {
 
-            if (_bluetoothSocket != null && _bluetoothSocket.isConnected()) {
-                _bluetoothSocket.close();
-                _bluetoothSocket = null;
+                if (_bluetoothSocket != null && _bluetoothSocket.isConnected()) {
+                    _bluetoothSocket.close();
+                    _bluetoothSocket = null;
 
-                if (_receiveThread != null) {
-                    _receiveThread.KillRecv();
-                    _receiveThread = null;
+                    if (_receiveThread != null) {
+                        _receiveThread.KillRecv();
+                        _receiveThread = null;
+                    }
+
+                    if (_sendThread != null) {
+                        _sendThread.killSend();
+                        _sendThread = null;
+                    }
                 }
-
-                if (_sendThread != null) {
-                    _sendThread.killSend();
-                    _sendThread = null;
-                }
-
-                _deviceCurrentStatus = BluetoothStatus.FREE;
             }
-//            }
         } catch (Exception e) {
-            sendErrorMessage(e.getMessage());
+            sendLogToUnity(UnityMessageDefine.SEND_ERROR, e.getMessage());
         }
     }
 
@@ -232,33 +244,17 @@ public class BTCManager {
      * @param messageBuffer
      */
     public void sendMessage(byte[] messageBuffer) {
+        if (checkDeviceAvailable())
+            _sendQueue.add(messageBuffer);
+    }
 
+    private boolean checkDeviceAvailable() {
+        if (_deviceCurrentStatus != BluetoothStatus.CONNECTED) {
+            sendLogToUnity(UnityMessageDefine.SEND_ERROR, "Bluetooth Device is disconnect");
+            return false;
+        }
 
-//        if (_deviceCurrentStatus != BluetoothStatus.CONNECTED) {
-//            sendErrorMessage("Send Error ,Device not Connected");
-//            return;
-//        }
-
-        //messageBuffer中有可能出现连包(发送密集的情况下,messageBuffer可能为两条消息合并在一起)的情况 需要分开
-//        String[] chunkStrArray = messageBuffer.toString().split("\n");
-//        for (String chunkStr : chunkStrArray) {
-//            sendErrorMessage("cout :" + chunkStr);
-//        }
-
-//        List<byte[]> bufferList = ArrayUtility.split(messageBuffer, (byte) '\n');
-//        for (byte[] buffer : bufferList) {
-//            _sendQueue.add(buffer);
-//        }
-//
-//        sendErrorMessageToMainThread("count :" + bufferList.size());
-//
-//        if (bufferList.size() > 0) {
-//            SendRunable sendingThread = new SendRunable();
-//            _executorSerivicePool.submit(sendingThread);
-//        }
-
-        _sendQueue.add(messageBuffer);
-
+        return true;
     }
 
     /**
@@ -267,9 +263,7 @@ public class BTCManager {
      * @param
      */
     public void searchDevices() {
-        if (this._deviceCurrentStatus == BluetoothStatus.CONNECTED)
-            sendErrorMessage("bluetooth is connecting ,please disconnect current device");
-        else {
+        if (checkDeviceAvailable()) {
             this._deviceCurrentStatus = BluetoothStatus.DISCOVERING;
             IntentFilter filter = new IntentFilter();
             //扫描时，需要定位权限，就算写在Manifest里 有可能也没开，需要判断
@@ -288,12 +282,6 @@ public class BTCManager {
         }
     }
 
-    public void setSearchDeviceCallback(UnityCallback onSearchFinishCallback, UnityCallback onSearchDeviceCallback) {
-        OnSearchedDevice = onSearchDeviceCallback;
-        OnSearchedDevicesCallback = onSearchFinishCallback;
-    }
-
-    //todo 线程问题后续修改 2019-09-02 15:35:37
     private BroadcastReceiver mDiscoveryReceiver = new BroadcastReceiver() {
 
         @Override
@@ -323,18 +311,24 @@ public class BTCManager {
 
                 _searchedRemoteDeviceMap.put(bluetoothDeviceInfo.deviceAddress, bluetoothDeviceInfo);
 
-                if (OnSearchedDevice != null)
-                    OnSearchedDevice.sendMessage(new Gson().toJson(bluetoothDeviceInfo));
+                UnityMessageAdapter searchDeviceMessage = new UnityMessageAdapter();
+                searchDeviceMessage.mMessageID = UnityMessageDefine.SEARCHED_DEVICE;
+                searchDeviceMessage.mMessageBody = bluetoothDeviceInfo;
+                String strSearchDeviceMessage = new Gson().toJson(searchDeviceMessage);
+                sendMessageToUnity(strSearchDeviceMessage);
 
             } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
                 Gson gson = new Gson();
-                String searchResult = gson.toJson(_searchedRemoteDeviceMap.values().toArray());
+
 
                 //扫描结束，关闭
                 _bluetoothAdapter.cancelDiscovery();
 
-                if (OnSearchedDevicesCallback != null)
-                    OnSearchedDevicesCallback.sendMessage(searchResult);
+                UnityMessageAdapter searchDeviceMessageFinish = new UnityMessageAdapter();
+                searchDeviceMessageFinish.mMessageID = UnityMessageDefine.SEARCHED_DEVICE_FINISH;
+                searchDeviceMessageFinish.mMessageBody = _searchedRemoteDeviceMap.values().toArray();
+                String searchResult = gson.toJson(searchDeviceMessageFinish);
+                sendMessageToUnity(searchResult);
 
                 _applicationContext.unregisterReceiver(mDiscoveryReceiver);
             }
@@ -351,23 +345,24 @@ public class BTCManager {
         public void onReceive(Context context, Intent intent) {
 
             String actionType = intent.getAction();
-            sendErrorMessage("jin le " + actionType);
-            if (BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED.equals(actionType)) {       //蓝牙状态改变
-                //通过intent.getIntExtra获取状态
-                int bluetoothState = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR);
 
-                if (bluetoothState == BluetoothAdapter.STATE_CONNECTED)
-                    _deviceCurrentStatus = BluetoothStatus.CONNECTED;
-                else if (bluetoothState == BluetoothAdapter.STATE_DISCONNECTING)
-                    _deviceCurrentStatus = BluetoothStatus.DISCOVERING;
-                else
-                    _deviceCurrentStatus = BluetoothStatus.FREE;
+            //通过intent.getIntExtra获取状态
+            BluetoothDevice device = intent.getParcelableExtra(BluetoothAdapter.EXTRA_STATE);
 
-                if (OnBluetoothStateChangCallback != null)
-                    OnBluetoothStateChangCallback.sendMessageInt(bluetoothState);
+            //蓝牙状态改变
+            if (BluetoothDevice.ACTION_ACL_CONNECTED.equals(actionType)) {
+                _deviceCurrentStatus = BluetoothStatus.CONNECTED;
+            } else if (BluetoothDevice.ACTION_ACL_DISCONNECTED.equals((actionType))) {
+                _deviceCurrentStatus = BluetoothStatus.FREE;
             }
+
+            UnityMessageAdapter onDeviceStateChangedMessage = new UnityMessageAdapter();
+            onDeviceStateChangedMessage.mMessageID = UnityMessageDefine.BLUETOOTH_STATE_CHANGED;
+            onDeviceStateChangedMessage.mMessageBody = _deviceCurrentStatus.ordinal();
+            sendMessageToUnity(new Gson().toJson(onDeviceStateChangedMessage));
         }
     }
+
 
     /**
      * 获取当前设备状态
@@ -378,24 +373,13 @@ public class BTCManager {
         return this._deviceCurrentStatus.ordinal();
     }
 
-    /**
-     * 设置
-     *
-     * @param bufferCallback
-     */
-    public void setOnReceiveMessageCallback(UnityBufferCallback bufferCallback) {
-        this.OnReceivedDataCallback = bufferCallback;
-    }
-
-    private void sendErrorMessage(String errorMessage) {
-        if (this.OnErrorCallback != null)
-            this.OnErrorCallback.sendMessage(errorMessage);
-    }
 
     private void OnReveiveBuffer(byte[] recvBuffer) {
-        if (this.OnReceivedDataCallback != null)
-            this.OnReceivedDataCallback.sendMessageBuffer(recvBuffer);
+        UnityMessageAdapter message = new UnityMessageAdapter();
+        message.mMessageID = UnityMessageDefine.SEND_MESSAGE_BUFFER;
+        message.mMessageBody = new String(recvBuffer);
 
+        sendMessageToUnity(new Gson().toJson(message));
     }
 
 
@@ -434,7 +418,7 @@ public class BTCManager {
             try {
                 BluetoothDevice remoteDevice = _bluetoothAdapter.getRemoteDevice(_remoteDeviceAddress);
                 if (remoteDevice == null)
-                    sendErrorMessage(_remoteDeviceAddress + " device is null");
+                    sendLogToUnity(UnityMessageDefine.SEND_ERROR, remoteDevice.getAddress() + " device is null");
 
                 //取消当前设备的搜索
                 _bluetoothAdapter.cancelDiscovery();
@@ -458,7 +442,7 @@ public class BTCManager {
                 _sendThread = new SendRunable();
                 _executorSerivicePool.submit(_sendThread);
             } catch (Exception e) {
-                sendErrorMessage(e.getMessage());
+                sendLogToUnity(UnityMessageDefine.SEND_ERROR, e.getMessage());
                 _deviceCurrentStatus = BluetoothStatus.FREE;
             }
         }
@@ -489,7 +473,7 @@ public class BTCManager {
                         _bluetoothSendStream.flush();
 
                 } catch (IOException e) {
-                    sendErrorMessageToMainThread(e.getMessage());
+                    sendLogToUnity(UnityMessageDefine.SEND_ERROR, e.getMessage());
                 }
             }
         }
@@ -510,9 +494,10 @@ public class BTCManager {
         @Override
         public void run() {
             while (isRuning) {
-//                if (_deviceCurrentStatus != BluetoothStatus.CONNECTED || _bluetoothRecvStream == null) {
-//                    continue;     //todo:state 需要再整理一下
-//                }
+                if (_deviceCurrentStatus != BluetoothStatus.CONNECTED) {
+                    sendLogToUnity(UnityMessageDefine.SEND_ERROR, "device not connected");
+                    continue;
+                }
 
                 try {
                     //蓝牙模块有可能一次发不出所有内容，分两次发出
@@ -524,10 +509,7 @@ public class BTCManager {
                             if (_recvBufferCount > 0) {
                                 //会有线程问题，当前线程属于子线程，直接返回到Unity 也是子线程，如果使用
                                 byte[] recvMessageBuffer = Arrays.copyOfRange(_recvBuffer, 0, _recvBufferCount);        //[from,to)
-                                Message msg = new Message();
-                                msg.arg1 = 1;
-                                msg.obj = recvMessageBuffer;
-                                _mainThreadHandler.sendMessage(msg);
+                                OnReveiveBuffer(recvMessageBuffer);
                             }
 
                             _recvBufferCount = 0;
@@ -544,36 +526,5 @@ public class BTCManager {
         public void KillRecv() {
             this.isRuning = false;
         }
-    }
-
-    private void sendErrorMessageToMainThread(String errorMessage) {
-        Message msg = new Message();
-        msg.arg1 = 0;
-        msg.obj = errorMessage;
-        _mainThreadHandler.sendMessage(msg);
-    }
-
-    /**
-     * 主线程消息处理（子线程与主线程通讯）
-     */
-    private class MainThreadMessageHandler extends Handler {
-
-        public MainThreadMessageHandler(Looper looper) {
-            super(looper);
-        }
-
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.arg1) {
-                case 0:     //出错
-                    sendErrorMessage(msg.obj.toString());
-                    break;
-                case 1:     //接收到新消息
-                    OnReveiveBuffer((byte[]) msg.obj);
-                    break;
-            }
-
-        }
-
     }
 }

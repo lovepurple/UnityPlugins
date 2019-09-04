@@ -22,8 +22,6 @@ private:
 
     MotorController *m_motorColtroller;
 
-    // void OnHandleMessage(EMessageDefine messageID, byte *messageBuffer);
-
     void OnHandleMessage(Message& message);
 
     //发送队列

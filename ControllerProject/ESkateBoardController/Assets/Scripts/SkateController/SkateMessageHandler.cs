@@ -10,7 +10,7 @@ public class SkateMessageHandler
     public SkateMessageHandler(IBluetoothDevice bluetoothDevice)
     {
         this.m_bluetoothDevice = bluetoothDevice;
-        this.m_bluetoothDevice.OnReceiveDataEvent += OnRecvMessageBuffer;
+        BluetoothEvents.OnReceiveDataEvent += OnRecvMessageBuffer;
     }
 
     private void OnRecvMessageBuffer(byte[] obj)

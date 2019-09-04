@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-public interface IBluetoothDevice : IBluetoothEvents
+public interface IBluetoothDevice
 {
     void InitializeBluetoothDevice();
 

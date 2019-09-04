@@ -100,17 +100,15 @@ public class ClientMain : MonoBehaviour
         BluetoothProxy.Intance.InitializeBluetoothProxy();
         m_skateMessageHandler = new SkateMessageHandler(BluetoothProxy.Intance.BluetoothDevice);
 
-        BluetoothProxy.Intance.BluetoothDevice.OnErrorEvent += (errorMsg) =>
-        {
-            //m_receiveMessage.text = errorMsg;
-            Debug.Log(errorMsg);
-        };
+        BluetoothEvents.OnErrorEvent += OnLog;
+        BluetoothEvents.OnLogEvent += OnLog;
 
         MessageHandler.RegisterMessageHandler((int)MessageDefine.E_D2C_MOTOR_SPEED, OnGetMotorSpeedResponse);
+    }
 
-
-
-
+    private void OnLog(string logContent)
+    {
+        m_receiveMessage.text = logContent;
     }
 
     private void OnBtnConnectBClick(GameObject btn)

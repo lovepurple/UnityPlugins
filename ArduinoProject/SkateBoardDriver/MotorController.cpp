@@ -99,9 +99,6 @@ byte *MotorController::Handle_GetCurrentSpeedMessage(char data[5])
     pResult[0] = E_D2C_MOTOR_SPEED;
     itoa(speedThousands, pResult + 1, 10);
     pResult[4] = (byte)'\0';
-    Serial.println("current speed");
-    Serial.println(data);
-
 
     return (byte *)pResult;
 }

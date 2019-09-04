@@ -17,7 +17,6 @@
     <application
         android:allowBackup="true"
         android:supportsRtl="true" >
-        <!-- <activity android:name="com.lovepurple.btccontroller.MainActivity" > -->
         <activity android:name="com.unity3d.player.UnityPlayerActivity" android:label="@string/app_name">
             <intent-filter >
                 <action android:name="android.intent.action.MAIN" />
