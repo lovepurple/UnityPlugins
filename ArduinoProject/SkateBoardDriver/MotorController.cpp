@@ -53,13 +53,12 @@ void MotorController::MotorMaxPower()
 
 void SetMotorController(MotorController *motorController);
 
-MotorController *GetMotorController();
 
-void MotorController::SetMotorSpeedPercentage(const float percentage01)
+void MotorController::SetMotorPower(const float percentage01)
 {
     float speedClampPercentage = Utility::Clamp01(percentage01);
     
-    float currentPercentageSpeed = GetCurrentSpeedPercentage();
+    float currentPercentageSpeed = GetMotorPower();
     if(abs(currentPercentageSpeed - speedClampPercentage) < 0.01f)
     {   
         Serial.println("Speed Close ");
@@ -71,7 +70,7 @@ void MotorController::SetMotorSpeedPercentage(const float percentage01)
     SetSpeedByDuty(speedToPWMDuty);
 }
 
-float MotorController::GetCurrentSpeedPercentage()
+float MotorController::GetMotorPower()
 {
     float dutyPercentage01 = Utility::Remap(this->m_currentMotorDuty, MOTOR_MIN_DUTY, MOTOR_MAX_DUTY, 0.0, 1.0);
     return dutyPercentage01;
@@ -92,7 +91,7 @@ void MotorController::SetSpeedByDuty(float pwmDuty)
 
 byte *MotorController::Handle_GetCurrentSpeedMessage(char data[5])
 {
-    int speedThousands = int(GetCurrentSpeedPercentage() * 999);
+    int speedThousands = int(GetMotorPower() * 999);
 
     char *pResult;      
     pResult = &data[0];     
@@ -110,5 +109,9 @@ void MotorController::Handle_SetPercentageSpeedMessage(MessageBody& messageBody)
         return;
 
     int speedThousand = atoi(messageBody.pMessageBody);
-    this->SetMotorSpeedPercentage(speedThousand / 999.0f);
+    this->SetMotorPower(speedThousand / 999.0f);
+}
+
+void MotorController::SetSendMessageDelegate(SendMessageDelegate delegate){
+    this->m_sendMessageDelegate = delegate;
 }

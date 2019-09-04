@@ -17,6 +17,8 @@ private:
 
     float m_currentMotorDuty = 0.0;
 
+    SendMessageDelegate m_sendMessageDelegate;
+
 public:
     MotorController(uint8_t motorPowerPin, uint8_t ecsPinA, uint8_t ecsPinB);
     ~MotorController();
@@ -35,13 +37,18 @@ public:
     void MotorMaxPower();
 
     //使用百分比设置速度
-    void SetMotorSpeedPercentage(const float percentage01);
+    void SetMotorPower(const float percentage01);
 
     //获取当前百分比的速度
-    float GetCurrentSpeedPercentage();
+    float GetMotorPower();
 
     //使用占空比设置速度
     void SetSpeedByDuty(float pwmDuty);
+
+        /**
+     * 设置发消息的代理
+     */ 
+    void SetSendMessageDelegate(SendMessageDelegate delegate);
 
 
 
@@ -53,6 +60,8 @@ public:
 
     //设置速度处理
     void Handle_SetPercentageSpeedMessage(MessageBody& messageBody);
+
+
 };
 
 #endif

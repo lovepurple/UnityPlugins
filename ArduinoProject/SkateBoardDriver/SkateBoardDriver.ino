@@ -8,6 +8,8 @@
 MessageHandler *pMessageHandler = nullptr;
 MotorController *pMotorController = nullptr;
 
+void S(byte* dd);
+
 void setup()
 {
     Serial.begin(9600);
@@ -19,8 +21,10 @@ void setup()
     }
 
     pMotorController = new MotorController(MOTOR_POWER_PIN, ESC_A, ECS_B);
+    pMotorController->SetSendMessageDelegate(&S);      //函数指针的赋值
 
     pMessageHandler->SetMotorController(pMotorController);
+
 
 }
 

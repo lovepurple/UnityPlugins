@@ -46,5 +46,6 @@ public:
 
     //消息结束标识
     static char Message_End_Flag;
+    // static void SendMessage(byte* messageBuffer);
 };
 #endif
