@@ -14,6 +14,7 @@
 #define ECS_FREQUENCY 60               //电调频率
 #define MOTOR_MIN_DUTY 0.05             //电机最小速度的占空比
 #define MOTOR_MAX_DUTY 0.1              //电机最大速度的占空比
+#define GEAR_COUNT 5                    //速度档数量
 
 //声明另一个类，include 或有循环include的问题
 class MessageHandler;

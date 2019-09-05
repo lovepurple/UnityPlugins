@@ -44,6 +44,8 @@ public class SkateOperatorPanel : UIPanelLogicBase
         m_btnStop.AddClickCallback(OnBtnStopClick);
 
 
+        MessageHandler.RegisterMessageHandler((int)MessageDefine.E_D2C_MOTOR_SPEED, OnGetMotorGearResponse);
+
     }
 
     private void OnBtnStartUpClick(GameObject obj)
@@ -62,23 +64,20 @@ public class SkateOperatorPanel : UIPanelLogicBase
 
     private void OnJoyStickMove(Vector2 delta)
     {
-        //todo:之后考虑差值
-        //char buffer[]
-        if (delta.y >= 0)
-        {
-            //0.1为一档
-            //四舍五入
-            float gear = Mathf.RoundToInt(delta.y * GearCount) * 1.0f / GearCount;        //Shader中常用方法
-
-            SetSpeed(gear);
-        }
+        SpeedController.Instance.SetSpeedByNormalizedPower(delta.y);
     }
 
+    //todo:接下来把数都换成档位，初始化时 传到arduino一共多少个档位，减少数据传递
     private void SetSpeed(float percentage01)
     {
         int speedThoudsand = (int)MathUtil.Remap(percentage01, 0, 1, 0, 999);
 
         List<byte> messageBuffer = SkateMessageHandler.GetSkateMessage(MessageDefine.E_C2D_MOTOR_DRIVE);
+
+        List<byte> fixedMessageBuffer = new List<byte>(3);
+        //补齐三位
+        //for()
+
 
         messageBuffer.AddRange(Encoding.ASCII.GetBytes(speedThoudsand.ToString()));
 
@@ -95,6 +94,11 @@ public class SkateOperatorPanel : UIPanelLogicBase
 
     private void OnJoyStickMoveStart()
     {
+    }
+
+    private void OnGetMotorGearResponse(object data)
+    {
+        Debug.Log("当前档位：" + SpeedController.Instance.Gear);
     }
 
     public override void OnExit()

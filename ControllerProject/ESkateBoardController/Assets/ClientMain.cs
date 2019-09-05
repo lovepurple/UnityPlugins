@@ -96,7 +96,6 @@ public class ClientMain : MonoBehaviour
         BluetoothEvents.OnErrorEvent += OnLog;
         BluetoothEvents.OnLogEvent += OnLog;
 
-        MessageHandler.RegisterMessageHandler((int)MessageDefine.E_D2C_MOTOR_SPEED, OnGetMotorSpeedResponse);
 
         SetToPanel(1);
     }
@@ -115,7 +114,7 @@ public class ClientMain : MonoBehaviour
         else
         {
             moveDistanceX *= m_currentPanelIndex - panelIndex;
-            moveDuration = Math.Abs(m_currentPanelIndex - panelIndex) * 0.5f;
+            moveDuration = Math.Abs(m_currentPanelIndex - panelIndex) * 0.3f;
         }
 
         float currentX = this.m_functionPanelRootTransform.anchoredPosition.x;
@@ -182,12 +181,7 @@ public class ClientMain : MonoBehaviour
     }
 
 
-    private void OnGetMotorSpeedResponse(object data)
-    {
-        char[] speed = (char[])data;
-
-        //this.m_receiveMessage.text = $"当前速度：{DigitUtility.GetUInt32(speed) / 999.0f}";
-    }
+    
 
     private void Update()
     {
