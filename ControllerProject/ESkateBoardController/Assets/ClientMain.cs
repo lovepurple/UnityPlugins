@@ -9,10 +9,6 @@ public class ClientMain : MonoBehaviour
 {
     private Text m_panelTitle = null;
 
-    private UIPanelLogicBase m_escSettingPanel = null;
-    private UIPanelLogicBase m_operatePanel = null;
-    private UIPanelLogicBase m_bluetoothConnectionPanel;
-
     private const int Panel_WIDTH = 1080;
 
     private Image m_btnESCSetting = null;
@@ -39,7 +35,6 @@ public class ClientMain : MonoBehaviour
     private SkateMessageHandler m_skateMessageHandler = null;
 
     private int m_currentPanelIndex = -1;
-
 
     private void Start()
     {
@@ -95,16 +90,13 @@ public class ClientMain : MonoBehaviour
 
         m_functionPanelRootTransform = transform.Find("PanelScrollRect/Viewport/Content").GetComponent<RectTransform>();
 
+        BluetoothProxy.Intance.InitializeBluetoothProxy();
+        m_skateMessageHandler = new SkateMessageHandler(BluetoothProxy.Intance.BluetoothDevice);
 
-       
+        BluetoothEvents.OnErrorEvent += OnLog;
+        BluetoothEvents.OnLogEvent += OnLog;
 
-        //BluetoothProxy.Intance.InitializeBluetoothProxy();
-        //m_skateMessageHandler = new SkateMessageHandler(BluetoothProxy.Intance.BluetoothDevice);
-
-        //BluetoothEvents.OnErrorEvent += OnLog;
-        //BluetoothEvents.OnLogEvent += OnLog;
-
-        //MessageHandler.RegisterMessageHandler((int)MessageDefine.E_D2C_MOTOR_SPEED, OnGetMotorSpeedResponse);
+        MessageHandler.RegisterMessageHandler((int)MessageDefine.E_D2C_MOTOR_SPEED, OnGetMotorSpeedResponse);
 
         SetToPanel(1);
     }
@@ -126,22 +118,24 @@ public class ClientMain : MonoBehaviour
             moveDuration = Math.Abs(m_currentPanelIndex - panelIndex) * 0.5f;
         }
 
-        this.m_functionPanelRootTransform.DOAnchorPosX(moveDistanceX, moveDuration).OnComplete(() =>
-        {
-            if (this.m_currentPanelIndex != -1)
-                this.m_panelGroup[this.m_currentPanelIndex].OnExit();
+        float currentX = this.m_functionPanelRootTransform.anchoredPosition.x;
 
-            this.m_currentPanelIndex = panelIndex;
-            this.m_panelGroup[this.m_currentPanelIndex].OnEnter();
-            this.m_panelTitle.text = this.m_panelGroup[this.m_currentPanelIndex].PanelName;
-        });
+        this.m_functionPanelRootTransform.DOAnchorPosX(moveDistanceX + currentX, moveDuration).OnComplete(() =>
+         {
+             if (this.m_currentPanelIndex != -1)
+                 this.m_panelGroup[this.m_currentPanelIndex].OnExit();
+
+             this.m_currentPanelIndex = panelIndex;
+             this.m_panelGroup[this.m_currentPanelIndex].OnEnter();
+             this.m_panelTitle.text = this.m_panelGroup[this.m_currentPanelIndex].PanelName;
+         });
 
     }
 
 
 
 
- 
+
 
 
 
@@ -199,6 +193,6 @@ public class ClientMain : MonoBehaviour
     {
         BluetoothProxy.Intance.Tick();
     }
-   
+
 
 }

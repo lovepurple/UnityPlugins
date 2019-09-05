@@ -20,8 +20,8 @@ public class SkateSettingPanel : UIPanelLogicBase
     {
         m_btnEnterProgramming = m_panelRootObject.GetComponent<MaskableGraphic>("ButtonGroup/Button (2)");
         m_btnInitialize = m_panelRootObject.GetComponent<MaskableGraphic>("ButtonGroup/Button");
-        m_btnPowerOff = m_panelRootObject.GetComponent<MaskableGraphic>("ButtonGroup/Button(1)");
-        m_btnDown = m_panelRootObject.GetComponent<MaskableGraphic>("ButtonGroup/Button(3)");
+        m_btnPowerOff = m_panelRootObject.GetComponent<MaskableGraphic>("ButtonGroup/Button (1)");
+        m_btnDown = m_panelRootObject.GetComponent<MaskableGraphic>("ButtonGroup/Button (3)");
         m_btnUp = m_panelRootObject.GetComponent<MaskableGraphic>("ButtonGroup/Button (4)");
     }
 
