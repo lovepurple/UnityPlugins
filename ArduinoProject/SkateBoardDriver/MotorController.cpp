@@ -43,12 +43,12 @@ void MotorController::InitializeESC()
 
 void MotorController::MotorMinPower()
 {
-    SetSpeedByDuty(MOTOR_MIN_DUTY);
+    SetMotorPower(0);
 }
 
 void MotorController::MotorMaxPower()
 {
-    SetSpeedByDuty(MOTOR_MAX_DUTY);
+    SetMotorPower(1);
 }
 
 bool MotorController::SetMotorPower(const float percentage01)
@@ -86,17 +86,16 @@ void MotorController::SetSpeedByDuty(float pwmDuty)
     Timer1.pwm(m_ecsPinA, duty * 1023);
 }
 
-byte *MotorController::Handle_GetCurrentSpeedMessage(char data[5])
+byte *MotorController::Handle_GetCurrentSpeedMessage()
 {
     int speedThousands = int(GetMotorPower() * 999);
 
-    char *pResult;
-    pResult = &data[0];
-    pResult[0] = E_D2C_MOTOR_SPEED;
-    itoa(speedThousands, pResult + 1, 10);
-    pResult[4] = (byte)'\0';
+    char *pMessageBuffer = DynamicBuffer::GetBuffer();
+    pMessageBuffer[0] = E_D2C_MOTOR_SPEED;
+    itoa(speedThousands, pMessageBuffer + 1, 10);
+    pMessageBuffer[4] = (byte)'\0';
 
-    return (byte *)pResult;
+    return (byte *)pMessageBuffer;
 }
 
 void MotorController::Handle_SetPercentageSpeedMessage(MessageBody &messageBody)
@@ -111,12 +110,10 @@ void MotorController::Handle_SetPercentageSpeedMessage(MessageBody &messageBody)
     //发送新的油门大小到客户端
     if (isSuccess)
     {
-        Serial.println("===============================================");
-        Serial.println("Send new Speed");
-        char power[5];
-        byte* messageBuffer = Handle_GetCurrentSpeedMessage(power);
+        byte* messageBuffer = Handle_GetCurrentSpeedMessage();
         
         //指针函数的调用方式(todo:需要整理。。。函数指针)
+        //messageBuffer 是在这里分配的，传入到下面的函数里已经被释放
          ((MessageHandler*)m_caller->*m_sendMessageDelegate)(messageBuffer);
     }
 }

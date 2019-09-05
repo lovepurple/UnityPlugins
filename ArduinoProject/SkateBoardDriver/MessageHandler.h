@@ -6,7 +6,7 @@
 
 #include <Arduino.h> //系统默认的Serial
 #include "NeoSWSerial.h"
-
+#include "DynamicBuffer.h"
 #include "MotorController.h"
 #include "MessageDefine.h"
 #include "QList.h"

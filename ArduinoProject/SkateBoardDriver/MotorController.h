@@ -8,6 +8,7 @@
 #include "GlobalDefine.h"
 #include "Utility.h"
 #include "MessageDefine.h"
+#include "DynamicBuffer.h"
 
 class MotorController
 {
@@ -57,7 +58,7 @@ public:
     //todo:之后用(void*)
     //处理获取当前速度消息
     //C++常用的方式，对象内存传入，不在函数内分配新的堆内容
-    byte* Handle_GetCurrentSpeedMessage(char data[8]);       
+    byte* Handle_GetCurrentSpeedMessage();       
 
     //设置速度处理
     void Handle_SetPercentageSpeedMessage(MessageBody& messageBody);

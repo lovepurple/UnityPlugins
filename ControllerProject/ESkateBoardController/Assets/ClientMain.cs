@@ -1,29 +1,32 @@
-﻿using EngineCore;
-using EngineCore.Utility;
-using GOGUI;
+﻿using DG.Tweening;
+using EngineCore;
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class ClientMain : MonoBehaviour
 {
-    private const string Device_A = "98:D3:31:F5:8B:1A";
-    private const string Device_B = "20:16:06:12:28:69";
+    private Text m_panelTitle = null;
 
-    private const int GearCount = 5; //档位数量
+    private UIPanelLogicBase m_escSettingPanel = null;
+    private UIPanelLogicBase m_operatePanel = null;
+    private UIPanelLogicBase m_bluetoothConnectionPanel;
 
-    private Text m_receiveMessage = null;
+    private const int Panel_WIDTH = 1080;
 
-    private Button m_btnConnectA = null;
-    private Button m_btnConnectB = null;
-    private Button m_btnDisconnect = null;
+    private Image m_btnESCSetting = null;
+    private Image m_btnOperate = null;
+    private Image m_btnBluetoothSetting = null;
+
+    private RectTransform m_functionPanelRootTransform = null;
+
+    private UIPanelLogicBase[] m_panelGroup = new UIPanelLogicBase[3];
+
+
     private Button m_btnCurrentStatus = null;
     private Button m_btnMotorInit = null;
     private Button m_btnMotorMin = null;
-    private Button m_btnMotorNormalStart = null;
     private Button m_btnSpeedup = null;
     private Button m_btnSpeedDown = null;
     private Button m_btnStop = null;
@@ -33,36 +36,44 @@ public class ClientMain : MonoBehaviour
     private Button m_btnSetLowSpeed = null;
     private Button m_btnSetHighSpeed = null;
 
-    private Button m_btnTestMessage = null;
-
     private SkateMessageHandler m_skateMessageHandler = null;
 
-    public ETCJoystick ControllerJoyStick;
+    private int m_currentPanelIndex = -1;
+
 
     private void Start()
     {
-        m_receiveMessage = transform.Find("Text").GetComponent<Text>();
+        this.m_btnESCSetting = transform.GetComponent<Image>("Menu/MenuItem/Toggle/Background");
+        this.m_btnESCSetting.AddClickCallback(obj =>
+        {
+            SetToPanel(0);
+        });
 
-        m_btnConnectA = transform.Find("GameObject/Button (12)").GetComponent<Button>();
-        m_btnConnectA.AddClickCallback(OnBtnConnectAClick);
+        this.m_btnOperate = transform.GetComponent<Image>("Menu/MenuItem/Toggle (1)/Background");
+        this.m_btnOperate.AddClickCallback(obj =>
+        {
+            SetToPanel(1);
+        });
 
-        m_btnConnectB = transform.Find("GameObject/Button (13)").GetComponent<Button>();
-        m_btnConnectB.AddClickCallback(OnBtnConnectBClick);
+        this.m_btnBluetoothSetting = transform.GetComponent<Image>("Menu/MenuItem/Toggle (2)/Background");
+        this.m_btnBluetoothSetting.AddClickCallback(obj =>
+        {
+            SetToPanel(2);
+        });
 
-        m_btnDisconnect = transform.Find("GameObject/Button (1)").GetComponent<Button>();
-        m_btnDisconnect.AddClickCallback(OnBtnDisconnectClick);
+        m_panelTitle = transform.GetComponent<Text>("Text_PageTitle");
+
+        m_panelGroup[0] = new SkateSettingPanel(transform.Find("PanelScrollRect/Viewport/Content/MotorSetting").GetComponent<RectTransform>());
+        m_panelGroup[0].OnCreate();
+
+        m_panelGroup[1] = new SkateOperatorPanel(transform.Find("PanelScrollRect/Viewport/Content/MotorController").GetComponent<RectTransform>());
+        m_panelGroup[1].OnCreate();
+
+        m_panelGroup[2] = new BluetoothPanel(transform.Find("PanelScrollRect/Viewport/Content/Connection").GetComponent<RectTransform>());
+        m_panelGroup[2].OnCreate();
 
         m_btnCurrentStatus = transform.Find("GameObject/Button (2)").GetComponent<Button>();
         m_btnCurrentStatus.AddClickCallback(OnBtnBluetoothStatusClick);
-
-        m_btnMotorInit = transform.Find("GameObject/Button (3)").GetComponent<Button>();
-        m_btnMotorInit.AddClickCallback(OnBtnMotorInitClick);
-
-        m_btnMotorMin = transform.Find("GameObject/Button (4)").GetComponent<Button>();
-        m_btnMotorMin.AddClickCallback(OnBtnMotorMinSpeedClick);
-
-        m_btnMotorNormalStart = transform.Find("GameObject/Button (5)").GetComponent<Button>();
-        m_btnMotorNormalStart.AddClickCallback(OnBtnMotorNormalStartClick);
 
         m_btnSpeedup = transform.Find("GameObject/Button (6)").GetComponent<Button>();
         m_btnSpeedup.AddClickCallback(OnBtnSpeedupClick);
@@ -82,75 +93,61 @@ public class ClientMain : MonoBehaviour
         m_btnGetCurrentSpeed = transform.Find("GameObject/Button (11)").GetComponent<Button>();
         m_btnGetCurrentSpeed.AddClickCallback(OnBtnGetCurrentSpeedClick);
 
-        m_btnSetLowSpeed = transform.Find("GameObject/Button (14)").GetComponent<Button>();
-        m_btnSetLowSpeed.AddClickCallback(btn => SetSpeed(0.33f));
-
-        m_btnSetHighSpeed = transform.Find("GameObject/Button (15)").GetComponent<Button>();
-        m_btnSetHighSpeed.AddClickCallback(btn => SetSpeed(0.66f));
-
-        m_btnTestMessage = transform.Find("GameObject/Button (16)").GetComponent<Button>();
-        m_btnTestMessage.AddClickCallback(OnTestMessageClick);
+        m_functionPanelRootTransform = transform.Find("PanelScrollRect/Viewport/Content").GetComponent<RectTransform>();
 
 
-        ControllerJoyStick.onMove.AddListener(OnJoyStickMove);
-        ControllerJoyStick.onMoveSpeed.AddListener(OnJoyStickMoveSpeed);
-        ControllerJoyStick.onMoveStart.AddListener(OnJoyStickMoveStart);
-        ControllerJoyStick.onMoveEnd.AddListener(OnJoyStickMoveEnd);
+       
 
-        BluetoothProxy.Intance.InitializeBluetoothProxy();
-        m_skateMessageHandler = new SkateMessageHandler(BluetoothProxy.Intance.BluetoothDevice);
+        //BluetoothProxy.Intance.InitializeBluetoothProxy();
+        //m_skateMessageHandler = new SkateMessageHandler(BluetoothProxy.Intance.BluetoothDevice);
 
-        BluetoothEvents.OnErrorEvent += OnLog;
-        BluetoothEvents.OnLogEvent += OnLog;
+        //BluetoothEvents.OnErrorEvent += OnLog;
+        //BluetoothEvents.OnLogEvent += OnLog;
 
-        MessageHandler.RegisterMessageHandler((int)MessageDefine.E_D2C_MOTOR_SPEED, OnGetMotorSpeedResponse);
+        //MessageHandler.RegisterMessageHandler((int)MessageDefine.E_D2C_MOTOR_SPEED, OnGetMotorSpeedResponse);
+
+        SetToPanel(1);
     }
 
     private void OnLog(string logContent)
     {
-        m_receiveMessage.text = logContent;
     }
 
-    private void OnBtnConnectBClick(GameObject btn)
+    private void SetToPanel(int panelIndex)
     {
-        BluetoothProxy.Intance.BluetoothDevice.ConnectToDevice(Device_B);
+        float moveDistanceX = Panel_WIDTH;
+        float moveDuration = 0.01f;
+        //initial
+        if (m_currentPanelIndex == -1)
+            moveDistanceX *= -panelIndex;
+        else
+        {
+            moveDistanceX *= m_currentPanelIndex - panelIndex;
+            moveDuration = Math.Abs(m_currentPanelIndex - panelIndex) * 0.5f;
+        }
+
+        this.m_functionPanelRootTransform.DOAnchorPosX(moveDistanceX, moveDuration).OnComplete(() =>
+        {
+            if (this.m_currentPanelIndex != -1)
+                this.m_panelGroup[this.m_currentPanelIndex].OnExit();
+
+            this.m_currentPanelIndex = panelIndex;
+            this.m_panelGroup[this.m_currentPanelIndex].OnEnter();
+            this.m_panelTitle.text = this.m_panelGroup[this.m_currentPanelIndex].PanelName;
+        });
+
     }
 
-    private void OnBtnConnectAClick(GameObject btn)
-    {
-        BluetoothProxy.Intance.BluetoothDevice.ConnectToDevice(Device_A);
-    }
 
 
-    private void OnBtnDisconnectClick(GameObject btn)
-    {
-        BluetoothProxy.Intance.BluetoothDevice.Disconnect();
-    }
 
-    private void OnBtnMotorInitClick(GameObject btn)
-    {
-        List<byte> messageBuffer = SkateMessageHandler.GetSkateMessage(MessageDefine.E_C2D_MOTOR_INITIALIZE);
+ 
 
-        BluetoothProxy.Intance.BluetoothDevice.SendData(messageBuffer);
-    }
+
 
     private void OnBtnBluetoothStatusClick(GameObject btn)
     {
-        this.m_receiveMessage.text = BluetoothProxy.Intance.BluetoothDevice.GetBluetoothDeviceStatus().ToString();
-    }
-
-    private void OnBtnMotorMinSpeedClick(GameObject btn)
-    {
-        List<byte> messageBuffer = SkateMessageHandler.GetSkateMessage(MessageDefine.E_C2D_MOTOR_CORRECT_MIN_POWER);
-
-        BluetoothProxy.Intance.BluetoothDevice.SendData(messageBuffer);
-    }
-
-    private void OnBtnMotorNormalStartClick(GameObject btn)
-    {
-        List<byte> messageBuffer = SkateMessageHandler.GetSkateMessage(MessageDefine.E_C2D_MOTOR_NORMAL_START);
-
-        BluetoothProxy.Intance.BluetoothDevice.SendData(messageBuffer);
+        //this.m_receiveMessage.text = BluetoothProxy.Intance.BluetoothDevice.GetBluetoothDeviceStatus().ToString();
     }
 
 
@@ -179,9 +176,7 @@ public class ClientMain : MonoBehaviour
 
     private void OnBtnPowerOff(GameObject btn)
     {
-        List<byte> messageBuffer = SkateMessageHandler.GetSkateMessage(MessageDefine.E_C2D_MOTOR_POWEROFF);
 
-        BluetoothProxy.Intance.BluetoothDevice.SendData(messageBuffer);
     }
 
     private void OnBtnGetCurrentSpeedClick(GameObject btn)
@@ -192,67 +187,18 @@ public class ClientMain : MonoBehaviour
 
     }
 
-    private void OnTestMessageClick(GameObject btn)
-    {
-        SetSpeed(0.1f);
-        SetSpeed(0.2f);
-        SetSpeed(0.3f);
-        SetSpeed(0.4f);
-        SetSpeed(0.5f);
-    }
-
-
 
     private void OnGetMotorSpeedResponse(object data)
     {
         char[] speed = (char[])data;
 
-        this.m_receiveMessage.text = $"当前速度：{DigitUtility.GetUInt32(speed) / 999.0f}";
+        //this.m_receiveMessage.text = $"当前速度：{DigitUtility.GetUInt32(speed) / 999.0f}";
     }
 
     private void Update()
     {
         BluetoothProxy.Intance.Tick();
     }
-
-
-    /****************************************/
-    private void OnJoyStickMove(Vector2 delta)
-    {
-        //todo:之后考虑差值
-        //char buffer[]
-        if (delta.y >= 0)
-        {
-            //0.1为一档
-            //四舍五入
-            float gear = Mathf.RoundToInt(delta.y * GearCount) * 1.0f / GearCount;        //Shader中常用方法
-
-            SetSpeed(gear);
-        }
-
-    }
-
-    private void SetSpeed(float percentage01)
-    {
-        int speedThoudsand = (int)MathUtil.Remap(percentage01, 0, 1, 0, 999);
-
-        List<byte> messageBuffer = SkateMessageHandler.GetSkateMessage(MessageDefine.E_C2D_MOTOR_DRIVE);
-
-        messageBuffer.AddRange(Encoding.ASCII.GetBytes(speedThoudsand.ToString()));
-
-        BluetoothProxy.Intance.BluetoothDevice.SendData(messageBuffer);
-    }
-
-    private void OnJoyStickMoveSpeed(Vector2 delta)
-    {
-    }
-
-    private void OnJoyStickMoveEnd()
-    {
-    }
-
-    private void OnJoyStickMoveStart()
-    {
-    }
+   
 
 }

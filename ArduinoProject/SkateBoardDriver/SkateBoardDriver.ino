@@ -4,11 +4,10 @@
 #include "MessageHandler.h"
 #include "MotorController.h"
 #include "GlobalDefine.h"
+#include "DynamicBuffer.h"
 
 MessageHandler *pMessageHandler = nullptr;
 MotorController *pMotorController = nullptr;
-
-
 
 void setup()
 {

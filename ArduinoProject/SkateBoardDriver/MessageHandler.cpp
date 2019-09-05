@@ -78,6 +78,8 @@ void MessageHandler::SendMessageInternal(char *sendBuffer)
         sendBuffer++;
     }
     this->m_bluetooth->write(MessageHandler::Message_End_Flag);
+
+    DynamicBuffer::RecycleBuffer(&sendBuffer[0]);
 }
 
 
@@ -109,8 +111,7 @@ void MessageHandler::OnHandleMessage(Message& message)
     case E_C2D_MOTOR_NORMAL_START:
         break;
     case E_C2D_MOTOR_GET_SPEED:
-        char resultData[8];
-        byte *responseBuffer = this->m_motorColtroller->Handle_GetCurrentSpeedMessage(resultData);
+        byte *responseBuffer = this->m_motorColtroller->Handle_GetCurrentSpeedMessage();
         SendMessage(responseBuffer);
         break;
     }
