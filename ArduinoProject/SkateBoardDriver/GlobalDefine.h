@@ -15,5 +15,8 @@
 #define MOTOR_MIN_DUTY 0.05             //电机最小速度的占空比
 #define MOTOR_MAX_DUTY 0.1              //电机最大速度的占空比
 
-//函数指针
-typedef void (*SendMessageDelegate)(byte*);
+//声明另一个类，include 或有循环include的问题
+class MessageHandler;
+
+//需要加上域
+typedef void (MessageHandler::*SendMessageDelegate)(byte*);         

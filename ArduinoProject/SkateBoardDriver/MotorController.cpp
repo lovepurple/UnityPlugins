@@ -51,23 +51,20 @@ void MotorController::MotorMaxPower()
     SetSpeedByDuty(MOTOR_MAX_DUTY);
 }
 
-void SetMotorController(MotorController *motorController);
-
-
-void MotorController::SetMotorPower(const float percentage01)
+bool MotorController::SetMotorPower(const float percentage01)
 {
     float speedClampPercentage = Utility::Clamp01(percentage01);
-    
+
     float currentPercentageSpeed = GetMotorPower();
-    if(abs(currentPercentageSpeed - speedClampPercentage) < 0.01f)
-    {   
+    if (abs(currentPercentageSpeed - speedClampPercentage) < 0.01f)
+    {
         Serial.println("Speed Close ");
-        return;
+        return false;
     }
     float speedToPWMDuty = Utility::Lerp(MOTOR_MIN_DUTY, MOTOR_MAX_DUTY, speedClampPercentage);
 
-
     SetSpeedByDuty(speedToPWMDuty);
+    return true;
 }
 
 float MotorController::GetMotorPower()
@@ -93,8 +90,8 @@ byte *MotorController::Handle_GetCurrentSpeedMessage(char data[5])
 {
     int speedThousands = int(GetMotorPower() * 999);
 
-    char *pResult;      
-    pResult = &data[0];     
+    char *pResult;
+    pResult = &data[0];
     pResult[0] = E_D2C_MOTOR_SPEED;
     itoa(speedThousands, pResult + 1, 10);
     pResult[4] = (byte)'\0';
@@ -102,16 +99,30 @@ byte *MotorController::Handle_GetCurrentSpeedMessage(char data[5])
     return (byte *)pResult;
 }
 
-void MotorController::Handle_SetPercentageSpeedMessage(MessageBody& messageBody)
+void MotorController::Handle_SetPercentageSpeedMessage(MessageBody &messageBody)
 {
     //滤掉错包
-    if(messageBody.messageSize != 3)
+    if (messageBody.messageSize != 3)
         return;
 
     int speedThousand = atoi(messageBody.pMessageBody);
-    this->SetMotorPower(speedThousand / 999.0f);
+    bool isSuccess = this->SetMotorPower(speedThousand / 999.0f);
+
+    //发送新的油门大小到客户端
+    if (isSuccess)
+    {
+        Serial.println("===============================================");
+        Serial.println("Send new Speed");
+        char power[5];
+        byte* messageBuffer = Handle_GetCurrentSpeedMessage(power);
+        
+        //指针函数的调用方式(todo:需要整理。。。函数指针)
+         ((MessageHandler*)m_caller->*m_sendMessageDelegate)(messageBuffer);
+    }
 }
 
-void MotorController::SetSendMessageDelegate(SendMessageDelegate delegate){
+void MotorController::SetSendMessageDelegate(SendMessageDelegate delegate,void* caller)
+{
     this->m_sendMessageDelegate = delegate;
+    this->m_caller = caller;
 }
