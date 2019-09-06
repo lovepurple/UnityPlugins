@@ -1,6 +1,7 @@
 ﻿using EngineCore;
 using EngineCore.Utility;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using UnityEngine;
 
@@ -64,9 +65,11 @@ public class SpeedController : Singleton<SpeedController>
     {
         int speedThoudsand = (int)MathUtil.Remap(gear, 0, GEAR_COUNT, 0, 999);
 
+        List<byte> speedBuffer = DigitUtility.GetFixedLengthBufferList(Encoding.ASCII.GetBytes(speedThoudsand.ToString()).ToList(), 3, (byte)'0');
+
         List<byte> messageBuffer = SkateMessageHandler.GetSkateMessage(MessageDefine.E_C2D_MOTOR_DRIVE);
 
-        messageBuffer.AddRange(Encoding.ASCII.GetBytes(speedThoudsand.ToString()));
+        messageBuffer.AddRange(speedBuffer);
 
         BluetoothProxy.Intance.BluetoothDevice.SendData(messageBuffer);
     }

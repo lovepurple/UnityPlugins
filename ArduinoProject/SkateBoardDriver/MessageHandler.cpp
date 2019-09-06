@@ -40,7 +40,6 @@ void MessageHandler::Tick()
                 }
                 messageBuffer[m_recvBufferCount-1]=(byte)'\0';
 
-
                 MessageBody messageBody={
                     messageBuffer,
                     m_recvBufferCount-1
@@ -58,6 +57,7 @@ void MessageHandler::Tick()
         }
     }
 
+    //如果消息太多加入MsTimer2 把发送单独使用Timer跑
     while (m_sendMessageQueue.size() > 0)
     {
         byte *sendBuffer = m_sendMessageQueue.front();
