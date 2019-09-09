@@ -9,3 +9,6 @@
 /ControllerProject/BluetoothAndroidProject/btccontroller/*.iml
 /ControllerProject/BluetoothAndroidProject/.gradle
 /ControllerProject/BluetoothAndroidProject/local.properties
+/SkateBoardDriver/.vs
+/SkateBoardDriver/SkateBoardDriver/Debug
+/SkateBoardDriver/SkateBoardDriver/__vm
