@@ -4,39 +4,28 @@
  Author:	purple
 */
 
-//#include "NeoSWSerial.h"
-//
-//NeoSWSerial* pBluetooth;
-#include "NeoSWSerial.h"
-
-NeoSWSerial* pBluetooth;
+#include "Utility.h"
+#include "MotorController.h"
+#include "DynamicBuffer.h"
+#include "MessageHandler.h"
 
 void setup()
 {
 	Serial.begin(9600);
-
-	pBluetooth = new NeoSWSerial(2, 3);
-	pBluetooth->begin(9600);
-	pBluetooth->listen();
+	DynamicBuffer.init();
 }
-
-char m_tempBuffer[16];
-int m_recvCount = 0;
 
 void loop() {
 
-	while (pBluetooth->available() > 0)
-	{
-		char c = pBluetooth->read();
-		if (c != '\n')
-			m_tempBuffer[m_recvCount++]= c;
-		else
-		{
-			m_tempBuffer[m_recvCount] = '\0';
-			Serial.print(m_tempBuffer);
-			Serial.print('\n');
-			m_recvCount = 0;
-		}
-	}
+	MessageHandler.Tick();
 
+	//if (Serial.available() > 0)
+	//{
+	//	char* buffer= DynamicBuffer.GetBuffer();
+	//	buffer[0] = '2';
+	//	buffer[1] = '\0';
+	//	MessageHandler.SendMessage(buffer);
+	//}
+	//char* buffer = MotorController.Handle_GetCurrentSpeedMessage();
+	//MessageHandler.SendMessage(buffer);
 }
