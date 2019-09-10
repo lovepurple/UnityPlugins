@@ -9,7 +9,7 @@
 
 //电调控制引脚（使用TimerOne）
 #define ESC_A 9
-#define ECS_B 10
+#define ESC_B 10
 #define MOTOR_POWER_PIN 7               //一个引脚可以控制两个引脚
 #define MOTOR_POWER_DRIVE_MODE  LOW     //电机电调继电器模式（低电平 还是高电平触发）
 #define ECS_FREQUENCY 60               //电调频率

@@ -20,9 +20,6 @@ public class AndroidBluetoothClassicDevice : IBluetoothDevice
 
     private AndroidBluetoothMessageHandler m_internalBluetoothMessageHandler = null;
 
-    /// <summary>
-    /// 
-    /// </summary>
     public bool IsBluetoothEnabled()
     {
         return AndroidBridgeInstance.Call<bool>("isEnabled");
@@ -52,8 +49,7 @@ public class AndroidBluetoothClassicDevice : IBluetoothDevice
 
     public void SendData(List<byte> sendBuffer)
     {
-        if (sendBuffer.Last() != '\n')
-            sendBuffer.Add(Convert.ToByte('\n'));
+      
 
         AndroidBridgeInstance.Call("sendMessage", sendBuffer.ToArray());
     }

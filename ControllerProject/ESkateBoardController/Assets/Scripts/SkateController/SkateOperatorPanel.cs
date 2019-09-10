@@ -12,8 +12,10 @@ public class SkateOperatorPanel : UIPanelLogicBase
 
     private MaskableGraphic m_btnStartup;
     private MaskableGraphic m_btnStop;
+    private Text m_txtMotorPower = null;
 
     private bool m_isStarpup = true;
+
 
     public SkateOperatorPanel(RectTransform uiPanelRootTransfrom) : base(uiPanelRootTransfrom)
     {
@@ -26,6 +28,7 @@ public class SkateOperatorPanel : UIPanelLogicBase
 
         m_btnStartup = m_panelRootObject.GetComponent<MaskableGraphic>("ButtonGroup/Button");
         m_btnStop = m_panelRootObject.GetComponent<MaskableGraphic>("ButtonGroup/Button (1)");
+        m_txtMotorPower = m_panelRootObject.GetComponent<Text>("InfoPanel/Template/Text (1)");
     }
 
     public override void OnEnter(params object[] onEnterParams)
@@ -46,42 +49,30 @@ public class SkateOperatorPanel : UIPanelLogicBase
 
         MessageHandler.RegisterMessageHandler((int)MessageDefine.E_D2C_MOTOR_SPEED, OnGetMotorGearResponse);
 
+        if (BluetoothProxy.Intance.BluetoothState == BluetoothStatus.CONNECTED)
+        {
+            TimeModule.Instance.SetTimeInterval(RequestCurrentGear, 1);
+        }
+
     }
 
     private void OnBtnStartUpClick(GameObject obj)
     {
         List<byte> messageBuffer = SkateMessageHandler.GetSkateMessage(MessageDefine.E_C2D_MOTOR_NORMAL_START);
 
-        BluetoothProxy.Intance.BluetoothDevice.SendData(messageBuffer);
+        BluetoothProxy.Intance.SendData(messageBuffer);
     }
 
     private void OnBtnStopClick(GameObject obj)
     {
         List<byte> messageBuffer = SkateMessageHandler.GetSkateMessage(MessageDefine.E_C2D_MOTOR_CORRECT_MIN_POWER);
 
-        BluetoothProxy.Intance.BluetoothDevice.SendData(messageBuffer);
+        BluetoothProxy.Intance.SendData(messageBuffer);
     }
 
     private void OnJoyStickMove(Vector2 delta)
     {
         SpeedController.Instance.SetSpeedByNormalizedPower(delta.y);
-    }
-
-    //todo:接下来把数都换成档位，初始化时 传到arduino一共多少个档位，减少数据传递
-    private void SetSpeed(float percentage01)
-    {
-        int speedThoudsand = (int)MathUtil.Remap(percentage01, 0, 1, 0, 999);
-
-        List<byte> messageBuffer = SkateMessageHandler.GetSkateMessage(MessageDefine.E_C2D_MOTOR_DRIVE);
-
-        List<byte> fixedMessageBuffer = new List<byte>(3);
-        //补齐三位
-        //for()
-
-
-        messageBuffer.AddRange(Encoding.ASCII.GetBytes(speedThoudsand.ToString()));
-
-        BluetoothProxy.Intance.BluetoothDevice.SendData(messageBuffer);
     }
 
     private void OnJoyStickMoveSpeed(Vector2 delta)
@@ -98,7 +89,14 @@ public class SkateOperatorPanel : UIPanelLogicBase
 
     private void OnGetMotorGearResponse(object data)
     {
-        Debug.Log("当前档位：" + SpeedController.Instance.Gear);
+        this.m_txtMotorPower.text = SpeedController.Instance.Gear.ToString();
+    }
+
+    private void RequestCurrentGear()
+    {
+        List<byte> messageBuffer = SkateMessageHandler.GetSkateMessage(MessageDefine.E_C2D_MOTOR_GET_SPEED);
+
+        BluetoothProxy.Intance.SendData(messageBuffer);
     }
 
     public override void OnExit()
@@ -109,5 +107,7 @@ public class SkateOperatorPanel : UIPanelLogicBase
 
         m_btnStartup.RemoveClickCallback(OnBtnStartUpClick);
         m_btnStop.RemoveClickCallback(OnBtnStopClick);
+
+        TimeModule.Instance.RemoveTimeaction(RequestCurrentGear);
     }
 }

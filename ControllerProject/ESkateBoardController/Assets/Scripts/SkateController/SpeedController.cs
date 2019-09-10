@@ -71,7 +71,7 @@ public class SpeedController : Singleton<SpeedController>
 
         messageBuffer.AddRange(speedBuffer);
 
-        BluetoothProxy.Intance.BluetoothDevice.SendData(messageBuffer);
+        BluetoothProxy.Intance.SendData(messageBuffer);
     }
 
     private void OnGetMotorGearResponse(object data)

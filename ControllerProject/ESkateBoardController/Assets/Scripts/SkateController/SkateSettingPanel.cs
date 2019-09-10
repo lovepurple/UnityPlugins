@@ -48,28 +48,28 @@ public class SkateSettingPanel : UIPanelLogicBase
     {
         List<byte> messageBuffer = SkateMessageHandler.GetSkateMessage(MessageDefine.E_C2D_MOTOR_INITIALIZE);
 
-        BluetoothProxy.Intance.BluetoothDevice.SendData(messageBuffer);
+        BluetoothProxy.Intance.SendData(messageBuffer);
     }
 
     private void OnBtnDownClick(GameObject btn)
     {
         List<byte> messageBuffer = SkateMessageHandler.GetSkateMessage(MessageDefine.E_C2D_MOTOR_CORRECT_MIN_POWER);
 
-        BluetoothProxy.Intance.BluetoothDevice.SendData(messageBuffer);
+        BluetoothProxy.Intance.SendData(messageBuffer);
     }
 
     private void OnBtnUpClick(GameObject btn)
     {
         List<byte> messageBuffer = SkateMessageHandler.GetSkateMessage(MessageDefine.E_C2D_MOTOR_CORRECT_MAX_POWER);
 
-        BluetoothProxy.Intance.BluetoothDevice.SendData(messageBuffer);
+        BluetoothProxy.Intance.SendData(messageBuffer);
     }
 
     private void OnBtnPowerOffClick(GameObject btn)
     {
         List<byte> messageBuffer = SkateMessageHandler.GetSkateMessage(MessageDefine.E_C2D_MOTOR_POWEROFF);
 
-        BluetoothProxy.Intance.BluetoothDevice.SendData(messageBuffer);
+        BluetoothProxy.Intance.SendData(messageBuffer);
     }
 
     public override void OnExit()

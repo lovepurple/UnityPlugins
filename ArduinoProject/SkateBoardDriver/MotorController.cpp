@@ -58,7 +58,7 @@ bool MotorController::SetMotorPower(const float percentage01)
     float currentPercentageSpeed = GetMotorPower();
     if (abs(currentPercentageSpeed - speedClampPercentage) < 0.01f)
     {
-        Serial.println("Speed Close ");
+        // Serial.println("Speed Close ");
         return false;
     }
     float speedToPWMDuty = Utility::Lerp(MOTOR_MIN_DUTY, MOTOR_MAX_DUTY, speedClampPercentage);
@@ -106,6 +106,7 @@ void MotorController::Handle_SetPercentageSpeedMessage(MessageBody &messageBody)
 
     int speedThousand = atoi(messageBody.pMessageBody);
     bool isSuccess = this->SetMotorPower(speedThousand / 999.0f);
+
 
     //发送新的油门大小到客户端
     if (isSuccess)

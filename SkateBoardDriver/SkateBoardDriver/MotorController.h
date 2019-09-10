@@ -19,6 +19,9 @@ class MotorControllerClass
 {
 private:
 	float m_currentMotorDuty = 0.0;
+	bool m_hasChangedPower = true;
+
+	void InitializePWM();
 
 public:
 	void init();
@@ -31,6 +34,9 @@ public:
 
 	//初始化电调
 	void InitializeESC();
+
+	//电机正常启动
+	void MotorStarup();
 
 	void MotorMinPower();
 

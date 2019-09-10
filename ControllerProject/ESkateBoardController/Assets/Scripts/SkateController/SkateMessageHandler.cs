@@ -19,7 +19,7 @@ public class SkateMessageHandler
         {
             MessageDefine messageID = (MessageDefine)obj[0];
             char[] messageBody = null;
-            if (obj.Length > 2)
+            if (obj.Length > 1)
                 messageBody = Encoding.ASCII.GetChars(obj.Skip(1).ToArray());
 
             MessageHandler.Call((int)messageID, messageBody);

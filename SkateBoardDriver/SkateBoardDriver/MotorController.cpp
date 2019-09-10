@@ -1,8 +1,15 @@
 #include "MotorController.h"
 
+void MotorControllerClass::InitializePWM()
+{
+	Timer1.initialize(1000000 / ECS_FREQUENCY);		//在MotorController构造里init 不执行，不确定是否是有延迟或其它位置有更改
+}
+
 void MotorControllerClass::init()
 {
 	pinMode(MOTOR_POWER_PIN, OUTPUT);
+	PowerOff();
+
 }
 
 bool MotorControllerClass::IsPowerOn()
@@ -18,24 +25,42 @@ void MotorControllerClass::PowerOn()
 void MotorControllerClass::PowerOff()
 {
 	digitalWrite(MOTOR_POWER_PIN, !MOTOR_POWER_DRIVE_MODE);
-	Timer1.disablePwm(ESC_A);
+	Timer1.stop();
 }
 
 void MotorControllerClass::InitializeESC()
 {
+	/*if (!IsPowerOn())
+	{*/
+	InitializePWM();
 	MotorMaxPower();
-	delay(2000);
+	delay(500);
 	PowerOn();
+	//}
+}
+
+
+void MotorControllerClass::MotorStarup()
+{
+	/*if (!IsPowerOn())
+	{*/
+	InitializePWM();
+	MotorMinPower();
+	delay(500);
+	PowerOn();
+	//}
 }
 
 void MotorControllerClass::MotorMinPower()
 {
 	SetMotorPower(0);
+	this->m_hasChangedPower = true;
 }
 
 void MotorControllerClass::MotorMaxPower()
 {
 	SetMotorPower(1);
+	this->m_hasChangedPower = true;
 }
 
 bool MotorControllerClass::SetMotorPower(const float percentage01)
@@ -43,11 +68,7 @@ bool MotorControllerClass::SetMotorPower(const float percentage01)
 	float speedClampPercentage = Utility.Clamp01(percentage01);
 
 	float currentPercentageSpeed = GetMotorPower();
-	//if (abs(currentPercentageSpeed - speedClampPercentage) < 0.01f)
-	//{
-	//	//Serial.println("Speed Close ");
-	//	return false;
-	//}
+
 	float speedToPWMDuty = Utility.Lerp(MOTOR_MIN_DUTY, MOTOR_MAX_DUTY, speedClampPercentage);
 
 	SetSpeedByDuty(speedToPWMDuty);
@@ -69,20 +90,27 @@ void MotorControllerClass::SetSpeedByDuty(float pwmDuty)
 		duty = MOTOR_MIN_DUTY;
 
 	this->m_currentMotorDuty = duty;
-
 	Timer1.pwm(ESC_A, duty * 1023);
 }
 
 char* MotorControllerClass::Handle_GetCurrentSpeedMessage()
 {
-	int speedThousands = int(GetMotorPower() * 999);
+	if (m_hasChangedPower)
+	{
+		int speedThousands = int(GetMotorPower() * 999);
 
-	char* pMessageBuffer = DynamicBuffer.GetBuffer();
-	pMessageBuffer[0] = E_D2C_MOTOR_SPEED;
-	itoa(speedThousands, pMessageBuffer + 1, 10);
-	pMessageBuffer[4] = '\0';
+		char* pMessageBuffer = DynamicBuffer.GetBuffer();
+		pMessageBuffer[0] = E_D2C_MOTOR_SPEED;
+		itoa(speedThousands, pMessageBuffer + 1, 10);
+		pMessageBuffer[4] = '\0';
 
-	return pMessageBuffer;
+		m_hasChangedPower = false;
+
+		return pMessageBuffer;
+	}
+
+	return nullptr;
+
 }
 
 void MotorControllerClass::Handle_SetPercentageSpeedMessage(Message& message)
@@ -95,17 +123,7 @@ void MotorControllerClass::Handle_SetPercentageSpeedMessage(Message& message)
 	}
 	char* pSpeedBuffer = message.messageBody;
 	int speedThousand = atoi(pSpeedBuffer);
-	bool isSuccess = this->SetMotorPower(speedThousand / 999.0f);
-
-	//return;
-	//发送新的油门大小到客户端
-	if (isSuccess)
-	{
-		char* messageBuffer = Handle_GetCurrentSpeedMessage();
-		//MessageHandler.SendMessage(messageBuffer);
-		
-		DynamicBuffer.RecycleBuffer(messageBuffer);
-	}
+	this->m_hasChangedPower = this->SetMotorPower(speedThousand / 999.0f);
 }
 
 

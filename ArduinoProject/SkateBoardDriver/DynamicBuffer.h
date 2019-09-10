@@ -1,7 +1,7 @@
 #ifndef DYNAMICBUFFER_H
 #define DYNAMICBUFFER_H
 #include "QList.h"
-#define DYNAMIC_BUFFER_SIZE 256
+#define DYNAMIC_BUFFER_SIZE 32
 #define ONE_BUFFER_SIZE 16
 
 class DynamicBuffer

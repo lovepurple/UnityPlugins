@@ -10,15 +10,14 @@
 #include "MotorController.h"
 #include "MessageDefine.h"
 #include "QList.h"
+#include "TimerOne.h"
 
 class MessageHandler
 {
 private:
-    NeoSWSerial *m_bluetooth;
-    uint8_t m_rxPin; //uinit_8 = char
-    uint8_t m_txPin;
+    NeoSWSerial* m_bluetooth;
 
-    byte m_tempBuffer[64];
+    byte* m_pTempBuffer;      
 
     MotorController *m_motorColtroller;
 
@@ -30,8 +29,10 @@ private:
     //发消息  todo：BufferCount 
     void SendMessageInternal(char *sendBuffer);
 
+    void TimerInterrupt();
+
 public:
-    MessageHandler(uint8_t rx, uint8_t tx, uint16_t baudRate = 9600);
+    MessageHandler(uint8_t rx, uint8_t tx);
 
     void Tick();
 
@@ -47,6 +48,8 @@ public:
     //消息结束标识
     static char Message_End_Flag;
     // static void SendMessage(byte* messageBuffer);
+
+    void Nidaye();
 
 };
 #endif

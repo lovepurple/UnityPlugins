@@ -5,30 +5,47 @@
 #include "MotorController.h"
 #include "GlobalDefine.h"
 #include "DynamicBuffer.h"
+#include "NeoSWSerial.h"
+// MessageHandler* pMessageHandler = nullptr;
+// MotorController *pMotorController = nullptr;
 
-MessageHandler *pMessageHandler = nullptr;
-MotorController *pMotorController = nullptr;
+// NeoSWSerial bluetooth(2, 3);
+// NeoSWSerial* pBluetoothSerial;
 
 void setup()
 {
     Serial.begin(9600);
 
-    pMessageHandler = new MessageHandler(BLUETOOTH_RX, BLUETOOTH_TX,9600);
+    pBluetoothSerial = new NeoSWSerial(2,3);
+    pBluetoothSerial->begin(9600);
 
     while (!Serial)
     {
     }
 
-    pMotorController = new MotorController(MOTOR_POWER_PIN, ESC_A, ECS_B);
-    pMotorController->SetSendMessageDelegate(&(pMessageHandler->SendMessage),pMessageHandler);      //函数指针的赋值
+    // pMessageHandler = &MessageHandler(2,3);
+    // pMessageHandler->SetSoftwareBluetooth(&sb);
 
-    pMessageHandler->SetMotorController(pMotorController);
+    // pMotorController = new MotorController(MOTOR_POWER_PIN, ESC_A, ECS_B);
+    // pMotorController->SetSendMessageDelegate(&(pMessageHandler->SendMessage),pMessageHandler);      //函数指针的赋值
 
+    // pMessageHandler->SetMotorController(pMotorController);
 }
 
 void loop()
 {
-    if (pMessageHandler != nullptr)
-        pMessageHandler->Tick();
+    // pMessageHandler->Tick();
 
+    while ( pBluetoothSerial->available() > 0)
+        Serial.print((char) pBluetoothSerial->read());
+    // messageHandler.Tick();
+    // if (pMessageHandler != nullptr)
+    // {
+    //     pMessageHandler->Tick();
+    // }
+
+    // while(bt.available())
+    // {
+    //     Serial.println((char)bt.read());
+    // }
 }

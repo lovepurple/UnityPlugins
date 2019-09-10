@@ -4,7 +4,8 @@
 
 //蓝牙模块引脚
 #define BLUETOOTH_RX 2
-#define BLUETOOTH_TX 4
+#define BLUETOOTH_TX 3
+#define BLUETOOTH_BAND 9600
 
 //电调控制引脚（使用TimerOne）
 #define ESC_A 9
@@ -21,3 +22,4 @@ class MessageHandler;
 
 //需要加上域
 typedef void (MessageHandler::*SendMessageDelegate)(byte*);         
+

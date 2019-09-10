@@ -5,7 +5,8 @@ MessageHandlerClass::MessageHandlerClass()
 	MessageHandler.m_pBluetooth = new NeoSWSerial(BLUETOOTH_RX, BLUETOOTH_TX);
 	MessageHandler.m_pBluetooth->begin(BLUETOOTH_BAUD);
 	MessageHandler.m_pBluetooth->listen();
-	//Timer1.attachInterrupt(MessageHandlerClass::SendMessageInternal);
+
+	MotorController.init();
 }
 
 MessageHandlerClass::~MessageHandlerClass()
@@ -80,6 +81,7 @@ void MessageHandlerClass::OnHandleMessage(Message& message)
 		MotorController.InitializeESC();
 		break;
 	case E_C2D_MOTOR_NORMAL_START:
+		MotorController.MotorStarup();
 		break;
 	case E_C2D_MOTOR_GET_SPEED:
 		char* responseBuffer = MotorController.Handle_GetCurrentSpeedMessage();
@@ -90,10 +92,7 @@ void MessageHandlerClass::OnHandleMessage(Message& message)
 
 void MessageHandlerClass::SendMessage(char* messageBuffer)
 {
-	Serial.print("push");
-	//MessageHandler.SendMessageQueue.push_back(messageBuffer);
 	m_sendMessageQueue.push_back(messageBuffer);
-	Serial.print(m_sendMessageQueue.size());
 }
 
 void MessageHandlerClass::SendMessageInternal()
@@ -109,11 +108,11 @@ void MessageHandlerClass::SendMessageInternal()
 		}
 		MessageHandler.m_pBluetooth->write('\n');
 		MessageHandler.m_pBluetooth->flush();
-		
+
 		Serial.print("Sending...");
 		Serial.print(sendBuffer);
 		Serial.print('\n');
-		
+
 		DynamicBuffer.RecycleBuffer(sendBuffer);
 
 		MessageHandler.m_sendMessageQueue.pop_front();

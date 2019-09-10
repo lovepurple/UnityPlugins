@@ -19,10 +19,8 @@ public class ClientMain : MonoBehaviour
 
     private UIPanelLogicBase[] m_panelGroup = new UIPanelLogicBase[3];
 
-
     private Button m_btnCurrentStatus = null;
     private Button m_btnMotorInit = null;
-    private Button m_btnMotorMin = null;
     private Button m_btnSpeedup = null;
     private Button m_btnSpeedDown = null;
     private Button m_btnStop = null;
@@ -102,6 +100,7 @@ public class ClientMain : MonoBehaviour
 
     private void OnLog(string logContent)
     {
+        Debug.Log(logContent);
     }
 
     private void SetToPanel(int panelIndex)
@@ -128,15 +127,7 @@ public class ClientMain : MonoBehaviour
              this.m_panelGroup[this.m_currentPanelIndex].OnEnter();
              this.m_panelTitle.text = this.m_panelGroup[this.m_currentPanelIndex].PanelName;
          });
-
     }
-
-
-
-
-
-
-
 
     private void OnBtnBluetoothStatusClick(GameObject btn)
     {
@@ -157,14 +148,14 @@ public class ClientMain : MonoBehaviour
     {
         List<byte> messageBuffer = SkateMessageHandler.GetSkateMessage(MessageDefine.E_C2D_MOTOR_CORRECT_MIN_POWER);
 
-        BluetoothProxy.Intance.BluetoothDevice.SendData(messageBuffer);
+        BluetoothProxy.Intance.SendData(messageBuffer);
     }
 
     private void OnBtnMaxSpeedClick(GameObject btn)
     {
         List<byte> messageBuffer = SkateMessageHandler.GetSkateMessage(MessageDefine.E_C2D_MOTOR_CORRECT_MAX_POWER);
 
-        BluetoothProxy.Intance.BluetoothDevice.SendData(messageBuffer);
+        BluetoothProxy.Intance.SendData(messageBuffer);
     }
 
     private void OnBtnPowerOff(GameObject btn)
@@ -174,19 +165,13 @@ public class ClientMain : MonoBehaviour
 
     private void OnBtnGetCurrentSpeedClick(GameObject btn)
     {
-        List<byte> messageBuffer = SkateMessageHandler.GetSkateMessage(MessageDefine.E_C2D_MOTOR_GET_SPEED);
-
-        BluetoothProxy.Intance.BluetoothDevice.SendData(messageBuffer);
+        
 
     }
-
-
-    
 
     private void Update()
     {
         BluetoothProxy.Intance.Tick();
+        TimeModule.Instance.Update();
     }
-
-
 }
