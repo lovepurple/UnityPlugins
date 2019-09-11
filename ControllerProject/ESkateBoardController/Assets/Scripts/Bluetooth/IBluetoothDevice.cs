@@ -3,6 +3,9 @@ using System.Collections.Generic;
 
 public interface IBluetoothDevice
 {
+    /// <summary>
+    /// 初始化蓝牙设备
+    /// </summary>
     void InitializeBluetoothDevice();
 
     /// <summary>

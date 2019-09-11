@@ -5,8 +5,6 @@ MessageHandlerClass::MessageHandlerClass()
 	MessageHandler.m_pBluetooth = new NeoSWSerial(BLUETOOTH_RX, BLUETOOTH_TX);
 	MessageHandler.m_pBluetooth->begin(BLUETOOTH_BAUD);
 	MessageHandler.m_pBluetooth->listen();
-
-	MotorController.init();
 }
 
 MessageHandlerClass::~MessageHandlerClass()
@@ -50,10 +48,7 @@ void MessageHandlerClass::Tick()
 		}
 	}
 
-	while (m_sendMessageQueue.size()>0)
-	{
-		SendMessageInternal();
-	}
+	SendMessageInternal();
 }
 
 void MessageHandlerClass::OnHandleMessage(Message& message)

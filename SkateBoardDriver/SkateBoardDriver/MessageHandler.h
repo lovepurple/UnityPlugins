@@ -17,6 +17,9 @@
 #include "Utility.h"
 #include "MotorController.h"
 
+/**
+ * Arduino 消息处理类
+ */
 class MessageHandlerClass
 {
 public:

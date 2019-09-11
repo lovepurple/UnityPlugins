@@ -69,35 +69,23 @@ void MessageHandler::Tick()
         //         //     messageBuffer[i - 1] = m_pTempBuffer[i];
         //         // }
         //         // messageBuffer[m_recvBufferCount - 1] = (byte)'\0';
-
+                m_handleMessageCount++;
         //         m_pTempBuffer[m_recvBufferCount-1] = (byte)'\0';
-
+                m_handleMessageCount++;
         //         MessageBody messageBody = {
         //             m_pTempBuffer,
         //             m_recvBufferCount - 1};
 
-        //         Message message = {
-        //             messageType,
-        //             messageBody};
-
-        //         Serial.println(*m_pTempBuffer);
-
-        //         // OnHandleMessage(message);
-        //         // DynamicBuffer::RecycleBuffer(m_pTempBuffer);
-        //     }
-
-        //     m_recvBufferCount = 0;
-        // }
-    // }
-
-    // while (m_sendMessageQueue.size() > 0)
-    // {
-    //     byte *sendBuffer = this->m_sendMessageQueue.front();
-    //     Serial.println("sendMessage");
-    //     Serial.println(sendBuffer[0]);
-    //     this->SendMessageInternal((char *)sendBuffer);
-    //    this-> m_sendMessageQueue.pop_front();
-    // }
+    //如果消息太多加入MsTimer2 把发送单独使用Timer跑
+    while (m_sendMessageQueue.size() > 0)
+    {
+        byte *sendBuffer = m_sendMessageQueue.front();
+        Serial.println("sendMessage");
+        Serial.println(sendBuffer[0]);
+        SendMessageInternal((char *)sendBuffer);
+        m_sendMessageQueue.pop_front();
+        m_handleMessageCount ++;
+    }
 }
 
 void MessageHandler::SendMessageInternal(char *sendBuffer)

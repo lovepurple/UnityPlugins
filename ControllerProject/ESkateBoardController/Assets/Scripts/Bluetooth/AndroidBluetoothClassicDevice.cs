@@ -49,8 +49,6 @@ public class AndroidBluetoothClassicDevice : IBluetoothDevice
 
     public void SendData(List<byte> sendBuffer)
     {
-      
-
         AndroidBridgeInstance.Call("sendMessage", sendBuffer.ToArray());
     }
 
