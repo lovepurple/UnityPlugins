@@ -7,6 +7,9 @@ public class SignalPanel : UIPanelLogicBase
     private Image m_imgOnline;
     private Image m_imgOffline;
 
+    private Image[] m_imgBatteryList = new Image[6];
+    private Text m_txtBattery;
+
     public SignalPanel(RectTransform uiPanelRootTransfrom) : base(uiPanelRootTransfrom)
     {
     }
@@ -17,6 +20,11 @@ public class SignalPanel : UIPanelLogicBase
 
         this.m_imgOffline = m_panelRootObject.GetComponent<Image>("img_offline");
         this.m_imgOnline = m_panelRootObject.GetComponent<Image>("img_online");
+
+        for (int i = 0; i <= 5; ++i)
+            m_imgBatteryList[i] = m_panelRootObject.GetComponent<Image>($"battery_panel/battery_{0}");
+
+        this.m_txtBattery = m_panelRootObject.GetComponent<Text>("battery_panel/txt_battery");
     }
 
     public override void OnEnter(params object[] onEnterParams)
@@ -36,6 +44,15 @@ public class SignalPanel : UIPanelLogicBase
     public override void OnExit()
     {
         BluetoothEvents.OnBluetoothDeviceStateChangedEvent -= OnBluetoothDeviceStateChanged;
+    }
+
+
+    private void SetBatteryLevel(int batteryLevel)
+    {
+        for (int i = 0; i <= 5; ++i)
+            m_imgBatteryList[i].gameObject.SetActive(i == batteryLevel);
+
+        this.m_txtBattery.text = $"{10}%";
     }
 
 }

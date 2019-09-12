@@ -1,10 +1,8 @@
-﻿using UnityEngine;
-using System.Collections;
-using UnityEngine.UI;
-using TechTweaking.Bluetooth;
+﻿using DG.Tweening;
 using EngineCore;
 using System;
-using DG.Tweening;
+using UnityEngine;
+using UnityEngine.UI;
 
 public class MainPanel : UIPanelLogicBase
 {

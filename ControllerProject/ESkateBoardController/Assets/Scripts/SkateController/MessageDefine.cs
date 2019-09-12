@@ -12,4 +12,6 @@ public enum MessageDefine
     E_C2D_MOTOR_NORMAL_START = 116,     //电机正常启动
     E_C2D_MOTOR_GET_SPEED = 117,    //获取电机当前速度
     E_D2C_MOTOR_SPEED = 118,        //返回电机当前速度
+    E_C2D_REMAINING_POWER = 119,    //获取剩余电量
+    E_D2C_REMAINING_POWER = 120,	//返回剩余电量
 }

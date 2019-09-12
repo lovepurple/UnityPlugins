@@ -19,8 +19,6 @@ public class ClientMain : MonoSingleton<ClientMain>
         mainPanel.OnEnter();
     }
 
-
-
     private void Update()
     {
         BluetoothProxy.Intance.Tick();
