@@ -9,6 +9,7 @@ public class SpeedController : Singleton<SpeedController>
 {
     //挡位数
     public const int GEAR_COUNT = 5;
+    public float GEAR_POWER_BASIC = 0.25f;      //实际挡位的基数(0~1) 如果是1 太快,
 
     private int m_currentGear = 0;
 
@@ -63,7 +64,8 @@ public class SpeedController : Singleton<SpeedController>
     /// <param name="gear"></param>
     private void SetSkateBoardSpeedByGear(int gear)
     {
-        int speedThoudsand = (int)MathUtil.Remap(gear, 0, GEAR_COUNT, 0, 999);
+        int speedTemp = (int)MathUtil.Remap(gear, 0, GEAR_COUNT, 0, 999);
+        int speedThoudsand = (int)(speedTemp * GEAR_POWER_BASIC);
 
         List<byte> speedBuffer = DigitUtility.GetFixedLengthBufferList(Encoding.ASCII.GetBytes(speedThoudsand.ToString()).ToList(), 3, (byte)'0');
 

@@ -1,4 +1,6 @@
 using EngineCore;
+using EngineCore.Utility;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -24,13 +26,15 @@ public class SignalPanel : UIPanelLogicBase
         for (int i = 0; i <= 5; ++i)
             m_imgBatteryList[i] = m_panelRootObject.GetComponent<Image>($"battery_panel/battery_{0}");
 
-        this.m_txtBattery = m_panelRootObject.GetComponent<Text>("battery_panel/txt_battery");
+        
     }
 
     public override void OnEnter(params object[] onEnterParams)
     {
         BluetoothEvents.OnBluetoothDeviceStateChangedEvent += OnBluetoothDeviceStateChanged;
         OnBluetoothDeviceStateChanged((int)BluetoothProxy.Intance.BluetoothState);
+
+        MessageHandler.RegisterMessageHandler((int)MessageDefine.E_D2C_REMAINING_POWER, OnReceiveSkaterBatteryPowerHandler);
     }
 
     private void OnBluetoothDeviceStateChanged(int status)
@@ -39,20 +43,48 @@ public class SignalPanel : UIPanelLogicBase
 
         this.m_imgOffline.gameObject.SetActive(bluetoothStatus != BluetoothStatus.CONNECTED);
         this.m_imgOnline.gameObject.SetActive(bluetoothStatus == BluetoothStatus.CONNECTED);
+
+        //1分钟一次请求剩余电量
+        if (bluetoothStatus == BluetoothStatus.CONNECTED)
+            TimeModule.Instance.SetTimeInterval(GetSkaterBatteryPower, 60f);
+        else
+            TimeModule.Instance.RemoveTimeaction(GetSkaterBatteryPower);
     }
+
+    private void GetSkaterBatteryPower()
+    {
+        List<byte> msgBuffer = SkateMessageHandler.GetSkateMessage(MessageDefine.E_C2D_REMAINING_POWER);
+        BluetoothProxy.Intance.SendData(msgBuffer);
+    }
+
 
     public override void OnExit()
     {
         BluetoothEvents.OnBluetoothDeviceStateChangedEvent -= OnBluetoothDeviceStateChanged;
+        MessageHandler.UnRegisterMessageHandler((int)MessageDefine.E_D2C_REMAINING_POWER, OnReceiveSkaterBatteryPowerHandler);
+        TimeModule.Instance.RemoveTimeaction(GetSkaterBatteryPower);
+    }
+
+    private void OnReceiveSkaterBatteryPowerHandler(object recvData)
+    {
+        char[] batteryPowerData = (char[])recvData;
+        uint voltHandred = DigitUtility.GetUInt32(batteryPowerData);
+        float volt = voltHandred * 0.01f;
+
+        int percentageRemainPower = SystemController.GetPercentageBatteryPower(volt);
+        SetBatteryLevel(percentageRemainPower);
     }
 
 
-    private void SetBatteryLevel(int batteryLevel)
+    private void SetBatteryLevel(int  remainPowerPercentage)
     {
+        //5个级别
+        int batteryLevel = remainPowerPercentage / 20;
+
         for (int i = 0; i <= 5; ++i)
             m_imgBatteryList[i].gameObject.SetActive(i == batteryLevel);
 
-        this.m_txtBattery.text = $"{10}%";
+        this.m_txtBattery.text = $"{remainPowerPercentage}%";
     }
 
 }

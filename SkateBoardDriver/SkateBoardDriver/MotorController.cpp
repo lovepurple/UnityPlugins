@@ -8,23 +8,27 @@ void MotorControllerClass::InitializePWM()
 void MotorControllerClass::init()
 {
 	pinMode(MOTOR_POWER_PIN, OUTPUT);
+	pinMode(ESC_POWER_PIN, OUTPUT);
 	PowerOff();
 
 }
 
 bool MotorControllerClass::IsPowerOn()
 {
-	return digitalRead(MOTOR_POWER_PIN) == HIGH;
+	return digitalRead(MOTOR_POWER_PIN) == MOTOR_POWER_DRIVE_MODE && digitalRead(ESC_POWER_PIN) == ESC_POWN_DRIVE_MODE;
 }
 
 void MotorControllerClass::PowerOn()
 {
 	digitalWrite(MOTOR_POWER_PIN, MOTOR_POWER_DRIVE_MODE);
+	digitalWrite(ESC_POWER_PIN, ESC_POWN_DRIVE_MODE);
 }
 
 void MotorControllerClass::PowerOff()
 {
 	digitalWrite(MOTOR_POWER_PIN, !MOTOR_POWER_DRIVE_MODE);
+	digitalWrite(ESC_POWER_PIN, !ESC_POWN_DRIVE_MODE);
+	MotorMinPower();
 	Timer1.stop();
 }
 

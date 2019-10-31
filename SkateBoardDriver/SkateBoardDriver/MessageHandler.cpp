@@ -5,6 +5,8 @@ MessageHandlerClass::MessageHandlerClass()
 	MessageHandler.m_pBluetooth = new NeoSWSerial(BLUETOOTH_RX, BLUETOOTH_TX);
 	MessageHandler.m_pBluetooth->begin(BLUETOOTH_BAUD);
 	MessageHandler.m_pBluetooth->listen();
+
+	MotorController.init();
 }
 
 MessageHandlerClass::~MessageHandlerClass()
@@ -82,9 +84,9 @@ void MessageHandlerClass::OnHandleMessage(Message& message)
 		char* responseBuffer = MotorController.Handle_GetCurrentSpeedMessage();
 		SendMessage(responseBuffer);
 		break;
-	case E_D2C_REMAINING_POWER:
-		break;
 	case E_C2D_REMAINING_POWER:
+		char* responseBuffer1 = SystemController.Handle_GetSystemRemainingPower();
+		SendMessage(responseBuffer1);
 		break;
 	}
 }

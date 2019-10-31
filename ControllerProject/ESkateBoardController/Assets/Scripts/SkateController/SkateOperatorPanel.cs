@@ -12,6 +12,16 @@ public class SkateOperatorPanel : UIPanelLogicBase
 
     private MaskableGraphic m_btnStartup;
     private MaskableGraphic m_btnStop;
+
+    private MaskableGraphic m_btnGear1;
+    private MaskableGraphic m_btnGear2;
+    private MaskableGraphic m_btnGear3;
+    private MaskableGraphic m_btnGear4;
+    private MaskableGraphic m_btnGear5;
+    private MaskableGraphic m_btnGear6;
+    private MaskableGraphic m_btnGear7;
+    private MaskableGraphic m_btnGear8;
+
     private Text m_txtMotorPower = null;
 
     private bool m_isStarpup = true;
@@ -28,6 +38,17 @@ public class SkateOperatorPanel : UIPanelLogicBase
 
         m_btnStartup = m_panelRootObject.GetComponent<MaskableGraphic>("ButtonGroup/Button");
         m_btnStop = m_panelRootObject.GetComponent<MaskableGraphic>("ButtonGroup/Button (1)");
+
+        m_btnGear1 = m_panelRootObject.GetComponent<MaskableGraphic>("ButtonGroup/Button (4)");
+        m_btnGear2 = m_panelRootObject.GetComponent<MaskableGraphic>("ButtonGroup/Button (5)");
+        m_btnGear3 = m_panelRootObject.GetComponent<MaskableGraphic>("ButtonGroup/Button (6)");
+        m_btnGear4 = m_panelRootObject.GetComponent<MaskableGraphic>("ButtonGroup/Button (7)");
+        m_btnGear5 = m_panelRootObject.GetComponent<MaskableGraphic>("GearGroup/Button (7)");
+        m_btnGear6 = m_panelRootObject.GetComponent<MaskableGraphic>("GearGroup/Button (8)");
+        m_btnGear7 = m_panelRootObject.GetComponent<MaskableGraphic>("GearGroup/Button (9)");
+        m_btnGear8 = m_panelRootObject.GetComponent<MaskableGraphic>("GearGroup/Button (10)");
+
+
         m_txtMotorPower = m_panelRootObject.GetComponent<Text>("InfoPanel/Template/Text (1)");
     }
 

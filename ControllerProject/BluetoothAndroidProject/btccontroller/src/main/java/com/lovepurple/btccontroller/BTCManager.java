@@ -268,8 +268,6 @@ public class BTCManager {
             IntentFilter filter = new IntentFilter();
             //扫描时，需要定位权限，就算写在Manifest里 有可能也没开，需要判断
             filter.addAction(BluetoothDevice.ACTION_FOUND);
-//            if (_applicationContext.checkSelfPermission((Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)
-//                sendErrorMessage("permission android.permission.ACCESS_COARSE_LOCATION  deny");
 
             filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
             filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_STARTED);

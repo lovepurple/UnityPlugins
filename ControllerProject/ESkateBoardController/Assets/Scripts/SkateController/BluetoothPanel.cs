@@ -24,7 +24,6 @@ public class BluetoothPanel : UIPanelLogicBase
         base.OnCreate();
 
         m_btnConnectA = m_panelRootObject.GetComponent<MaskableGraphic>("ButtonGroup/Button");
-        m_btnConnectB = m_panelRootObject.GetComponent<MaskableGraphic>("ButtonGroup/Button (1)");
         m_btnDisconnect = m_panelRootObject.GetComponent<MaskableGraphic>("ButtonGroup/Button (2)");
     }
 
@@ -33,7 +32,6 @@ public class BluetoothPanel : UIPanelLogicBase
         base.OnEnter(onEnterParams);
 
         m_btnConnectA.AddClickCallback(OnBtnConnectAClick);
-        m_btnConnectB.AddClickCallback(OnBtnConnectBClick);
         m_btnDisconnect.AddClickCallback(OnBtnDisconnectClick);
     }
 
@@ -42,10 +40,7 @@ public class BluetoothPanel : UIPanelLogicBase
         BluetoothProxy.Intance.BluetoothDevice.ConnectToDevice(Device_A);
     }
 
-    private void OnBtnConnectBClick(GameObject btn)
-    {
-        BluetoothProxy.Intance.BluetoothDevice.ConnectToDevice(Device_B);
-    }
+
 
     private void OnBtnDisconnectClick(GameObject btn)
     {
@@ -55,7 +50,6 @@ public class BluetoothPanel : UIPanelLogicBase
     public override void OnExit()
     {
         m_btnConnectA.RemoveClickCallback(OnBtnConnectAClick);
-        m_btnConnectB.RemoveClickCallback(OnBtnConnectBClick);
         m_btnDisconnect.RemoveClickCallback(OnBtnDisconnectClick);
     }
 }

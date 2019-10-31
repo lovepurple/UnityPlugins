@@ -16,6 +16,7 @@
 #include "TimerOne.h"
 #include "Utility.h"
 #include "MotorController.h"
+#include "SystemController.h"
 
 /**
  * Arduino 消息处理类
