@@ -1,2 +1,2 @@
-include ':btccontroller'
+include ':btccontroller', ':blecontroller'
 rootProject.name='BluetoothController'
