@@ -1,16 +1,16 @@
 ﻿/**
  *  Android 经典蓝牙2。0通讯
  */
+
 using Newtonsoft.Json;
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 public class AndroidBluetoothClassicDevice : IBluetoothDevice
 {
     //Android 输出的jar的BundleName
     private const string NATIVE_PLUGIN_BUNDLE_NAME = "com.lovepurple.btccontroller";
+
     public const string ANDROID_STRING_CALLBACK_INTERFACE = "com.lovepurple.btccontroller.UnityStringCallback";
     private const string ANDROID_BYTES_CALLBACK_INTERFACE = "com.lovepurple.btccontroller.UnityBufferCallback";
     private const string ANDROID_INT_CALLBACK_INTERFACE = "com.lovepurple.btccontroller.UnityIntCallback";
@@ -32,7 +32,6 @@ public class AndroidBluetoothClassicDevice : IBluetoothDevice
         AndroidBridgeInstance.Call("initialBTCManager", m_internalBluetoothMessageHandler);
     }
 
-
     public List<BluetoothDeviceInfo> GetPariedDevices()
     {
         string bondDeviceList = AndroidBridgeInstance.Call<string>("getPariedDevices");
@@ -40,7 +39,6 @@ public class AndroidBluetoothClassicDevice : IBluetoothDevice
 
         return result;
     }
-
 
     public string GetConnectedDeviceName()
     {
@@ -79,7 +77,6 @@ public class AndroidBluetoothClassicDevice : IBluetoothDevice
         if (this.m_internalBluetoothMessageHandler != null)
             this.m_internalBluetoothMessageHandler.Tick();
     }
-
 
     private static AndroidJavaObject AndroidBridgeInstance
     {

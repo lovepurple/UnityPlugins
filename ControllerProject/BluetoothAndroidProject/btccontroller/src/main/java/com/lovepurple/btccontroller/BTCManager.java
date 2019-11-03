@@ -195,7 +195,7 @@ public class BTCManager {
             }
             if (_deviceCurrentStatus != BluetoothStatus.CONNECTED) {
 
-                if (!_bluetoothAdapter.checkBluetoothAddress(dstAddress)) {
+                if (!BluetoothAdapter.checkBluetoothAddress(dstAddress)) {
                     sendLogToUnity(UnityMessageDefine.SEND_ERROR, "mac address is not correct! make sure it's upper case!");
                     return;
                 }

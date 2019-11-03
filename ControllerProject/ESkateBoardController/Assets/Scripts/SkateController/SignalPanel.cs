@@ -23,6 +23,8 @@ public class SignalPanel : UIPanelLogicBase
         this.m_imgOffline = m_panelRootObject.GetComponent<Image>("img_offline");
         this.m_imgOnline = m_panelRootObject.GetComponent<Image>("img_online");
 
+        this.m_txtBattery = m_panelRootObject.GetComponent<Text>($"battery_panel/txt_battery");
+
         for (int i = 0; i <= 5; ++i)
             m_imgBatteryList[i] = m_panelRootObject.GetComponent<Image>($"battery_panel/battery_{0}");
 
