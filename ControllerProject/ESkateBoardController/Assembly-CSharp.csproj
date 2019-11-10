@@ -171,7 +171,6 @@
     <Compile Include="Assets\Scripts\Bluetooth\Android\AndroidStringCallback.cs" />
     <Compile Include="Assets\Scripts\Bluetooth\Android\IAndroidCallback.cs" />
     <Compile Include="Assets\Scripts\Bluetooth\AndroidBLEDevice.cs" />
-    <Compile Include="Assets\Scripts\Bluetooth\AndroidBluetoothClassicDevice.cs" />
     <Compile Include="Assets\Scripts\Bluetooth\BluetoothDeviceInfo.cs" />
     <Compile Include="Assets\Scripts\Bluetooth\BluetoothEvents.cs" />
     <Compile Include="Assets\Scripts\Bluetooth\BluetoothProxy.cs" />

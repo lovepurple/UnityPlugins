@@ -14,7 +14,7 @@ public class AndroidBLEDevice : IBluetoothDevice
 
     public void ConnectToDevice(string remoteDeviceMacAddress)
     {
-        throw new System.NotImplementedException();
+        AndroidBridgeInstance.Call("connectDevice", remoteDeviceMacAddress);
     }
 
     public void Disconnect()
