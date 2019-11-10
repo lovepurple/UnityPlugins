@@ -5,8 +5,14 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCallback;
 import android.bluetooth.BluetoothGattCharacteristic;
+import android.bluetooth.BluetoothGattServer;
+import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothProfile;
+import android.bluetooth.le.BluetoothLeScanner;
+import android.bluetooth.le.ScanCallback;
+import android.bluetooth.le.ScanResult;
+import android.bluetooth.le.ScanSettings;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -16,6 +22,7 @@ import android.util.Log;
 
 import com.google.gson.Gson;
 import com.lovepurple.bluetoothcommom.BluetoothDeviceInfo;
+import com.lovepurple.bluetoothcommom.BluetoothStatus;
 import com.lovepurple.bluetoothcommom.IBluetoothManager;
 import com.lovepurple.bluetoothcommom.IUnityBluetoothAdapter;
 import com.lovepurple.bluetoothcommom.UnityBridgeUtility;
@@ -23,8 +30,16 @@ import com.lovepurple.bluetoothcommom.UnityMessageAdapter;
 import com.lovepurple.bluetoothcommom.UnityMessageDefine;
 import com.lovepurple.bluetoothcommom.UnityStringCallback;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Queue;
 import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.LinkedTransferQueue;
 
 /**
  * BLE 控制器
@@ -43,14 +58,37 @@ public class BLEManager implements IBluetoothManager, IUnityBluetoothAdapter {
     // 自定义的Intent
     public final static String ACTION_RECEIVED_DATA = "ACTION_RECEIVED_DATA";
     public final static String RECEIVED_DATA_INTENT_KEY = "RECEIVED_DATA_INTENT_KEY";
+    public final static String ACTION_SCANNED_FINISH = "ACTION_SCANNED_FINISH";
+    public final static String ACTION_BLUETOOTH_STATE_CHANGED = "ACTION_BLUETOOTH_STATE_CHANGED";
+
 
     private Context _applicationContext;
     private BluetoothManager mBluetoothManager = null;
     private BluetoothAdapter mBluetoothAdapter = null;
     private BluetoothGatt mBluetoothGatt;       //远程设备的gatt
+    private static final long SCAN_PERIOD = 10000;
+
+    // 数据发送队列
+    private Queue<byte[]> mSendQueue = new LinkedTransferQueue<>();
+
+    //当前蓝牙状态
+    private BluetoothStatus mDeviceCurrentStatus = BluetoothStatus.FREE;
+
+    //扫描到的设备列表
+    private HashMap<String, BluetoothDeviceInfo> mSearchedRemoteDeviceMap = new HashMap<>();
+
+
+    //线程池
+    private ExecutorService mExecutorSerivicePool = Executors.newCachedThreadPool();
 
     //发送到Unity的代理
     private UnityStringCallback mSendToUnityHandler = null;
+
+    //发送线程的线程池句柄
+    private Future mSendThreadHandler = null;
+
+    //接收，发送的服务
+    private BluetoothGattCharacteristic mCommunicationGattCharacteristic;
 
     private BLEManager(Context context) {
         this._applicationContext = context;
@@ -135,17 +173,36 @@ public class BLEManager implements IBluetoothManager, IUnityBluetoothAdapter {
     private void registerBLEIntentReceiver() {
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(ACTION_RECEIVED_DATA);
+        intentFilter.addAction(ACTION_SCANNED_FINISH);
+        intentFilter.addAction(ACTION_BLUETOOTH_STATE_CHANGED);
 
-
-        _applicationContext.registerReceiver(_mGattUpdateReceiver, intentFilter);
+        _applicationContext.registerReceiver(mBLEUpdateReceiver, intentFilter);
 
     }
 
     //gatt服务回调
     private final BluetoothGattCallback mGattCallback = new BluetoothGattCallback() {
+
+        //发现服务
         @Override
         public void onServicesDiscovered(BluetoothGatt gatt, int status) {
+            List<BluetoothGattService> gattServiceList = gatt.getServices();
 
+            //找出发送，接受的服务
+            for (BluetoothGattService gattService : gattServiceList) {
+
+                if (gattService.getUuid().toString().equalsIgnoreCase(UUID_SERVICE.toString())) {
+                    List<BluetoothGattCharacteristic> gattCharacteristicList = gattService.getCharacteristics();
+
+                    for (BluetoothGattCharacteristic gattCharacteristic : gattCharacteristicList) {
+
+                        if (gattCharacteristic.getUuid().toString().equalsIgnoreCase(UUID_SERVICE.toString())) {
+                            mCommunicationGattCharacteristic = gattCharacteristic;
+                            mBluetoothGatt.setCharacteristicNotification(mCommunicationGattCharacteristic, true);
+                        }
+                    }
+                }
+            }
         }
 
         //连接状态改变，status ：操作是否成功   newState：具体的状态
@@ -153,14 +210,21 @@ public class BLEManager implements IBluetoothManager, IUnityBluetoothAdapter {
         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
             if (status == BluetoothGatt.GATT_SUCCESS) {
 
-                if (newState == BluetoothProfile.STATE_CONNECTED) {
-                    mBluetoothGatt.discoverServices();
+                final Intent bluetoothStausChangedIntent = new Intent(ACTION_BLUETOOTH_STATE_CHANGED);
 
+                if (newState == BluetoothProfile.STATE_CONNECTED) {
+                    mDeviceCurrentStatus = BluetoothStatus.CONNECTED;
+                    mBluetoothGatt.discoverServices();
+                    SendRunable mSendThread = new SendRunable();
+                    mSendThreadHandler = mExecutorSerivicePool.submit(mSendThread);
                 } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                     mBluetoothGatt.close();
                     mBluetoothGatt = null;
-
+                    mDeviceCurrentStatus = BluetoothStatus.FREE;
+                    mSendThreadHandler.cancel(true);            //取消线程
                 }
+
+                _applicationContext.sendBroadcast(bluetoothStausChangedIntent);
             }
         }
 
@@ -192,13 +256,12 @@ public class BLEManager implements IBluetoothManager, IUnityBluetoothAdapter {
             }
         }
 
-
     };
 
     /**
      * 自定义的Receiver
      */
-    private final BroadcastReceiver _mGattUpdateReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver mBLEUpdateReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             String intentAction = intent.getAction();
@@ -212,6 +275,26 @@ public class BLEManager implements IBluetoothManager, IUnityBluetoothAdapter {
 
                 sendMessageToUnity(new Gson().toJson(messageToUnity));
             }
+            // 扫描结束
+            else if (intentAction.equals(ACTION_SCANNED_FINISH)) {
+                UnityMessageAdapter messageToUnity = new UnityMessageAdapter();
+                messageToUnity.mMessageID = UnityMessageDefine.SEARCHED_DEVICE_FINISH;
+                messageToUnity.mMessageBody = mSearchedRemoteDeviceMap.values().toArray();
+
+                Gson gson = new Gson();
+                String jsonMessageToUnity = gson.toJson(messageToUnity);
+                sendMessageToUnity(jsonMessageToUnity);
+            }
+            // 蓝牙状态改变
+            else if (intentAction.equals(ACTION_BLUETOOTH_STATE_CHANGED)) {
+                UnityMessageAdapter messageToUnity = new UnityMessageAdapter();
+                messageToUnity.mMessageID = UnityMessageDefine.BLUETOOTH_STATE_CHANGED;
+                messageToUnity.mMessageBody = mDeviceCurrentStatus.ordinal();
+
+                sendMessageToUnity(new Gson().toJson(messageToUnity));
+            }
+
+
         }
     };
 
@@ -226,14 +309,78 @@ public class BLEManager implements IBluetoothManager, IUnityBluetoothAdapter {
         mBluetoothGatt = null;
     }
 
-    @Override
-    public void searchDevices() {
+    private boolean mIsScaningDevice = false;
 
+    @Override
+    public void searchDevices(boolean isEnable) {
+        final BluetoothLeScanner scanner = mBluetoothAdapter.getBluetoothLeScanner();
+
+        if (isEnable) {
+            //子线程扫描
+            new Thread() {
+                @Override
+                public void run() {
+                    mSearchedRemoteDeviceMap.clear();
+                    mIsScaningDevice = true;
+                    ScanSettings.Builder builder = new ScanSettings.Builder();
+                    builder.setScanMode(ScanSettings.SCAN_MODE_BALANCED);
+                    scanner.startScan(mLeScanCallback);
+
+                    //阻塞住主线程
+                    try {
+                        Thread.sleep(SCAN_PERIOD);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+
+                    //SCAN_PERIOD 时间后关闭扫描
+                    mIsScaningDevice = false;
+                    scanner.stopScan(mLeScanCallback);
+                }
+            }.start();
+        } else {
+            mIsScaningDevice = false;
+            scanner.stopScan(mLeScanCallback);
+        }
     }
+
+    //Android 中大量使用 callback的写法
+    private ScanCallback mLeScanCallback = new ScanCallback() {
+        //扫到设备回调
+        @Override
+        public void onScanResult(int callbackType, ScanResult result) {
+
+
+        }
+
+        //扫到所有回调
+        @Override
+        public void onBatchScanResults(List<ScanResult> results) {
+            for (ScanResult scanResult : results) {
+                BluetoothDevice searchDevice = scanResult.getDevice();
+                BluetoothDeviceInfo searchDeviceInfo = new BluetoothDeviceInfo();
+                searchDeviceInfo.deviceAddress = searchDevice.getAddress();
+                searchDeviceInfo.deviceName = searchDevice.getName();
+                searchDeviceInfo.deviceBondState = searchDevice.getBondState();
+
+                mSearchedRemoteDeviceMap.put(searchDeviceInfo.deviceName, searchDeviceInfo);
+            }
+
+            Intent intent = new Intent(ACTION_SCANNED_FINISH);
+            _applicationContext.sendBroadcast(intent);
+        }
+
+        @Override
+        public void onScanFailed(int errorCode) {
+            log(UnityMessageDefine.SEND_ERROR, "scan error :" + errorCode);
+        }
+    };
 
     @Override
     public void sendData(byte[] bufferData) {
-
+        if (mDeviceCurrentStatus == BluetoothStatus.CONNECTED) {
+            mSendQueue.add(bufferData);
+        }
     }
 
     @Override
@@ -257,5 +404,43 @@ public class BLEManager implements IBluetoothManager, IUnityBluetoothAdapter {
         }
     }
 
+    /**
+     * 发送线程
+     */
+    private class SendRunable implements Runnable {
+
+        private boolean isRunning = true;
+
+        @Override
+        public void run() {
+            while (isRunning && mCommunicationGattCharacteristic != null) {
+//                try {
+                int messageCount = mSendQueue.size();
+                //合包发送
+                for (int i = 0; i < mSendQueue.size(); ++i) {
+                    byte[] messageBuffer = mSendQueue.poll();
+                    mCommunicationGattCharacteristic.setValue(messageBuffer);           //todo:超过20字节需要分包？
+                    mBluetoothGatt.writeCharacteristic(mCommunicationGattCharacteristic);
+
+//
+//                        _bluetoothSendStream.write(messageBuffer);
+//
+//                        if (messageBuffer[messageBuffer.length - 1] != '\n')
+//                            _bluetoothSendStream.write('\n');
+                }
+
+//                    if (messageCount > 0)
+//                        _bluetoothSendStream.flush();
+
+//                } catch (IOException e) {
+//                    log(UnityMessageDefine.SEND_ERROR, e.getMessage());
+//                }
+            }
+        }
+
+        public void killSend() {
+            this.isRunning = false;
+        }
+    }
 
 }

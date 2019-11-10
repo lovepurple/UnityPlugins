@@ -48,7 +48,7 @@ public interface IBluetoothManager {
     /**
      * 搜索设备
      */
-    void searchDevices();
+    void searchDevices(boolean isEnable);
 
     /**
      * 发送数据
