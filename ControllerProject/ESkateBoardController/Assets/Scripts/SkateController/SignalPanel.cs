@@ -11,6 +11,7 @@ public class SignalPanel : UIPanelLogicBase
 
     private Image[] m_imgBatteryList = new Image[6];
     private Text m_txtBattery;
+    private Toggle m_toggleDeviceType = null;
 
     public SignalPanel(RectTransform uiPanelRootTransfrom) : base(uiPanelRootTransfrom)
     {
@@ -28,7 +29,7 @@ public class SignalPanel : UIPanelLogicBase
         for (int i = 0; i <= 5; ++i)
             m_imgBatteryList[i] = m_panelRootObject.GetComponent<Image>($"battery_panel/battery_{0}");
 
-        
+        this.m_toggleDeviceType = m_panelRootObject.GetComponent<Toggle>("Toggle");
     }
 
     public override void OnEnter(params object[] onEnterParams)
@@ -37,7 +38,17 @@ public class SignalPanel : UIPanelLogicBase
         OnBluetoothDeviceStateChanged((int)BluetoothProxy.Intance.BluetoothState);
 
         MessageHandler.RegisterMessageHandler((int)MessageDefine.E_D2C_REMAINING_POWER, OnReceiveSkaterBatteryPowerHandler);
+
+        this.m_toggleDeviceType.isOn = BluetoothProxy.Intance.BluetoothDeviceType == BluetoothProxy.EBluetoothDeviceType.BLUETOOTH_LOW_ENERGY;
+        this.m_toggleDeviceType.onValueChanged.AddListener(OnBluetoothDeviceTypeChanged);
+
     }
+
+    private void OnBluetoothDeviceTypeChanged(bool val)
+    {
+        BluetoothProxy.Intance.BluetoothDeviceType = val ? BluetoothProxy.EBluetoothDeviceType.BLUETOOTH_LOW_ENERGY : BluetoothProxy.EBluetoothDeviceType.BLUETOOTH_CLASSIC;
+    }
+
 
     private void OnBluetoothDeviceStateChanged(int status)
     {
@@ -65,6 +76,8 @@ public class SignalPanel : UIPanelLogicBase
         BluetoothEvents.OnBluetoothDeviceStateChangedEvent -= OnBluetoothDeviceStateChanged;
         MessageHandler.UnRegisterMessageHandler((int)MessageDefine.E_D2C_REMAINING_POWER, OnReceiveSkaterBatteryPowerHandler);
         TimeModule.Instance.RemoveTimeaction(GetSkaterBatteryPower);
+
+        this.m_toggleDeviceType.onValueChanged.RemoveListener(OnBluetoothDeviceTypeChanged);
     }
 
     private void OnReceiveSkaterBatteryPowerHandler(object recvData)
@@ -78,7 +91,7 @@ public class SignalPanel : UIPanelLogicBase
     }
 
 
-    private void SetBatteryLevel(int  remainPowerPercentage)
+    private void SetBatteryLevel(int remainPowerPercentage)
     {
         //5¸ö¼¶±ð
         int batteryLevel = remainPowerPercentage / 20;

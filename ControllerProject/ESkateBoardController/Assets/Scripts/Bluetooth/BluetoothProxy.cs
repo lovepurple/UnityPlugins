@@ -11,15 +11,24 @@ public class BluetoothProxy
 
     private List<byte> m_lasttimeSendBufferList = null;
     private BluetoothStatus m_bluetoothStatus = BluetoothStatus.FREE;
+    private EBluetoothDeviceType m_bluetoothDeviceType;
 
-    private BluetoothProxy() { }
+    private BluetoothProxy()
+    {
+        //m_bluetoothDeviceType = (EBluetoothDeviceType)Enum.Parse(typeof(EBluetoothDeviceType), LocalStorage.GetSetting(LocalSetting.E_BLUETOOTH_DEVICE_TYPE));
+
+        GlobalEvents.OnBluetoothDeviceChanged += OnBluetoothDeviceTypeChangedCallback;
+    }
 
     public void InitializeBluetoothProxy()
     {
         switch (Application.platform)
         {
             case RuntimePlatform.Android:
-                m_device = new AndroidBluetoothClassicDevice();
+                if (BluetoothDeviceType == EBluetoothDeviceType.BLUETOOTH_CLASSIC)
+                    m_device = new AndroidBluetoothClassicDevice();
+                else
+                    m_device = new AndroidBLEDevice();
                 break;
             default:
                 throw new System.Exception($"Platform{Application.platform.ToString()} BluetoothDevice Not Implememt");
@@ -86,9 +95,30 @@ public class BluetoothProxy
         this.m_bluetoothStatus = (BluetoothStatus)bluetoothStatus;
     }
 
+    private void OnBluetoothDeviceTypeChangedCallback(EBluetoothDeviceType bluetoothDeviceType)
+    {
+
+    }
+
     public IBluetoothDevice BluetoothDevice => this.m_device;
 
     public BluetoothStatus BluetoothState => this.m_bluetoothStatus;
 
     public static BluetoothProxy Intance => m_instance ?? (m_instance = new BluetoothProxy());
+
+    public EBluetoothDeviceType BluetoothDeviceType
+    {
+        get => m_bluetoothDeviceType;
+        set => m_bluetoothDeviceType = value;
+    }
+
+    /// <summary>
+    /// 蓝牙设备类型
+    /// </summary>
+    public enum EBluetoothDeviceType
+    {
+        NONE,
+        BLUETOOTH_CLASSIC,
+        BLUETOOTH_LOW_ENERGY
+    }
 }

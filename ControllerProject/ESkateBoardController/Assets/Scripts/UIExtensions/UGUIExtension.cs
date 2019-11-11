@@ -38,6 +38,8 @@ public static class UGUIExtension
         }
     }
 
+
+
     public static void RemoveClickCallback(this MaskableGraphic graphicWithRayCast, VoidDelegate callback)
     {
         EventTriggerListener.Get(graphicWithRayCast.gameObject).onClick -= callback;
