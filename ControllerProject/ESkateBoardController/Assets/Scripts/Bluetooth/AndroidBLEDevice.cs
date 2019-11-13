@@ -11,6 +11,7 @@ using UnityEngine;
 public class AndroidBLEDevice : IBluetoothDevice
 {
     private AndroidJavaObject m_androidBridgeInstance = null;
+    private AndroidBluetoothMessageHandler m_internalBluetoothMessageHandler = null;
 
     public void ConnectToDevice(string remoteDeviceMacAddress)
     {
@@ -19,7 +20,7 @@ public class AndroidBLEDevice : IBluetoothDevice
 
     public void Disconnect()
     {
-        throw new System.NotImplementedException();
+        AndroidBridgeInstance.Call("disconnect");
     }
 
     public BluetoothStatus GetBluetoothDeviceStatus()
@@ -39,6 +40,7 @@ public class AndroidBLEDevice : IBluetoothDevice
 
     public void InitializeBluetoothDevice()
     {
+        m_internalBluetoothMessageHandler = new AndroidBluetoothMessageHandler();
 
     }
 
@@ -54,12 +56,14 @@ public class AndroidBLEDevice : IBluetoothDevice
 
     public void SendData(List<byte> sendBuffer)
     {
-        throw new System.NotImplementedException();
+        AndroidBridgeInstance.Call("sendData", sendBuffer.ToArray());
     }
 
     public void Tick()
     {
-        throw new System.NotImplementedException();
+        //主线程中处理消息
+        if (this.m_internalBluetoothMessageHandler != null)
+            this.m_internalBluetoothMessageHandler.Tick();
     }
 
     public AndroidJavaObject AndroidBridgeInstance

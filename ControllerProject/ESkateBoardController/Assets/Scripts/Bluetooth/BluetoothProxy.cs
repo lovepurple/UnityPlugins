@@ -13,10 +13,10 @@ public class BluetoothProxy
     private BluetoothStatus m_bluetoothStatus = BluetoothStatus.FREE;
     private EBluetoothDeviceType m_bluetoothDeviceType;
 
+    private SkateMessageHandler m_skateMessageHandler = null;
+
     private BluetoothProxy()
     {
-        //m_bluetoothDeviceType = (EBluetoothDeviceType)Enum.Parse(typeof(EBluetoothDeviceType), LocalStorage.GetSetting(LocalSetting.E_BLUETOOTH_DEVICE_TYPE));
-
         GlobalEvents.OnBluetoothDeviceChanged += OnBluetoothDeviceTypeChangedCallback;
     }
 
@@ -38,6 +38,11 @@ public class BluetoothProxy
         if (m_device != null)
         {
             m_device.InitializeBluetoothDevice();
+
+            if (m_skateMessageHandler != null)
+                m_skateMessageHandler.SetBluetoothDevice(m_device);
+            else
+                m_skateMessageHandler = new SkateMessageHandler(m_device);
 
             BluetoothEvents.OnBluetoothDeviceStateChangedEvent += OnBluetoothStateChangedCallback;
         }
@@ -97,6 +102,14 @@ public class BluetoothProxy
 
     private void OnBluetoothDeviceTypeChangedCallback(EBluetoothDeviceType bluetoothDeviceType)
     {
+        this.m_bluetoothDeviceType = bluetoothDeviceType;
+        if (this.m_device != null)
+        {
+            this.m_device.Disconnect();
+            this.m_device = null;
+
+            BluetoothEvents.OnBluetoothDeviceStateChangedEvent -= OnBluetoothStateChangedCallback;
+        }
 
     }
 

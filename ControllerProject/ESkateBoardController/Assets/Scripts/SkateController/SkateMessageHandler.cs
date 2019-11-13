@@ -26,6 +26,11 @@ public class SkateMessageHandler
         }
     }
 
+    public void SetBluetoothDevice(IBluetoothDevice bluetoothDevice)
+    {
+        this.m_bluetoothDevice = bluetoothDevice;
+    }
+
     public static List<byte> GetSkateMessage(MessageDefine messageName)
     {
         List<byte> messageBufferList = new List<byte>() { (byte)messageName };

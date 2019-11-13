@@ -11,7 +11,7 @@ public class BluetoothPanel : UIPanelLogicBase
     private const string Device_A = "98:D3:31:F5:8B:1A";
 
     private const string BLE_Device_COMPANY = "00:15:84:32:17:5A";      //BT101
-    private const string BLE_Device_HOME = "";
+    private const string BLE_Device_HOME = "11:15:85:00:4F:D3";         //BT20
 
     private MaskableGraphic m_btnConnectA;
     private MaskableGraphic m_btnConnectB;

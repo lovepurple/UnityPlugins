@@ -11,7 +11,7 @@ public class AndroidBluetoothClassicDevice : IBluetoothDevice
     //Android 输出的jar的BundleName
     private const string NATIVE_PLUGIN_BUNDLE_NAME = "com.lovepurple.btccontroller";
 
-    public const string ANDROID_STRING_CALLBACK_INTERFACE = "com.lovepurple.btccontroller.UnityStringCallback";
+    public const string ANDROID_STRING_CALLBACK_INTERFACE = "com.lovepurple.bluetoothcommom.UnityStringCallback";
     private const string ANDROID_BYTES_CALLBACK_INTERFACE = "com.lovepurple.btccontroller.UnityBufferCallback";
     private const string ANDROID_INT_CALLBACK_INTERFACE = "com.lovepurple.btccontroller.UnityIntCallback";
 

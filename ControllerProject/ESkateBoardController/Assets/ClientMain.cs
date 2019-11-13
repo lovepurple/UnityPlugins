@@ -7,8 +7,7 @@ public class ClientMain : MonoSingleton<ClientMain>
 
     private void Awake()
     {
-        BluetoothProxy.Intance.InitializeBluetoothProxy();
-        m_skateMessageHandler = new SkateMessageHandler(BluetoothProxy.Intance.BluetoothDevice);
+      
     }
 
     private void Start()
