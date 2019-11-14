@@ -5,6 +5,7 @@
 	
 	purpose:  Android 蓝牙4.0 设备
 *********************************************************************/
+using Newtonsoft.Json;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -25,7 +26,8 @@ public class AndroidBLEDevice : IBluetoothDevice
 
     public BluetoothStatus GetBluetoothDeviceStatus()
     {
-        throw new System.NotImplementedException();
+        BluetoothStatus bluetoothStatus = (BluetoothStatus)AndroidBridgeInstance.Call<int>("getCurrentBluetoothStatus");
+        return bluetoothStatus;
     }
 
     public string GetConnectedDeviceName()
@@ -35,12 +37,16 @@ public class AndroidBLEDevice : IBluetoothDevice
 
     public List<BluetoothDeviceInfo> GetPariedDevices()
     {
-        throw new System.NotImplementedException();
+        string bondDeviceList = AndroidBridgeInstance.Call<string>("getPariedDevices");
+        List<BluetoothDeviceInfo> result = JsonConvert.DeserializeObject<List<BluetoothDeviceInfo>>(bondDeviceList);
+
+        return result;
     }
 
     public void InitializeBluetoothDevice()
     {
         m_internalBluetoothMessageHandler = new AndroidBluetoothMessageHandler();
+        m_androidBridgeInstance.Call("initializeBluetoothForUnity", m_internalBluetoothMessageHandler);
 
     }
 
@@ -51,7 +57,7 @@ public class AndroidBLEDevice : IBluetoothDevice
 
     public void SearchDevices()
     {
-        throw new System.NotImplementedException();
+        AndroidBridgeInstance.Call("searchDevices", true);
     }
 
     public void SendData(List<byte> sendBuffer)
