@@ -53,7 +53,7 @@ public class BLEManager implements IBluetoothManager, IUnityBluetoothAdapter {
     public static UUID BLE_SHIELD_RX_UUID = UUID.fromString("713d0002-503e-4c75-ba94-3148f18d941e");
 
     public final static UUID UUID_SERVICE =
-            UUID.fromString("0000ffe0-0000-1000-8000-00805f9b34fb");
+            UUID.fromString("0000ffe1-0000-1000-8000-00805f9b34fb");
 
     // 自定义的Intent
     public final static String ACTION_RECEIVED_DATA = "ACTION_RECEIVED_DATA";
@@ -186,15 +186,20 @@ public class BLEManager implements IBluetoothManager, IUnityBluetoothAdapter {
         //发现服务
         @Override
         public void onServicesDiscovered(BluetoothGatt gatt, int status) {
+
+
             List<BluetoothGattService> gattServiceList = gatt.getServices();
 
             //找出发送，接受的服务
             for (BluetoothGattService gattService : gattServiceList) {
 
                 if (gattService.getUuid().toString().equalsIgnoreCase(UUID_SERVICE.toString())) {
+
                     List<BluetoothGattCharacteristic> gattCharacteristicList = gattService.getCharacteristics();
 
                     for (BluetoothGattCharacteristic gattCharacteristic : gattCharacteristicList) {
+
+                        Log.e(BLEManager.class.getName(),gattCharacteristic.getUuid().toString());
 
                         if (gattCharacteristic.getUuid().toString().equalsIgnoreCase(UUID_SERVICE.toString())) {
                             mCommunicationGattCharacteristic = gattCharacteristic;
@@ -414,8 +419,11 @@ public class BLEManager implements IBluetoothManager, IUnityBluetoothAdapter {
         @Override
         public void run() {
             while (isRunning && mCommunicationGattCharacteristic != null) {
+                Log.w( "1", "cao cao cao dddddd");
 //                try {
                 int messageCount = mSendQueue.size();
+
+                Log.w( "count ", String.valueOf( messageCount));
                 //合包发送
                 for (int i = 0; i < mSendQueue.size(); ++i) {
                     byte[] messageBuffer = mSendQueue.poll();
