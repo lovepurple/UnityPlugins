@@ -34,13 +34,14 @@ public class BluetoothPanel : UIPanelLogicBase
 
         m_btnBLE_1 = m_panelRootObject.GetComponent<MaskableGraphic>("ButtonGroup/Button_BLE_1");
         m_btnBLE_2 = m_panelRootObject.GetComponent<MaskableGraphic>("ButtonGroup/Button_BLE_2");
+
+        GlobalEvents.OnBluetoothDeviceChanged += OnBluetoothDeviceChangedHandler;
     }
 
     public override void OnEnter(params object[] onEnterParams)
     {
         base.OnEnter(onEnterParams);
 
-        GlobalEvents.OnBluetoothDeviceChanged += OnBluetoothDeviceChangedHandler;
 
         m_btnConnectA.AddClickCallback(OnBtnConnectAClick);
         m_btnDisconnect.AddClickCallback(OnBtnDisconnectClick);
@@ -50,22 +51,25 @@ public class BluetoothPanel : UIPanelLogicBase
 
     private void OnBtnConnectAClick(GameObject btn)
     {
+        BluetoothProxy.Intance.InitializeBluetoothProxy();
         BluetoothProxy.Intance.BluetoothDevice.ConnectToDevice(Device_A);
     }
 
     private void OnBtnBLE1ConnectClick(GameObject btn)
     {
+        BluetoothProxy.Intance.InitializeBluetoothProxy();
         BluetoothProxy.Intance.BluetoothDevice.ConnectToDevice(BLE_Device_COMPANY);
     }
 
     private void OnBtnBLE2ConnectClick(GameObject btn)
     {
+        BluetoothProxy.Intance.InitializeBluetoothProxy();
         BluetoothProxy.Intance.BluetoothDevice.ConnectToDevice(BLE_Device_HOME);
     }
 
     private void OnBluetoothDeviceChangedHandler(EBluetoothDeviceType bluetoothDeviceType)
     {
-        m_btnBLE_1.SetActive(bluetoothDeviceType == EBluetoothDeviceType.BLUETOOTH_CLASSIC);
+        m_btnConnectA.SetActive(bluetoothDeviceType == EBluetoothDeviceType.BLUETOOTH_CLASSIC);
         m_btnBLE_1.SetActive(bluetoothDeviceType == EBluetoothDeviceType.BLUETOOTH_LOW_ENERGY);
         m_btnBLE_2.SetActive(bluetoothDeviceType == EBluetoothDeviceType.BLUETOOTH_LOW_ENERGY);
     }
@@ -83,6 +87,5 @@ public class BluetoothPanel : UIPanelLogicBase
         m_btnBLE_1.RemoveClickCallback(OnBtnBLE1ConnectClick);
         m_btnBLE_2.RemoveClickCallback(OnBtnBLE2ConnectClick);
 
-        GlobalEvents.OnBluetoothDeviceChanged -= OnBluetoothDeviceChangedHandler;
     }
 }

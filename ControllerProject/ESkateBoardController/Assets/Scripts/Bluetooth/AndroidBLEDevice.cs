@@ -16,7 +16,7 @@ public class AndroidBLEDevice : IBluetoothDevice
 
     public void ConnectToDevice(string remoteDeviceMacAddress)
     {
-        AndroidBridgeInstance.Call("connectDevice", remoteDeviceMacAddress);
+        AndroidBridgeInstance.Call<bool>("connectDevice", remoteDeviceMacAddress);
     }
 
     public void Disconnect()
@@ -46,7 +46,7 @@ public class AndroidBLEDevice : IBluetoothDevice
     public void InitializeBluetoothDevice()
     {
         m_internalBluetoothMessageHandler = new AndroidBluetoothMessageHandler();
-        m_androidBridgeInstance.Call("initializeBluetoothForUnity", m_internalBluetoothMessageHandler);
+        AndroidBridgeInstance.Call("initializeBluetoothForUnity", m_internalBluetoothMessageHandler);
 
     }
 

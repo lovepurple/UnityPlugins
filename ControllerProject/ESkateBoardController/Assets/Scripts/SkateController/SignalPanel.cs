@@ -13,6 +13,7 @@ public class SignalPanel : UIPanelLogicBase
     private Text m_txtBattery;
     private Toggle m_toggleDeviceType = null;
 
+
     public SignalPanel(RectTransform uiPanelRootTransfrom) : base(uiPanelRootTransfrom)
     {
     }
@@ -46,7 +47,7 @@ public class SignalPanel : UIPanelLogicBase
 
     private void OnBluetoothDeviceTypeChanged(bool val)
     {
-        BluetoothProxy.Intance.BluetoothDeviceType = val ? BluetoothProxy.EBluetoothDeviceType.BLUETOOTH_LOW_ENERGY : BluetoothProxy.EBluetoothDeviceType.BLUETOOTH_CLASSIC;
+        GlobalEvents.OnBluetoothDeviceChanged.SafeInvoke(val ? BluetoothProxy.EBluetoothDeviceType.BLUETOOTH_LOW_ENERGY : BluetoothProxy.EBluetoothDeviceType.BLUETOOTH_CLASSIC);
     }
 
 

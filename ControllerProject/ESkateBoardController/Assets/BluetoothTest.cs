@@ -9,13 +9,15 @@ public class BluetoothTest : MonoBehaviour
 {
     private void OnGUI()
     {
-        if (GUILayout.Button("add "))
+        if (GUILayout.Button("Get PairDe ", GUILayout.Width(100), GUILayout.Height(80)))
         {
-            List<byte> list1 = new List<byte>() { 6, 48, 120 };
+            var va = BluetoothProxy.Intance.BluetoothDevice.GetPariedDevices();
+            Debug.Log(va);
+        }
 
-            List<byte> list2 = DigitUtility.GetFixedLengthBufferList(list1, 10, 48);
-
-            Debug.Log(list2);
+        if (GUILayout.Button("Search", GUILayout.Width(100), GUILayout.Height(80)))
+        {
+            BluetoothProxy.Intance.BluetoothDevice.SearchDevices();
         }
 
 
