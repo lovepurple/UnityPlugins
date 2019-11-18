@@ -9,4 +9,9 @@ public interface UnityStringCallback {
      * @param msg
      */
     void sendMessage(String msg);
+
+    interface UnityIntCallback {
+
+        void sendMessageInt(int val);
+    }
 }

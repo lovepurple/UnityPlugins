@@ -11,5 +11,12 @@ public interface IUnityBluetoothAdapter {
      * @param strMessage
      */
     void sendMessageToUnity(String strMessage);
+
+    /**
+     * Unity 字节流回调
+     */
+    interface UnityBufferCallback {
+        void sendMessageBuffer(byte[] messageBuffer);
+    }
 }
 

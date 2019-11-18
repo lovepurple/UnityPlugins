@@ -9,6 +9,11 @@ import android.content.Intent;
 import android.content.IntentFilter;
 
 import com.google.gson.Gson;
+import com.lovepurple.bluetoothcommom.BluetoothDeviceInfo;
+import com.lovepurple.bluetoothcommom.BluetoothStatus;
+import com.lovepurple.bluetoothcommom.UnityMessageAdapter;
+import com.lovepurple.bluetoothcommom.UnityMessageDefine;
+import com.lovepurple.bluetoothcommom.UnityStringCallback;
 
 import java.io.IOException;
 import java.io.InputStream;
