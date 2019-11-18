@@ -230,33 +230,33 @@ public class BLEManager implements IBluetoothManager, IUnityBluetoothAdapter {
             SendRunnable mSendThread = new SendRunnable();
             mSendThreadHandler = mExecutorSerivicePool.submit(mSendThread);
 
+
         }
 
         //连接状态改变，status ：操作是否成功   newState：具体的状态
         @Override
         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
-            if (status == BluetoothGatt.GATT_SUCCESS) {
 
-                final Intent bluetoothStausChangedIntent = new Intent(ACTION_BLUETOOTH_STATE_CHANGED);
+            final Intent bluetoothStausChangedIntent = new Intent(ACTION_BLUETOOTH_STATE_CHANGED);
 
-                if (newState == BluetoothProfile.STATE_CONNECTED) {
-                    mDeviceCurrentStatus = BluetoothStatus.CONNECTED;
-                    mBluetoothGatt.discoverServices();
+            if (newState == BluetoothProfile.STATE_CONNECTED) {
+                mDeviceCurrentStatus = BluetoothStatus.CONNECTED;
+                mBluetoothGatt.discoverServices();
 
-                } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
-                    mBluetoothGatt.close();
-                    mBluetoothGatt = null;
-                    mDeviceCurrentStatus = BluetoothStatus.FREE;
-                    mSendThreadHandler.cancel(true);            //取消线程
-                }
-
-                _applicationContext.sendBroadcast(bluetoothStausChangedIntent);
+            } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
+                mBluetoothGatt.close();
+                mBluetoothGatt = null;
+                mDeviceCurrentStatus = BluetoothStatus.FREE;
+                mSendThreadHandler.cancel(true);            //取消线程
             }
+
+            _applicationContext.sendBroadcast(bluetoothStausChangedIntent);
         }
 
         //接收到数据,status 都是指的是否成功
         @Override
-        public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
+        public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic
+                characteristic, int status) {
             if (status == BluetoothGatt.GATT_SUCCESS && characteristic.getUuid() == BLE_SHIELD_RX_UUID) {
                 byte[] recvData = characteristic.getValue();
 
@@ -268,19 +268,27 @@ public class BLEManager implements IBluetoothManager, IUnityBluetoothAdapter {
             }
         }
 
+        @Override
+        public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic
+                characteristic, int status) {
+            Log.d(TAG, "on write : status :" + String.valueOf(status) + "------------" + "characteristic " + characteristic.getUuid());
+        }
+
         //同上，没有status
         @Override
-        public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
-            if (characteristic.getUuid() == BLE_SHIELD_RX_UUID) {
-                byte[] recvData = characteristic.getValue();
-
-                //Intent 实现事件通知
-                Intent recvIntent = new Intent(ACTION_RECEIVED_DATA);
-                recvIntent.putExtra(RECEIVED_DATA_INTENT_KEY, recvData);
-
-                _applicationContext.sendBroadcast(recvIntent);      //发送相关Intent 的事件
-            }
+        public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic
+                characteristic) {
+//            if (characteristic.getUuid() == BLE_SHIELD_RX_UUID) {
+//                byte[] recvData = characteristic.getValue();
+//
+//                //Intent 实现事件通知
+//                Intent recvIntent = new Intent(ACTION_RECEIVED_DATA);
+//                recvIntent.putExtra(RECEIVED_DATA_INTENT_KEY, recvData);
+//
+//                _applicationContext.sendBroadcast(recvIntent);      //发送相关Intent 的事件
+//            }
         }
+
 
     };
 
@@ -407,8 +415,12 @@ public class BLEManager implements IBluetoothManager, IUnityBluetoothAdapter {
 
     @Override
     public void sendData(byte[] bufferData) {
+
         if (mDeviceCurrentStatus == BluetoothStatus.CONNECTED) {
-            mSendQueue.add(bufferData);
+            synchronized (this) {
+                mSendQueue.add(bufferData);
+                Log.e(TAG, "Current  count " + mSendQueue.size());
+            }
         }
     }
 
@@ -442,23 +454,34 @@ public class BLEManager implements IBluetoothManager, IUnityBluetoothAdapter {
 
         @Override
         public void run() {
-            while (isRunning && mTxCharacteristic != null) {
-//                try {
-                int messageCount = mSendQueue.size();
-                Log.e(TAG, String.valueOf(messageCount));
 
+            while (isRunning && mTxCharacteristic != null) {
+                int messageCount = mSendQueue.size();
+
+                synchronized (this) {
+                    while (mSendQueue.size() > 0) {
+                        byte[] sendBuffer = mSendQueue.poll();
+                        boolean isSetVal = mTxCharacteristic.setValue(sendBuffer);
+                        boolean isSuccessed = mBluetoothGatt.writeCharacteristic(mTxCharacteristic);
+                        Log.e(TAG, "eeeeeeeeeeeeeeeee :" + isSuccessed);
+
+                    }
+
+                }
+
+                /*
                 //合包发送
                 for (int i = 0; i < mSendQueue.size(); ++i) {
                     byte[] messageBuffer = mSendQueue.poll();
                     mTxCharacteristic.setValue(messageBuffer);           //todo:超过20字节需要分包？
                     mBluetoothGatt.writeCharacteristic(mTxCharacteristic);
-
+*/
 //
 //                        _bluetoothSendStream.write(messageBuffer);
 //
 //                        if (messageBuffer[messageBuffer.length - 1] != '\n')
 //                            _bluetoothSendStream.write('\n');
-                }
+//            }
 
 //                    if (messageCount > 0)
 //                        _bluetoothSendStream.flush();

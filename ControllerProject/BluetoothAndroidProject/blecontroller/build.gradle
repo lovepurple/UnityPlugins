@@ -3,7 +3,6 @@ apply plugin: 'com.android.library'
 android {
     compileSdkVersion 29
     buildToolsVersion "29.0.2"
-    compileOptions.encoding = 'UTF-8'
 
 
     defaultConfig {
@@ -29,4 +28,8 @@ dependencies {
     implementation project(path: ':bluetoothcommom')
     compileOnly files('libs/classes.jar')
     implementation files('libs/gson-2.8.5.jar')
+}
+
+tasks.withType(JavaCompile){
+    options.encoding = "UTF-8"
 }

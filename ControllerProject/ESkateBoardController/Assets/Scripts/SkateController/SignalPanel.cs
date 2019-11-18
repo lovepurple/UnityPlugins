@@ -13,7 +13,6 @@ public class SignalPanel : UIPanelLogicBase
     private Text m_txtBattery;
     private Toggle m_toggleDeviceType = null;
 
-
     public SignalPanel(RectTransform uiPanelRootTransfrom) : base(uiPanelRootTransfrom)
     {
     }
@@ -42,14 +41,12 @@ public class SignalPanel : UIPanelLogicBase
 
         this.m_toggleDeviceType.isOn = BluetoothProxy.Intance.BluetoothDeviceType == BluetoothProxy.EBluetoothDeviceType.BLUETOOTH_LOW_ENERGY;
         this.m_toggleDeviceType.onValueChanged.AddListener(OnBluetoothDeviceTypeChanged);
-
     }
 
     private void OnBluetoothDeviceTypeChanged(bool val)
     {
         GlobalEvents.OnBluetoothDeviceChanged.SafeInvoke(val ? BluetoothProxy.EBluetoothDeviceType.BLUETOOTH_LOW_ENERGY : BluetoothProxy.EBluetoothDeviceType.BLUETOOTH_CLASSIC);
     }
-
 
     private void OnBluetoothDeviceStateChanged(int status)
     {
@@ -71,7 +68,6 @@ public class SignalPanel : UIPanelLogicBase
         BluetoothProxy.Intance.SendData(msgBuffer);
     }
 
-
     public override void OnExit()
     {
         BluetoothEvents.OnBluetoothDeviceStateChangedEvent -= OnBluetoothDeviceStateChanged;
@@ -91,7 +87,6 @@ public class SignalPanel : UIPanelLogicBase
         SetBatteryLevel(percentageRemainPower);
     }
 
-
     private void SetBatteryLevel(int remainPowerPercentage)
     {
         //5¸ö¼¶±ð
@@ -102,5 +97,4 @@ public class SignalPanel : UIPanelLogicBase
 
         this.m_txtBattery.text = $"{remainPowerPercentage}%";
     }
-
 }
