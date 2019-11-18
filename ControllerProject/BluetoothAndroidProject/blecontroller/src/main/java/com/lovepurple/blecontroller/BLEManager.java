@@ -5,7 +5,6 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCallback;
 import android.bluetooth.BluetoothGattCharacteristic;
-import android.bluetooth.BluetoothGattServer;
 import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothProfile;
@@ -30,7 +29,6 @@ import com.lovepurple.bluetoothcommom.UnityMessageAdapter;
 import com.lovepurple.bluetoothcommom.UnityMessageDefine;
 import com.lovepurple.bluetoothcommom.UnityStringCallback;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -48,12 +46,27 @@ import java.util.concurrent.LinkedTransferQueue;
 public class BLEManager implements IBluetoothManager, IUnityBluetoothAdapter {
     private static BLEManager _instance;
 
-    //接、收的 UUID
-    public static UUID BLE_SHIELD_TX_UUID = UUID.fromString("713d0003-503e-4c75-ba94-3148f18d941e");
-    public static UUID BLE_SHIELD_RX_UUID = UUID.fromString("713d0002-503e-4c75-ba94-3148f18d941e");
+    private static String TAG = BLEManager.class.getName();
 
+    //接、收的 Characteristic  UUID
+    //不同的设备 可能不相同  BT16 BT20 都是这个
+    public static UUID BLE_SHIELD_TX_UUID = UUID.fromString("0000ffe1-0000-1000-8000-00805f9b34fb");
+    public static UUID BLE_SHIELD_RX_UUID = UUID.fromString("0000ffe2-0000-1000-8000-00805f9b34fb");
+
+    //服务UUID
     public final static UUID UUID_SERVICE =
-            UUID.fromString("0000ffe1-0000-1000-8000-00805f9b34fb");
+            UUID.fromString("0000ffe0-0000-1000-8000-00805f9b34fb");
+
+   /*
+        另一组常用的uuid
+   mServiceUuidtry1 = "0000ffe0-0000-1000-8000-00805f9b34fb";
+    mRxUuidtry1 = "0000ffe2-0000-1000-8000-00805f9b34fb";
+    mTxUuidtry1 = "0000ffe1-0000-1000-8000-00805f9b34fb";
+    mServiceUuidtry2 = "6e400001-b5a3-f393-e0a9-e50e24dcca9e";
+    mRxUuidtry2 = "6e400002-b5a3-f393-e0a9-e50e24dcca9e";
+    mTxUuidtry2 = "6e400003-b5a3-f393-e0a9-e50e24dcca9e";
+
+    */
 
     // 自定义的Intent
     public final static String ACTION_RECEIVED_DATA = "ACTION_RECEIVED_DATA";
@@ -87,8 +100,9 @@ public class BLEManager implements IBluetoothManager, IUnityBluetoothAdapter {
     //发送线程的线程池句柄
     private Future mSendThreadHandler = null;
 
-    //接收，发送的服务
-    private BluetoothGattCharacteristic mCommunicationGattCharacteristic;
+    //接收，发送的服务 ，有时不用区分，可以通过一个同时收发
+    private BluetoothGattCharacteristic mTxCharacteristic;
+    private BluetoothGattCharacteristic mRxCharacteristic;
 
     private BLEManager(Context context) {
         this._applicationContext = context;
@@ -187,27 +201,35 @@ public class BLEManager implements IBluetoothManager, IUnityBluetoothAdapter {
         @Override
         public void onServicesDiscovered(BluetoothGatt gatt, int status) {
 
-
-            List<BluetoothGattService> gattServiceList = gatt.getServices();
-
-            //找出发送，接受的服务
-            for (BluetoothGattService gattService : gattServiceList) {
-
-                if (gattService.getUuid().toString().equalsIgnoreCase(UUID_SERVICE.toString())) {
-
-                    List<BluetoothGattCharacteristic> gattCharacteristicList = gattService.getCharacteristics();
-
-                    for (BluetoothGattCharacteristic gattCharacteristic : gattCharacteristicList) {
-
-                        Log.e(BLEManager.class.getName(),gattCharacteristic.getUuid().toString());
-
-                        if (gattCharacteristic.getUuid().toString().equalsIgnoreCase(UUID_SERVICE.toString())) {
-                            mCommunicationGattCharacteristic = gattCharacteristic;
-                            mBluetoothGatt.setCharacteristicNotification(mCommunicationGattCharacteristic, true);
-                        }
-                    }
-                }
+            if (status != BluetoothGatt.GATT_SUCCESS) {
+                Log.e(TAG, "Serivces discovery failed :" + status);
+                return;
             }
+
+            //获取通讯的服务
+            //todo : 后期尝试能不能不通过指定的UUID获取（不同类型的设备有可能不同）
+            BluetoothGattService service = gatt.getService(UUID_SERVICE);
+
+            mTxCharacteristic = service.getCharacteristic(BLE_SHIELD_TX_UUID);
+            if (mTxCharacteristic == null) {
+                Log.e(TAG, "send charactristic can't find");
+                return;
+            }
+
+            mRxCharacteristic = service.getCharacteristic(BLE_SHIELD_RX_UUID);
+            if (mTxCharacteristic == null) {
+                Log.e(TAG, "receive charactristic can't find");
+                return;
+            }
+
+            gatt.setCharacteristicNotification(mTxCharacteristic, true);
+            gatt.setCharacteristicNotification(mRxCharacteristic, true);
+            gatt.readCharacteristic(mRxCharacteristic);
+
+
+            SendRunnable mSendThread = new SendRunnable();
+            mSendThreadHandler = mExecutorSerivicePool.submit(mSendThread);
+
         }
 
         //连接状态改变，status ：操作是否成功   newState：具体的状态
@@ -220,8 +242,7 @@ public class BLEManager implements IBluetoothManager, IUnityBluetoothAdapter {
                 if (newState == BluetoothProfile.STATE_CONNECTED) {
                     mDeviceCurrentStatus = BluetoothStatus.CONNECTED;
                     mBluetoothGatt.discoverServices();
-                    SendRunable mSendThread = new SendRunable();
-                    mSendThreadHandler = mExecutorSerivicePool.submit(mSendThread);
+
                 } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                     mBluetoothGatt.close();
                     mBluetoothGatt = null;
@@ -312,6 +333,9 @@ public class BLEManager implements IBluetoothManager, IUnityBluetoothAdapter {
         mBluetoothGatt.disconnect();
         mBluetoothGatt.close();
         mBluetoothGatt = null;
+        mRxCharacteristic = null;
+        mTxCharacteristic = null;
+        mSendThreadHandler.cancel(true);
     }
 
     private boolean mIsScaningDevice = false;
@@ -412,23 +436,22 @@ public class BLEManager implements IBluetoothManager, IUnityBluetoothAdapter {
     /**
      * 发送线程
      */
-    private class SendRunable implements Runnable {
+    private class SendRunnable implements Runnable {
 
         private boolean isRunning = true;
 
         @Override
         public void run() {
-            while (isRunning && mCommunicationGattCharacteristic != null) {
-                Log.w( "1", "cao cao cao dddddd");
+            while (isRunning && mTxCharacteristic != null) {
 //                try {
                 int messageCount = mSendQueue.size();
+                Log.e(TAG, String.valueOf(messageCount));
 
-                Log.w( "count ", String.valueOf( messageCount));
                 //合包发送
                 for (int i = 0; i < mSendQueue.size(); ++i) {
                     byte[] messageBuffer = mSendQueue.poll();
-                    mCommunicationGattCharacteristic.setValue(messageBuffer);           //todo:超过20字节需要分包？
-                    mBluetoothGatt.writeCharacteristic(mCommunicationGattCharacteristic);
+                    mTxCharacteristic.setValue(messageBuffer);           //todo:超过20字节需要分包？
+                    mBluetoothGatt.writeCharacteristic(mTxCharacteristic);
 
 //
 //                        _bluetoothSendStream.write(messageBuffer);
