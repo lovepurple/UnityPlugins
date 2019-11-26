@@ -17,6 +17,7 @@ class SpeedMonitorClass
  protected:
 
 private:
+	
 	NewPing* m_pSonar;
 
  public:
