@@ -12,8 +12,8 @@ float SystemControllerClass::GetBatteryVolt()
 
 void SystemControllerClass::init()
 {
-
-
+	m_pSonar = new NewPing(SONAR_TRIG_PIN, SONAR_ECHO_PIN, 500);
+	
 }
 
 

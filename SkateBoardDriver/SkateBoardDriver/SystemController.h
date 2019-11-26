@@ -11,6 +11,7 @@
 #include "DynamicBuffer.h"
 #include "MessageDefine.h"
 #include "GlobalDefine.h"
+#include "NewPing.h"
 
 /**
  *ÏµÍ³¿ØÖÆ
@@ -18,7 +19,8 @@
 class SystemControllerClass
 {
 protected:
-
+private:
+	NewPing* m_pSonar;
 
 public:
 	void init();

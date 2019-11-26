@@ -20,6 +20,10 @@
 #define GEAR_COUNT 5                    //速度档数量
 #define BATTERY_SENSOR_PIN A2			//电量测量PIN
 
+//测距模块占用引脚
+#define SONAR_TRIG_PIN 13
+#define SONAR_ECHO_PIN 12		
+
 //声明另一个类，include 或有循环include的问题
 class MessageHandler;
 
