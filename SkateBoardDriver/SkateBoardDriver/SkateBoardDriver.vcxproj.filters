@@ -45,6 +45,12 @@
     <ClInclude Include="SystemController.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="DriverMonitor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SpeedMonitor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DynamicBuffer.cpp">
@@ -63,6 +69,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="SystemController.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DriverMonitor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SpeedMonitor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

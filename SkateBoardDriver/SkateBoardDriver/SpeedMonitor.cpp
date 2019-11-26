@@ -11,6 +11,7 @@ void SpeedMonitorClass::init()
 
 void SpeedMonitorClass::Tick()
 {
+
 }
 
 
