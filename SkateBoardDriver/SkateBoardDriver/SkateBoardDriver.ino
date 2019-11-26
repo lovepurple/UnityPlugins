@@ -4,6 +4,8 @@
  Author:	purple
 */
 
+#include "SpeedMonitor.h"
+#include "DriverMonitor.h"
 #include "DynamicBuffer.h"
 #include "MessageHandler.h"
 
@@ -15,9 +17,12 @@ void setup()
 	{
 
 	}
+	DriverMonitor.init();
 }
 
 void loop() {
+
+	DriverMonitor.Tick();
 
 	MessageHandler.Tick();
 }
