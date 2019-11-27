@@ -20,17 +20,16 @@ private:
 	const unsigned int MAGNET_COUT = 2;
 
 	//每两个信号之前的Delta最小值
-	const unsigned int SIGNAL_DELTA_TIME = 30;
+	const unsigned int SIGNAL_DELTA_TIME = 10;
 
 	bool isEnableMonitor = false;
-	
 
-protected:
-
+	//刷新传感器状态
+	bool IsSensorValidState();
 
 public:
 	//每秒信号数量
-	int SignalCountPerSecond;
+	unsigned	int SignalCountPerSecond;
 
 	//电机每秒转数
 	int GetMotorRoundPerSecond();
@@ -40,6 +39,7 @@ public:
 	void Tick();
 
 	void EnableHallSensorMonitor(bool isEnable);
+
 };
 
 extern SpeedMonitorClass SpeedMonitor;
