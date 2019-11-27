@@ -28,7 +28,7 @@ bool SpeedMonitorClass::IsSensorValidState()
 
 int SpeedMonitorClass::GetMotorRoundPerSecond()
 {
-	return SignalCountPerSecond / MAGNET_COUT;
+	return SignalCountPerSecond / MAGNET_COUNT;
 }
 
 void SpeedMonitorClass::Init()
@@ -46,6 +46,12 @@ void SpeedMonitorClass::Tick()
 			this->SignalCountPerSecond = tempSignalCount;
 			tempSignalCount = 0;
 			lastPeriodBeginTime = millis();
+#ifdef DEBUG_MODE
+			Serial.print("Motor Speed:");
+			Serial.print(GetMotorRoundPerSecond());
+			Serial.println(" RPM")
+#endif 
+
 		}
 	}
 }

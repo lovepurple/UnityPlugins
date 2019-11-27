@@ -17,7 +17,7 @@ class SpeedMonitorClass
 {
 private:
 	//电机一圈磁铁数量
-	const unsigned int MAGNET_COUT = 2;
+	const unsigned int MAGNET_COUNT = 2;
 
 	//每两个信号之前的Delta最小值
 	const unsigned int SIGNAL_DELTA_TIME = 10;
