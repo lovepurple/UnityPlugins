@@ -4,7 +4,6 @@
  Author:	purple
 */
 
-#include "SpeedMonitor.h"
 #include "DriverMonitor.h"
 #include "DynamicBuffer.h"
 #include "MessageHandler.h"

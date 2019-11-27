@@ -6,12 +6,15 @@
 
 void DriverMonitorClass::init()
 {
-	SpeedMonitor.init();
+	VisibilityMonitor.init();
 
+	SpeedMonitor.Init();
 }
 
 void DriverMonitorClass::Tick()
 {
+	VisibilityMonitor.Tick();
+
 	SpeedMonitor.Tick();
 }
 

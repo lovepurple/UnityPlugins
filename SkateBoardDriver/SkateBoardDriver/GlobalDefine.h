@@ -3,12 +3,12 @@
  */
 
 //蓝牙模块引脚
-#define BLUETOOTH_RX 3
-#define BLUETOOTH_TX 4
+#define BLUETOOTH_RX_PIN 3
+#define BLUETOOTH_TX_PIN 4
 #define BLUETOOTH_BAUD 9600
 
 //电调控制引脚（使用TimerOne）
-#define ESC_A 9
+#define ESC_A_PIN 9
 #define ESC_B 10
 #define ESC_POWER_PIN 2
 #define ESC_POWN_DRIVE_MODE LOW
@@ -23,6 +23,12 @@
 //测距模块占用引脚
 #define SONAR_TRIG_PIN 13
 #define SONAR_ECHO_PIN 12		
+
+//霍尔传感器测速数字引脚
+#define HALL_SENSOR_PIN 8
+
+//Debug模式,使用Serial模拟协议
+#define DEBUG_MODE
 
 //声明另一个类，include 或有循环include的问题
 class MessageHandler;

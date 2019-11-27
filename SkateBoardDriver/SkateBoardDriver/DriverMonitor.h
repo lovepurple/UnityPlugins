@@ -9,6 +9,7 @@
 #include "WProgram.h"
 #endif
 
+#include "VisibilityMonitor.h"
 #include "SpeedMonitor.h"
 
 class DriverMonitorClass

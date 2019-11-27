@@ -4,14 +4,29 @@
 
 #include "SpeedMonitor.h"
 
-void SpeedMonitorClass::init()
+int SpeedMonitorClass::GetMotorRoundPerSecond()
 {
-	m_pSonar = &NewPing(11, 13, 500);
+	return SignalCountPerSecond / MAGNET_COUT;
+}
+
+void SpeedMonitorClass::Init()
+{
+	pinMode(HALL_SENSOR_PIN, INPUT);
+
 }
 
 void SpeedMonitorClass::Tick()
 {
 
+}
+
+unsigned long LastSignalTime;
+
+void SpeedMonitorClass::EnableHallSensorMonitor(bool isEnable)
+{
+	this->isEnableMonitor = isEnable;
+	if (isEnable)
+		LastSignalTime = millis();
 }
 
 

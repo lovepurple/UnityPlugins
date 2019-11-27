@@ -94,7 +94,7 @@ void MotorControllerClass::SetSpeedByDuty(float pwmDuty)
 		duty = MOTOR_MIN_DUTY;
 
 	this->m_currentMotorDuty = duty;
-	Timer1.pwm(ESC_A, duty * 1023);
+	Timer1.pwm(ESC_A_PIN, duty * 1023);
 }
 
 char* MotorControllerClass::Handle_GetCurrentSpeedMessage()
