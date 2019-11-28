@@ -18,6 +18,12 @@ void VisibilityMonitorClass::Tick()
 	{
 		this->SonarDistance = m_pSonar->ping_cm();
 		ulSonarStartTime = millis();
+#ifdef DEBUG_MODE
+		Serial.print("Sonar Distance:");
+		Serial.print(this->SonarDistance);
+		Serial.println("cm");
+#endif // DEBUG_MODE
+
 	}
 }
 
