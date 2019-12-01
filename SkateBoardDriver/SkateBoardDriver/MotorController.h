@@ -68,6 +68,9 @@ public:
 	 */
 	int ConvertPWMToGear(float pwmDuty);
 
+	//刹车
+	void Break();
+
 	/**************消息处理************************/
 	//todo:之后用(void*)
 	//处理获取当前速度消息
