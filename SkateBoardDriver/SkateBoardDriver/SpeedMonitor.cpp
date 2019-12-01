@@ -31,6 +31,11 @@ int SpeedMonitorClass::GetMotorRoundPerSecond()
 	return SignalCountPerSecond / MAGNET_COUNT;
 }
 
+float SpeedMonitorClass::GetCurrentSpeedKilometerPerHour()
+{
+	return 0.0f;
+}
+
 void SpeedMonitorClass::Init()
 {
 	pinMode(HALL_SENSOR_PIN, INPUT);

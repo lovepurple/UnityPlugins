@@ -63,8 +63,11 @@ void MotorControllerClass::MotorMinPower()
 
 void MotorControllerClass::MotorMaxPower()
 {
-	SetMotorPower(1);
-	this->m_hasChangedPower = true;
+	if (SpeedMonitor.GetMotorRoundPerSecond() < 1.0f)
+	{
+		SetMotorPower(1);
+		this->m_hasChangedPower = true;
+	}
 }
 
 bool MotorControllerClass::SetMotorPower(const float percentage01)
@@ -95,6 +98,13 @@ void MotorControllerClass::SetSpeedByDuty(float pwmDuty)
 
 	this->m_currentMotorDuty = duty;
 	Timer1.pwm(ESC_A_PIN, duty * 1023);
+}
+
+float MotorControllerClass::ConvertGearToPWMDuty(unsigned int gearID)
+{
+	float gearIncreasePWM = gearID * PWMDUTY_PER_GEAR;
+
+	return MOTOR_MIN_DUTY + gearIncreasePWM;
 }
 
 char* MotorControllerClass::Handle_GetCurrentSpeedMessage()

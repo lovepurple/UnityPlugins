@@ -13,6 +13,7 @@
 #include "Utility.h"
 #include "MessageDefine.h"
 #include "MessageHandler.h"
+#include "SpeedMonitor.h"
 
 
 class MotorControllerClass
@@ -40,6 +41,9 @@ public:
 
 	void MotorMinPower();
 
+	/**
+	 * 设置最大油门（只有在设置电调时生效）
+	 */
 	void MotorMaxPower();
 
 	//使用百分比设置速度
@@ -50,6 +54,19 @@ public:
 
 	//使用占空比设置速度
 	void SetSpeedByDuty(float pwmDuty);
+
+	//使用档位设置速度
+	void SetSpeedByGear(unsigned int gearID);
+
+	/**
+	 * 转换档位数到PWM
+	 */
+	float ConvertGearToPWMDuty(unsigned int gearID);
+
+	/**
+	 * 转换当PWM到档数位
+	 */
+	int ConvertPWMToGear(float pwmDuty);
 
 	/**************消息处理************************/
 	//todo:之后用(void*)
