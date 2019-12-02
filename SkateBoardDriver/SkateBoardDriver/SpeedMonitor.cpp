@@ -9,6 +9,8 @@ int lastSensorState = 0;
 unsigned long lastPeriodBeginTime = 0;
 
 unsigned int tempSignalCount = 0;
+unsigned long lastSensorSignalTime;
+
 
 bool SpeedMonitorClass::IsSensorValidState()
 {
@@ -33,7 +35,17 @@ int SpeedMonitorClass::GetMotorRoundPerSecond()
 
 float SpeedMonitorClass::GetCurrentSpeedKilometerPerHour()
 {
-	return 0.0f;
+	int roundPerHour = GetMotorRoundPerSecond() * 3600;
+
+	float wheelRoundPerHour = roundPerHour * SYNC_GEAR_RATIO;
+
+	float wheelPassMetersPerHour = wheelRoundPerHour * WHEEL_METER_PER_ROUND;
+
+	float kmPerHour = wheelPassMetersPerHour * 0.001;
+
+	this->m_kilometersPerHour = kmPerHour;
+
+	return kmPerHour;
 }
 
 void SpeedMonitorClass::Init()
@@ -54,7 +66,7 @@ void SpeedMonitorClass::Tick()
 #ifdef DEBUG_MODE
 			Serial.print("Motor Speed:");
 			Serial.print(GetMotorRoundPerSecond());
-			Serial.println(" RPM")
+			Serial.println(" RPM");
 #endif 
 
 		}
@@ -62,7 +74,6 @@ void SpeedMonitorClass::Tick()
 }
 
 
-unsigned long lastSensorSignalTime;
 
 void SpeedMonitorClass::EnableHallSensorMonitor(bool isEnable)
 {
@@ -72,6 +83,16 @@ void SpeedMonitorClass::EnableHallSensorMonitor(bool isEnable)
 		lastSensorSignalTime = millis();
 		lastPeriodBeginTime = millis();
 	}
+}
+
+int SpeedMonitorClass::ConvertKilometerPerHourToRPS(float kilometerPerHour)
+{
+	float meterPerSecond = kilometerPerHour * 0.2778f;
+	float wheelRoundPerSecond = meterPerSecond / WHEEL_METER_PER_ROUND;
+
+	int motorRoundPerSecond = (int)(wheelRoundPerSecond / SYNC_GEAR_RATIO);
+
+	return motorRoundPerSecond;
 }
 
 

@@ -24,6 +24,8 @@ private:
 
 	void InitializePWM();
 
+	static float m_GearToPWM[5];
+
 public:
 	void init();
 

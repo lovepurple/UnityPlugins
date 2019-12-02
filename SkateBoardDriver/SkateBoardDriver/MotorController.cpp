@@ -100,11 +100,38 @@ void MotorControllerClass::SetSpeedByDuty(float pwmDuty)
 	Timer1.pwm(ESC_A_PIN, duty * 1023);
 }
 
+void MotorControllerClass::SetSpeedByGear(unsigned int gearID)
+{
+	if (gearID >= GEAR_COUNT)
+		gearID = GEAR_COUNT - 1;
+
+	int currentGear = ConvertPWMToGear(this->m_currentMotorDuty);
+
+	//²»ÄÜÌøµµ
+	if (gearID - currentGear > 1)
+		return;
+
+	SetSpeedByDuty(m_GearToPWM[gearID]);
+}
+
+
 float MotorControllerClass::ConvertGearToPWMDuty(unsigned int gearID)
 {
-	float gearIncreasePWM = gearID * PWMDUTY_PER_GEAR;
+	if (gearID > GEAR_COUNT)
+		return m_GearToPWM[GEAR_COUNT - 1];
 
-	return MOTOR_MIN_DUTY + gearIncreasePWM;
+	return m_GearToPWM[gearID];
+}
+
+int MotorControllerClass::ConvertPWMToGear(float pwmDuty)
+{
+	for (int i = 0; i < 5; ++i)
+	{
+		if (pwmDuty <= m_GearToPWM[i])
+			return i;
+	}
+
+	return GEAR_COUNT;
 }
 
 char* MotorControllerClass::Handle_GetCurrentSpeedMessage()
@@ -139,6 +166,8 @@ void MotorControllerClass::Handle_SetPercentageSpeedMessage(Message& message)
 	int speedThousand = atoi(pSpeedBuffer);
 	this->m_hasChangedPower = this->SetMotorPower(speedThousand / 999.0f);
 }
+
+float MotorControllerClass::m_GearToPWM[5] = { 0.05f,0.055f,0.06f,0.065f,0.07f };
 
 
 MotorControllerClass MotorController;
