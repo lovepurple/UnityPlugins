@@ -27,11 +27,12 @@ private:
 	//刷新传感器状态
 	bool IsSensorValidState();
 
+	float m_kilometersPerHour;
+
+
 public:
 	//每秒信号数量
 	unsigned	int SignalCountPerSecond;
-
-	float KilometersPerHour;
 
 	//电机每秒转数
 	int GetMotorRoundPerSecond();
@@ -44,6 +45,11 @@ public:
 	void Tick();
 
 	void EnableHallSensorMonitor(bool isEnable);
+
+	/**
+	 * 转换km/h到实际电机转数
+	 */
+	static int ConvertKilometerPerHourToRPS(float kilometerPerHour);
 
 };
 

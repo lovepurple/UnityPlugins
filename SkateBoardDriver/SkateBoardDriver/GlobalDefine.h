@@ -2,7 +2,7 @@
  * 全局宏定义
  */
 
-//蓝牙模块引脚
+ //蓝牙模块引脚
 #define BLUETOOTH_RX_PIN 3
 #define BLUETOOTH_TX_PIN 4
 #define BLUETOOTH_BAUD 9600
@@ -18,8 +18,9 @@
 #define MOTOR_MIN_DUTY 0.05             //电机最小速度的占空比
 #define MOTOR_MAX_DUTY 0.1              //电机最大速度的占空比
 #define GEAR_COUNT 5                    //速度档数量
-#define PWMDUTY_PER_GEAR 0.005f				//每档增加的PWM
 
+#define SYNC_GEAR_RATIO 11.0f/36.0f		//todo :同步轮的比例 需要确定小齿与大齿的比值
+#define WHEEL_METER_PER_ROUND 0.2608	//轮子一圈周长
 
 #define BATTERY_SENSOR_PIN A6 			//电量测量PIN
 
@@ -37,4 +38,4 @@
 class MessageHandler;
 
 //需要加上域
-typedef void (MessageHandler::*SendMessageDelegate)(byte*);         
+typedef void (MessageHandler::* SendMessageDelegate)(byte*);
