@@ -4,7 +4,7 @@
 
  //蓝牙模块引脚
 #define BLUETOOTH_RX_PIN 3
-#define BLUETOOTH_TX_PIN 4
+#define BLUETOOTH_TX_PIN 5
 #define BLUETOOTH_BAUD 9600
 
 //电调控制引脚（使用TimerOne）

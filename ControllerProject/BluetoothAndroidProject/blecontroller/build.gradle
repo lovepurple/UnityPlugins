@@ -27,7 +27,7 @@ android {
 dependencies {
     implementation project(path: ':bluetoothcommom')
     compileOnly files('libs/classes.jar')
-    implementation files('libs/gson-2.8.5.jar')
+    compileOnly files('libs/gson-2.8.5.jar')
 }
 
 tasks.withType(JavaCompile){

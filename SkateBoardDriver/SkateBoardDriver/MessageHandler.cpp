@@ -2,11 +2,10 @@
 
 MessageHandlerClass::MessageHandlerClass()
 {
-#ifndef DEBUG_MODE
 	MessageHandler.m_pBluetooth = new NeoSWSerial(BLUETOOTH_RX, BLUETOOTH_TX);
 	MessageHandler.m_pBluetooth->begin(BLUETOOTH_BAUD);
 	MessageHandler.m_pBluetooth->listen();
-#endif // DEBUG_MODE
+
 	MotorController.init();
 }
 
@@ -21,15 +20,9 @@ void MessageHandlerClass::Tick()
 	char endMarker = '\n';
 	char rc;
 
-#ifndef DEBUG_MODE
 	while (MessageHandler.m_pBluetooth->available() > 0)
 	{
 		rc = MessageHandler.m_pBluetooth->read();
-#else
-	while (Serial.available() > 0)
-	{
-		rc = Serial.read();
-#endif // DEBUG_MODE
 
 		if (rc != '\n')
 		{
@@ -61,7 +54,7 @@ void MessageHandlerClass::Tick()
 	SendMessageInternal();
 }
 
-void MessageHandlerClass::OnHandleMessage(Message & message)
+void MessageHandlerClass::OnHandleMessage(Message& message)
 {
 	Serial.println(message.messageBody);
 
@@ -115,7 +108,7 @@ void MessageHandlerClass::SendMessageInternal()
 		{
 			Serial.write(*pSendBuffer);
 			pSendBuffer++;
-	}
+		}
 		Serial.write('\n');
 		Serial.flush();
 #else
@@ -136,7 +129,7 @@ void MessageHandlerClass::SendMessageInternal()
 		DynamicBuffer.RecycleBuffer(sendBuffer);
 
 		MessageHandler.m_sendMessageQueue.pop_front();
-}
+	}
 }
 
 char MessageHandlerClass::Message_End_Flag = '\n';

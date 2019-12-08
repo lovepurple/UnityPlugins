@@ -11,7 +11,7 @@ public class BluetoothProxy
 
     private List<byte> m_lasttimeSendBufferList = null;
     private BluetoothStatus m_bluetoothStatus = BluetoothStatus.FREE;
-    private EBluetoothDeviceType m_bluetoothDeviceType;
+    private EBluetoothDeviceType m_bluetoothDeviceType = EBluetoothDeviceType.BLUETOOTH_CLASSIC;
 
     private SkateMessageHandler m_skateMessageHandler = null;
 
