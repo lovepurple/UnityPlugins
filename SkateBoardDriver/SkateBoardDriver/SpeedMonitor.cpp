@@ -63,12 +63,8 @@ void SpeedMonitorClass::Tick()
 			this->SignalCountPerSecond = tempSignalCount;
 			tempSignalCount = 0;
 			lastPeriodBeginTime = millis();
-#ifdef DEBUG_MODE
-			Serial.print("Motor Speed:");
-			Serial.print(GetMotorRoundPerSecond());
-			Serial.println(" RPM");
-#endif 
 
+			UtilityClass::DebugLog("Motor Speed :" + String(GetMotorRoundPerSecond() + "RPS"), true);
 		}
 	}
 }

@@ -8,6 +8,7 @@
 #else
 #include "WProgram.h"
 #endif
+#include "GlobalDefine.h"
 
 class UtilityClass
 {
@@ -25,6 +26,16 @@ public:
 
 	//区间映射
 	float Remap(float val, float inputMin, float inputMax, float outMin, float outMax);
+
+	/**
+	 * 打印正常Log
+	 */
+	static void DebugLog(String logContent, bool isNewLine);
+
+	/**
+	 * 打印消息 消息结尾要有\0
+	 */
+	static void DebugMessage(char* pMessage);
 };
 
 extern UtilityClass Utility;

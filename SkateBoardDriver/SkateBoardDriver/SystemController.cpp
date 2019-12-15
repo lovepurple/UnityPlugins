@@ -24,6 +24,8 @@ char* SystemControllerClass::Handle_GetSystemRemainingPower()
 	pMessageBuffer[0] = (char)E_D2C_REMAINING_POWER;
 	float currentVolt = GetBatteryVolt();
 
+	UtilityClass::DebugLog(String(currentVolt),true);
+
 	int voltHundred = int(currentVolt * 100);
 
 	itoa(voltHundred, pMessageBuffer + 1, 10);

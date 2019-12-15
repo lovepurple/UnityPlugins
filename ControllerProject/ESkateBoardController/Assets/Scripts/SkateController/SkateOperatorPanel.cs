@@ -72,7 +72,7 @@ public class SkateOperatorPanel : UIPanelLogicBase
 
         if (BluetoothProxy.Intance.BluetoothState == BluetoothStatus.CONNECTED)
         {
-            TimeModule.Instance.SetTimeInterval(RequestCurrentGear, 1);
+            TimeModule.Instance.SetTimeInterval(RequestCurrentGear, 5);
         }
 
     }

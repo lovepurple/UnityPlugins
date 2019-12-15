@@ -2,7 +2,7 @@
 
 MessageHandlerClass::MessageHandlerClass()
 {
-	MessageHandler.m_pBluetooth = new NeoSWSerial(BLUETOOTH_RX, BLUETOOTH_TX);
+	MessageHandler.m_pBluetooth = new NeoSWSerial(BLUETOOTH_RX_PIN, BLUETOOTH_TX_PIN);
 	MessageHandler.m_pBluetooth->begin(BLUETOOTH_BAUD);
 	MessageHandler.m_pBluetooth->listen();
 
@@ -44,6 +44,9 @@ void MessageHandlerClass::Tick()
 				 RecvCount - 1,
 			};
 
+			UtilityClass::DebugLog("RecvMessage:", false);
+			UtilityClass::DebugMessage(messageBuffer);
+
 			OnHandleMessage(message);
 
 			RecvCount = 0;
@@ -56,7 +59,7 @@ void MessageHandlerClass::Tick()
 
 void MessageHandlerClass::OnHandleMessage(Message& message)
 {
-	Serial.println(message.messageBody);
+	Serial.println(message.messageID);
 
 	switch (message.messageID)
 	{
@@ -82,13 +85,17 @@ void MessageHandlerClass::OnHandleMessage(Message& message)
 		MotorController.MotorStarup();
 		break;
 	case E_C2D_MOTOR_GET_SPEED:
+	{
 		char* responseBuffer = MotorController.Handle_GetCurrentSpeedMessage();
 		SendMessage(responseBuffer);
 		break;
+	}
 	case E_C2D_REMAINING_POWER:
+	{
 		char* responseBuffer1 = SystemController.Handle_GetSystemRemainingPower();
 		SendMessage(responseBuffer1);
 		break;
+	}
 	}
 }
 
@@ -103,15 +110,7 @@ void MessageHandlerClass::SendMessageInternal()
 	{
 		char* sendBuffer = MessageHandler.m_sendMessageQueue.front();
 		char* pSendBuffer = sendBuffer;
-#ifdef DEBUG_MODE
-		while (*pSendBuffer)
-		{
-			Serial.write(*pSendBuffer);
-			pSendBuffer++;
-		}
-		Serial.write('\n');
-		Serial.flush();
-#else
+
 		while (*pSendBuffer)
 		{
 			MessageHandler.m_pBluetooth->write(*pSendBuffer);
@@ -119,12 +118,10 @@ void MessageHandlerClass::SendMessageInternal()
 		}
 		MessageHandler.m_pBluetooth->write('\n');
 		MessageHandler.m_pBluetooth->flush();
-#endif
 
-
-		Serial.print("Sending...");
-		Serial.print(sendBuffer);
-		Serial.print('\n');
+		UtilityClass::DebugLog("Sending Message :", false);
+		UtilityClass::DebugLog(String((int)sendBuffer[0]), false);
+		UtilityClass::DebugMessage(pSendBuffer);
 
 		DynamicBuffer.RecycleBuffer(sendBuffer);
 

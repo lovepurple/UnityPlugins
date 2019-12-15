@@ -27,7 +27,7 @@ public class SignalPanel : UIPanelLogicBase
         this.m_txtBattery = m_panelRootObject.GetComponent<Text>($"battery_panel/txt_battery");
 
         for (int i = 0; i <= 5; ++i)
-            m_imgBatteryList[i] = m_panelRootObject.GetComponent<Image>($"battery_panel/battery_{0}");
+            m_imgBatteryList[i] = m_panelRootObject.GetComponent<Image>($"battery_panel/img_battery_{i}");
 
         this.m_toggleDeviceType = m_panelRootObject.GetComponent<Toggle>("Toggle");
     }

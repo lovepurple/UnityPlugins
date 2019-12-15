@@ -1,10 +1,11 @@
 /**
  * 全局宏定义
  */
+#include "Utility.h"
 
  //蓝牙模块引脚
-#define BLUETOOTH_RX_PIN 3
-#define BLUETOOTH_TX_PIN 5
+#define BLUETOOTH_RX_PIN 5
+#define BLUETOOTH_TX_PIN 3
 #define BLUETOOTH_BAUD 9600
 
 //电调控制引脚（使用TimerOne）
@@ -31,8 +32,8 @@
 //霍尔传感器测速数字引脚
 #define HALL_SENSOR_PIN 8
 
-//Debug模式,使用Serial模拟协议
-#define DEBUG_MODE
+//Debug模式,输出Log
+#define DEBUG_MODE 1
 
 //声明另一个类，include 或有循环include的问题 
 class MessageHandler;

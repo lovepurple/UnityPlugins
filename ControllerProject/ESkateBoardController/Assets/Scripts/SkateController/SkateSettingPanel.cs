@@ -11,6 +11,8 @@ public class SkateSettingPanel : UIPanelLogicBase
     private MaskableGraphic m_btnDown = null;
     private MaskableGraphic m_btnPowerOff = null;
 
+    private MaskableGraphic m_btnRefreshBattery = null;
+
     public SkateSettingPanel(RectTransform uiPanelRootTransfrom) : base(uiPanelRootTransfrom)
     {
         PanelName = "œµÕ≥…Ë÷√";
@@ -23,6 +25,7 @@ public class SkateSettingPanel : UIPanelLogicBase
         m_btnPowerOff = m_panelRootObject.GetComponent<MaskableGraphic>("ButtonGroup/Button (1)");
         m_btnDown = m_panelRootObject.GetComponent<MaskableGraphic>("ButtonGroup/Button (3)");
         m_btnUp = m_panelRootObject.GetComponent<MaskableGraphic>("ButtonGroup/Button (4)");
+        m_btnRefreshBattery = m_panelRootObject.GetComponent<MaskableGraphic>("ButtonGroup/Button (6)");
     }
 
     public override void OnEnter(params object[] onEnterParams)
@@ -33,6 +36,7 @@ public class SkateSettingPanel : UIPanelLogicBase
         m_btnDown.AddClickCallback(OnBtnDownClick);
         m_btnUp.AddClickCallback(OnBtnUpClick);
         m_btnPowerOff.AddClickCallback(OnBtnPowerOffClick);
+        m_btnRefreshBattery.AddClickCallback(OnBtnRefreshBatteryClick);
     }
 
 
@@ -54,6 +58,13 @@ public class SkateSettingPanel : UIPanelLogicBase
     private void OnBtnDownClick(GameObject btn)
     {
         List<byte> messageBuffer = SkateMessageHandler.GetSkateMessage(MessageDefine.E_C2D_MOTOR_CORRECT_MIN_POWER);
+
+        BluetoothProxy.Intance.SendData(messageBuffer);
+    }
+
+    private void OnBtnRefreshBatteryClick(GameObject btn)
+    {
+        List<byte> messageBuffer = SkateMessageHandler.GetSkateMessage(MessageDefine.E_C2D_REMAINING_POWER);
 
         BluetoothProxy.Intance.SendData(messageBuffer);
     }
@@ -80,6 +91,7 @@ public class SkateSettingPanel : UIPanelLogicBase
         m_btnEnterProgramming.RemoveClickCallback(OnBtnEnterProgrammingClick);
         m_btnDown.RemoveClickCallback(OnBtnDownClick);
         m_btnUp.RemoveClickCallback(OnBtnUpClick);
+        m_btnRefreshBattery.RemoveClickCallback(OnBtnRefreshBatteryClick);
     }
 
 }

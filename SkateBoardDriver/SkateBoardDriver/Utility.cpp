@@ -29,3 +29,27 @@ float UtilityClass::Remap(float val, float inputMin, float inputMax, float outMi
 	float ratio = (outMax - outMin) / (inputMax - inputMin);
 	return outMin + ratio * (valClamped - inputMin);
 }
+
+void UtilityClass::DebugLog(String logContent, bool isNewLine)
+{
+	//使用宏时，虽然编译器没提示错误，也需要include global.h
+#if DEBUG_MODE
+	Serial.print(logContent);
+	if (isNewLine)
+		Serial.print('\n');
+#endif
+}
+
+void UtilityClass::DebugMessage(char* pMessage)
+{
+#if DEBUG_MODE
+	char* pTemp = pMessage;
+	while (*pTemp)
+	{
+		Serial.print((int)*pTemp);
+		Serial.print(" ");
+		pTemp++;
+	}
+	Serial.print('\n');
+#endif
+}

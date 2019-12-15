@@ -12,6 +12,6 @@ public class SystemController
     /// <returns></returns>
     public static int GetPercentageBatteryPower(float currentVolt)
     {
-        return (int)MathUtil.Remap01(currentVolt, GlobalDefine.MIN_BATTERY_VOLT, GlobalDefine.MAX_BATTERY_VOLT) * 100;
+        return (int)(MathUtil.Remap01(currentVolt, GlobalDefine.MIN_BATTERY_VOLT, GlobalDefine.MAX_BATTERY_VOLT) * 100);
     }
 }

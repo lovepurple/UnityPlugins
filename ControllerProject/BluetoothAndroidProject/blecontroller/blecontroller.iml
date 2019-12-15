@@ -93,5 +93,7 @@
     <orderEntry type="library" name="Gradle: __local_aars__:D.\GithubRepository\e-skateboard\ControllerProject\BluetoothAndroidProject\blecontroller\libs\classes.jar:unspecified@jar" level="project" />
     <orderEntry type="library" name="Gradle: __local_aars__:D.\GithubRepository\e-skateboard\ControllerProject\BluetoothAndroidProject\blecontroller\libs\gson-2.8.5.jar:unspecified@jar" level="project" />
     <orderEntry type="module" module-name="bluetoothcommom" />
+    <orderEntry type="module" module-name="bluetoothcommom" />
+    <orderEntry type="module" module-name="bluetoothcommom" />
   </component>
 </module>
