@@ -17,10 +17,7 @@ public class SkateOperatorPanel : UIPanelLogicBase
     private MaskableGraphic m_btnGear2;
     private MaskableGraphic m_btnGear3;
     private MaskableGraphic m_btnGear4;
-    private MaskableGraphic m_btnGear5;
-    private MaskableGraphic m_btnGear6;
-    private MaskableGraphic m_btnGear7;
-    private MaskableGraphic m_btnGear8;
+
 
     private Text m_txtMotorPower = null;
 
@@ -43,10 +40,6 @@ public class SkateOperatorPanel : UIPanelLogicBase
         m_btnGear2 = m_panelRootObject.GetComponent<MaskableGraphic>("ButtonGroup/Button (5)");
         m_btnGear3 = m_panelRootObject.GetComponent<MaskableGraphic>("ButtonGroup/Button (6)");
         m_btnGear4 = m_panelRootObject.GetComponent<MaskableGraphic>("ButtonGroup/Button (7)");
-        m_btnGear5 = m_panelRootObject.GetComponent<MaskableGraphic>("GearGroup/Button (7)");
-        m_btnGear6 = m_panelRootObject.GetComponent<MaskableGraphic>("GearGroup/Button (8)");
-        m_btnGear7 = m_panelRootObject.GetComponent<MaskableGraphic>("GearGroup/Button (9)");
-        m_btnGear8 = m_panelRootObject.GetComponent<MaskableGraphic>("GearGroup/Button (10)");
 
 
         m_txtMotorPower = m_panelRootObject.GetComponent<Text>("InfoPanel/Template/Text (1)");
@@ -67,6 +60,10 @@ public class SkateOperatorPanel : UIPanelLogicBase
         m_btnStartup.AddClickCallback(OnBtnStartUpClick);
         m_btnStop.AddClickCallback(OnBtnStopClick);
 
+        m_btnGear1.AddClickCallback(OnSetGear1Click);
+        m_btnGear2.AddClickCallback(OnSetGear2Click);
+        m_btnGear3.AddClickCallback(OnSetGear3Click);
+        m_btnGear4.AddClickCallback(OnSetGear4Click);
 
         MessageHandler.RegisterMessageHandler((int)MessageDefine.E_D2C_MOTOR_SPEED, OnGetMotorGearResponse);
 
@@ -75,6 +72,23 @@ public class SkateOperatorPanel : UIPanelLogicBase
             TimeModule.Instance.SetTimeInterval(RequestCurrentGear, 5);
         }
 
+    }
+
+    private void OnSetGear1Click(GameObject obj)
+    {
+        SpeedController.Instance.SetGear(1);
+    }
+    private void OnSetGear2Click(GameObject obj)
+    {
+        SpeedController.Instance.SetGear(2);
+    }
+    private void OnSetGear3Click(GameObject obj)
+    {
+        SpeedController.Instance.SetGear(3);
+    }
+    private void OnSetGear4Click(GameObject obj)
+    {
+        SpeedController.Instance.SetGear(4);
     }
 
     private void OnBtnStartUpClick(GameObject obj)
@@ -98,6 +112,7 @@ public class SkateOperatorPanel : UIPanelLogicBase
 
     private void OnJoyStickMoveSpeed(Vector2 delta)
     {
+
     }
 
     private void OnJoyStickMoveEnd()
@@ -128,6 +143,11 @@ public class SkateOperatorPanel : UIPanelLogicBase
 
         m_btnStartup.RemoveClickCallback(OnBtnStartUpClick);
         m_btnStop.RemoveClickCallback(OnBtnStopClick);
+
+        m_btnGear1.RemoveClickCallback(OnSetGear1Click);
+        m_btnGear2.RemoveClickCallback(OnSetGear2Click);
+        m_btnGear3.RemoveClickCallback(OnSetGear3Click);
+        m_btnGear4.RemoveClickCallback(OnSetGear4Click);
 
         TimeModule.Instance.RemoveTimeaction(RequestCurrentGear);
     }

@@ -57,7 +57,11 @@ public class SignalPanel : UIPanelLogicBase
 
         //1分钟一次请求剩余电量
         if (bluetoothStatus == BluetoothStatus.CONNECTED)
+        {
+            //TimeModule.Instance.SetTimeout(GetSkaterBatteryPower, 2f);
+            TimeModule.Instance.ExecuteOnNextFrame(() => GetSkaterBatteryPower());
             TimeModule.Instance.SetTimeInterval(GetSkaterBatteryPower, 60f);
+        }
         else
             TimeModule.Instance.RemoveTimeaction(GetSkaterBatteryPower);
     }

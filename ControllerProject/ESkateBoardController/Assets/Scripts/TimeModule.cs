@@ -186,7 +186,7 @@ namespace EngineCore
         /// 下一帧执行
         /// </summary>
         /// <param name="action"></param>
-        private void ExecuteOnNextFrame(Action action)
+        public void ExecuteOnNextFrame(Action action)
         {
             this.m_nextFrameExecuteActionList.Add(action);
         }

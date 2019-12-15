@@ -33,7 +33,7 @@
 #define HALL_SENSOR_PIN 8
 
 //Debug模式,输出Log
-#define DEBUG_MODE 1
+#define DEBUG_MODE 0
 
 //声明另一个类，include 或有循环include的问题 
 class MessageHandler;

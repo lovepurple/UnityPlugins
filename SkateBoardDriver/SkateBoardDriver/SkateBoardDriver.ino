@@ -21,7 +21,7 @@ void setup()
 
 void loop() {
 
-	DriverMonitor.Tick();
+	//DriverMonitor.Tick();
 
 	MessageHandler.Tick();
 }

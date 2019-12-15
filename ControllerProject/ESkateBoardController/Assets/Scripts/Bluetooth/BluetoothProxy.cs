@@ -10,6 +10,8 @@ public class BluetoothProxy
     private IBluetoothDevice m_device;
 
     private List<byte> m_lasttimeSendBufferList = null;
+    private float m_lastSendMessageTime = 0f;
+
     private BluetoothStatus m_bluetoothStatus = BluetoothStatus.FREE;
     private EBluetoothDeviceType m_bluetoothDeviceType = EBluetoothDeviceType.BLUETOOTH_CLASSIC;
 
@@ -74,7 +76,7 @@ public class BluetoothProxy
 
         //上一次可能有\n
         bool isNewDataBuffer = false;
-        if (m_lasttimeSendBufferList.Count != dataBuffer.Count)
+        if (m_lasttimeSendBufferList.Count != dataBuffer.Count || Time.time - m_lastSendMessageTime >= GlobalDefine.SAME_MESSAGE_INTERVAL)
             isNewDataBuffer = true;
         else
         {

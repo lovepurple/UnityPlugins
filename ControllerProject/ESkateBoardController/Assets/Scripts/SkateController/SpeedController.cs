@@ -8,7 +8,7 @@ using UnityEngine;
 public class SpeedController : Singleton<SpeedController>
 {
     //挡位数
-    public const int GEAR_COUNT = 5;
+    public const int GEAR_COUNT = 4;
     public float GEAR_POWER_BASIC = 0.25f;      //实际挡位的基数(0~1) 如果是1 太快,
 
     private int m_currentGear = 0;
@@ -51,7 +51,11 @@ public class SpeedController : Singleton<SpeedController>
         if (gear <= 0)
             gear = 0;
 
-        if (m_currentGear == gear)
+        if (gear > GEAR_COUNT)
+            return;
+
+        //不能跳档
+        if (Mathf.Abs(m_currentGear - gear) > 1)
             return;
 
         SetSkateBoardSpeedByGear(gear);
