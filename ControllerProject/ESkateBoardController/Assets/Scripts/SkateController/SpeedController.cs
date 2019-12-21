@@ -15,9 +15,14 @@ public class SpeedController : Singleton<SpeedController>
 
     public SpeedController()
     {
-        MessageHandler.RegisterMessageHandler((int)MessageDefine.E_D2C_MOTOR_SPEED, OnGetMotorGearResponse);
+
     }
 
+    public void InitSpeedController()
+    {
+        MessageHandler.RegisterMessageHandler((int)MessageDefine.E_D2C_MOTOR_SPEED, OnGetMotorGearResponse);
+        BluetoothEvents.OnBluetoothDeviceStateChangedEvent += OnBluetoothConnectionStateChangedHandler;
+    }
 
 
     /// <summary>
@@ -76,6 +81,21 @@ public class SpeedController : Singleton<SpeedController>
         List<byte> messageBuffer = SkateMessageHandler.GetSkateMessage(MessageDefine.E_C2D_MOTOR_DRIVE);
 
         messageBuffer.AddRange(speedBuffer);
+
+        BluetoothProxy.Intance.SendData(messageBuffer);
+    }
+
+    private void OnBluetoothConnectionStateChangedHandler(int bluetoothState)
+    {
+        if ((BluetoothStatus)bluetoothState == BluetoothStatus.CONNECTED)
+            TimeModule.Instance.SetTimeInterval(RequstMotorRPS, 1);
+        else
+            TimeModule.Instance.RemoveTimeaction(RequstMotorRPS);
+    }
+
+    private void RequstMotorRPS()
+    {
+        List<byte> messageBuffer = SkateMessageHandler.GetSkateMessage(MessageDefine.E_C2D_MOTOR_RPS);
 
         BluetoothProxy.Intance.SendData(messageBuffer);
     }

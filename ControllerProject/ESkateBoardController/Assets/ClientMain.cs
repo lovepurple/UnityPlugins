@@ -7,7 +7,7 @@ public class ClientMain : MonoSingleton<ClientMain>
 
     private void Awake()
     {
-      
+        SpeedController.Instance.InitSpeedController();
     }
 
     private void Start()

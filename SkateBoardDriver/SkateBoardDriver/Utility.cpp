@@ -40,9 +40,18 @@ void UtilityClass::DebugLog(String logContent, bool isNewLine)
 #endif
 }
 
+void UtilityClass::DebugMessage(String logContent, bool isNewLine)
+{
+#if DEBUG_MESSAGE
+	Serial.print(logContent);
+	if (isNewLine)
+		Serial.print('\n');
+#endif
+}
+
 void UtilityClass::DebugMessage(char* pMessage)
 {
-#if DEBUG_MODE
+#if DEBUG_MESSAGE
 	char* pTemp = pMessage;
 	while (*pTemp)
 	{

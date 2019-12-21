@@ -33,6 +33,11 @@ public:
 	static void DebugLog(String logContent, bool isNewLine);
 
 	/**
+	 * 打印消息
+	 */
+	static void DebugMessage(String logContent, bool isNewLine);
+
+	/**
 	 * 打印消息 消息结尾要有\0
 	 */
 	static void DebugMessage(char* pMessage);

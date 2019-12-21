@@ -13,6 +13,8 @@ public class SignalPanel : UIPanelLogicBase
     private Text m_txtBattery;
     private Toggle m_toggleDeviceType = null;
 
+    private Text m_txtMotorRps = null;
+
     public SignalPanel(RectTransform uiPanelRootTransfrom) : base(uiPanelRootTransfrom)
     {
     }
@@ -25,6 +27,7 @@ public class SignalPanel : UIPanelLogicBase
         this.m_imgOnline = m_panelRootObject.GetComponent<Image>("img_online");
 
         this.m_txtBattery = m_panelRootObject.GetComponent<Text>($"battery_panel/txt_battery");
+        this.m_txtMotorRps = m_panelRootObject.GetComponent<Text>("txt_motor_rps");
 
         for (int i = 0; i <= 5; ++i)
             m_imgBatteryList[i] = m_panelRootObject.GetComponent<Image>($"battery_panel/img_battery_{i}");
@@ -38,6 +41,7 @@ public class SignalPanel : UIPanelLogicBase
         OnBluetoothDeviceStateChanged((int)BluetoothProxy.Intance.BluetoothState);
 
         MessageHandler.RegisterMessageHandler((int)MessageDefine.E_D2C_REMAINING_POWER, OnReceiveSkaterBatteryPowerHandler);
+        MessageHandler.RegisterMessageHandler((int)MessageDefine.E_D2C_MOTOR_RPS, OnReceiveMotorRPSHandler);
 
         this.m_toggleDeviceType.isOn = BluetoothProxy.Intance.BluetoothDeviceType == BluetoothProxy.EBluetoothDeviceType.BLUETOOTH_LOW_ENERGY;
         this.m_toggleDeviceType.onValueChanged.AddListener(OnBluetoothDeviceTypeChanged);
@@ -58,7 +62,6 @@ public class SignalPanel : UIPanelLogicBase
         //1分钟一次请求剩余电量
         if (bluetoothStatus == BluetoothStatus.CONNECTED)
         {
-            //TimeModule.Instance.SetTimeout(GetSkaterBatteryPower, 2f);
             TimeModule.Instance.ExecuteOnNextFrame(() => GetSkaterBatteryPower());
             TimeModule.Instance.SetTimeInterval(GetSkaterBatteryPower, 60f);
         }
@@ -76,6 +79,7 @@ public class SignalPanel : UIPanelLogicBase
     {
         BluetoothEvents.OnBluetoothDeviceStateChangedEvent -= OnBluetoothDeviceStateChanged;
         MessageHandler.UnRegisterMessageHandler((int)MessageDefine.E_D2C_REMAINING_POWER, OnReceiveSkaterBatteryPowerHandler);
+        MessageHandler.UnRegisterMessageHandler((int)MessageDefine.E_D2C_MOTOR_RPS, OnReceiveMotorRPSHandler);
         TimeModule.Instance.RemoveTimeaction(GetSkaterBatteryPower);
 
         this.m_toggleDeviceType.onValueChanged.RemoveListener(OnBluetoothDeviceTypeChanged);
@@ -87,8 +91,28 @@ public class SignalPanel : UIPanelLogicBase
         uint voltHandred = DigitUtility.GetUInt32(batteryPowerData);
         float volt = voltHandred * 0.01f;
 
+        //太小则说明外部电源没接入
         int percentageRemainPower = SystemController.GetPercentageBatteryPower(volt);
+        if (percentageRemainPower < GlobalDefine.MIN_BATTERY_VOLT)
+            Debug.Log("主电源开关没打开");
+
         SetBatteryLevel(percentageRemainPower);
+    }
+
+    private void OnReceiveMotorRPSHandler(object recvData)
+    {
+        char[] motorRpsData = (char[])recvData;
+        uint motorRps = DigitUtility.GetUInt32(motorRpsData);
+
+        string colorFlag = string.Empty;
+        if (motorRps <= 2)
+            colorFlag = "#FFFFFFFF";
+        else if (motorRps <= 5)
+            colorFlag = "#30FF00FF";
+        else
+            colorFlag = "FF2A00FF";
+
+        this.m_txtMotorRps.text = $"<color={colorFlag}>{motorRps} r/s</color>";
     }
 
     private void SetBatteryLevel(int remainPowerPercentage)

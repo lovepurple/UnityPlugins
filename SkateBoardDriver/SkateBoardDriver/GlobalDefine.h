@@ -22,6 +22,7 @@
 
 #define SYNC_GEAR_RATIO 11.0f/36.0f		//todo :同步轮的比例 需要确定小齿与大齿的比值
 #define WHEEL_METER_PER_ROUND 0.2608	//轮子一圈周长
+#define MOTOR_MAX_RPS 10                //电机最大转数 r/s
 
 #define BATTERY_SENSOR_PIN A6 			//电量测量PIN
 
@@ -33,7 +34,10 @@
 #define HALL_SENSOR_PIN 8
 
 //Debug模式,输出Log
-#define DEBUG_MODE 0
+#define DEBUG_MODE 1
+
+//是否Debug 消息与Debug普通的Log拆开
+#define DEBUG_MESSAGE 1
 
 //声明另一个类，include 或有循环include的问题 
 class MessageHandler;

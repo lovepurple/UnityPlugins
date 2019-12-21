@@ -25,6 +25,9 @@ enum EMessageDefine
 	
 	E_C2D_REMAINING_POWER = 119,	//获取剩余电量
 	E_D2C_REMAINING_POWER = 120,	//返回剩余电量
+
+	E_C2D_MOTOR_RPS = 121,			//获取电机每秒转数
+	E_D2C_MOTOR_RPS = 122,			//返回电机每秒转数
 };
 
 

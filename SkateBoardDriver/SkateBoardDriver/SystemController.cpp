@@ -24,7 +24,9 @@ char* SystemControllerClass::Handle_GetSystemRemainingPower()
 	pMessageBuffer[0] = (char)E_D2C_REMAINING_POWER;
 	float currentVolt = GetBatteryVolt();
 
-	UtilityClass::DebugLog(String(currentVolt),true);
+	UtilityClass::DebugLog("Battery Volt:", false);
+	UtilityClass::DebugLog(String(currentVolt), false);
+	UtilityClass::DebugLog(" v", true);
 
 	int voltHundred = int(currentVolt * 100);
 

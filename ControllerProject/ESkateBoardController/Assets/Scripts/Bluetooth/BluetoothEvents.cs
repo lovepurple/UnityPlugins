@@ -28,7 +28,7 @@ public static class BluetoothEvents
     public static SafeAction OnConnectedEvent;
 
     /// <summary>
-    /// 蓝牙
+    /// 蓝牙连接状态改变
     /// </summary>
     public static SafeAction<int> OnBluetoothDeviceStateChangedEvent;
 

@@ -17,11 +17,13 @@ void setup()
 
 	}
 	DriverMonitor.init();
+
+	SpeedMonitor.EnableHallSensorMonitor(true);
 }
 
 void loop() {
 
-	//DriverMonitor.Tick();
+	DriverMonitor.Tick();
 
 	MessageHandler.Tick();
 }

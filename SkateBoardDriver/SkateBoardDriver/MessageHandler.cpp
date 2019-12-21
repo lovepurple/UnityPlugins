@@ -44,7 +44,7 @@ void MessageHandlerClass::Tick()
 				 RecvCount - 1,
 			};
 
-			UtilityClass::DebugLog("RecvMessage:", false);
+			UtilityClass::DebugMessage("RecvMessage:", false);
 			UtilityClass::DebugMessage(messageBuffer);
 
 			OnHandleMessage(message);
@@ -59,8 +59,6 @@ void MessageHandlerClass::Tick()
 
 void MessageHandlerClass::OnHandleMessage(Message& message)
 {
-	Serial.println(message.messageID);
-
 	switch (message.messageID)
 	{
 	case E_C2D_MOTOR_POWERON: //C++枚举不用写全名
@@ -96,6 +94,12 @@ void MessageHandlerClass::OnHandleMessage(Message& message)
 		SendMessage(responseBuffer1);
 		break;
 	}
+	case E_C2D_MOTOR_RPS:
+	{
+		char* pMotorRPSBuffer = SpeedMonitor.GetCurrentMotorRPSMesssage();
+		SendMessage(pMotorRPSBuffer);
+		break;
+	}
 	}
 }
 
@@ -119,9 +123,10 @@ void MessageHandlerClass::SendMessageInternal()
 		MessageHandler.m_pBluetooth->write('\n');
 		MessageHandler.m_pBluetooth->flush();
 
-		UtilityClass::DebugLog("Sending Message :", false);
-		UtilityClass::DebugLog(String((int)sendBuffer[0]), false);
-		UtilityClass::DebugMessage(pSendBuffer);
+		UtilityClass::DebugMessage("Sending Message :", false);
+		UtilityClass::DebugMessage(String((int)sendBuffer[0]), false);
+		char* pSendingBufferContent = &sendBuffer[0];
+		UtilityClass::DebugMessage(pSendingBufferContent);
 
 		DynamicBuffer.RecycleBuffer(sendBuffer);
 

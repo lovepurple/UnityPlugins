@@ -30,6 +30,8 @@ void MotorControllerClass::PowerOff()
 	digitalWrite(ESC_POWER_PIN, !ESC_POWN_DRIVE_MODE);
 	MotorMinPower();
 	Timer1.stop();
+
+	SpeedMonitor.EnableHallSensorMonitor(false);
 }
 
 void MotorControllerClass::InitializeESC()
@@ -52,6 +54,8 @@ void MotorControllerClass::MotorStarup()
 	MotorMinPower();
 	delay(500);
 	PowerOn();
+
+	SpeedMonitor.EnableHallSensorMonitor(true);
 	//}
 }
 

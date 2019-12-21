@@ -12,6 +12,8 @@
 #endif
 
 #include "GlobalDefine.h"
+#include "DynamicBuffer.h"
+#include "MessageDefine.h"
 
 class SpeedMonitorClass
 {
@@ -25,14 +27,14 @@ private:
 	bool isEnableMonitor = false;
 
 	//刷新传感器状态
-	bool IsSensorValidState();
+	bool RefreshSensorValidState();
 
 	float m_kilometersPerHour;
 
 
 public:
 	//每秒信号数量
-	unsigned	int SignalCountPerSecond;
+	unsigned int SignalCountPerSecond;
 
 	//电机每秒转数
 	int GetMotorRoundPerSecond();
@@ -45,6 +47,11 @@ public:
 	void Tick();
 
 	void EnableHallSensorMonitor(bool isEnable);
+
+	/**
+	 * 获取当前电机的转数
+	 */
+	char* GetCurrentMotorRPSMesssage();
 
 	/**
 	 * 转换km/h到实际电机转数

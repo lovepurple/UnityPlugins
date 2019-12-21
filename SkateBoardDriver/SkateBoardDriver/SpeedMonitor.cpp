@@ -12,7 +12,7 @@ unsigned int tempSignalCount = 0;
 unsigned long lastSensorSignalTime;
 
 
-bool SpeedMonitorClass::IsSensorValidState()
+bool SpeedMonitorClass::RefreshSensorValidState()
 {
 	int currentSensorState = digitalRead(HALL_SENSOR_PIN);
 
@@ -64,8 +64,12 @@ void SpeedMonitorClass::Tick()
 			tempSignalCount = 0;
 			lastPeriodBeginTime = millis();
 
-			UtilityClass::DebugLog("Motor Speed :" + String(GetMotorRoundPerSecond() + "RPS"), true);
+			UtilityClass::DebugLog("Motor Speed :", false);
+			UtilityClass::DebugLog(String(GetMotorRoundPerSecond()), false);
+			UtilityClass::DebugLog("RPS", true);
 		}
+
+		RefreshSensorValidState();
 	}
 }
 
@@ -79,6 +83,22 @@ void SpeedMonitorClass::EnableHallSensorMonitor(bool isEnable)
 		lastSensorSignalTime = millis();
 		lastPeriodBeginTime = millis();
 	}
+}
+
+char* SpeedMonitorClass::GetCurrentMotorRPSMesssage()
+{
+	if (this->isEnableMonitor)
+	{
+		int motorRps = GetMotorRoundPerSecond();
+		char* pMessageBuffer = DynamicBuffer.GetBuffer();
+		pMessageBuffer[0] = E_D2C_MOTOR_RPS;
+		itoa(motorRps, pMessageBuffer + 1, 10);
+		pMessageBuffer[3] = '\0';
+
+		return pMessageBuffer;
+	}
+
+	return nullptr;
 }
 
 int SpeedMonitorClass::ConvertKilometerPerHourToRPS(float kilometerPerHour)
