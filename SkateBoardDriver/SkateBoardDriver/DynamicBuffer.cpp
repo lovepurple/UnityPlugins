@@ -20,9 +20,8 @@ char* DynamicBufferClass::GetBuffer()
 	{
 		pBuffer = m_bufferQueue.front();
 		m_bufferQueue.pop_front();
-
 	}
-	return pBuffer;
+	return pBuffer;			//如果是个空Buffer 直接崩溃
 }
 
 void DynamicBufferClass::RecycleBuffer(char* recycleBuffer)

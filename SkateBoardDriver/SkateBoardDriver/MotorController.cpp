@@ -142,7 +142,7 @@ char* MotorControllerClass::Handle_GetCurrentSpeedMessage()
 {
 	if (m_hasChangedPower)
 	{
-		int speedThousands = int(GetMotorPower() * 999);
+		int speedThousands = int(GetMotorPower() * 1000 - 1);
 
 		char* pMessageBuffer = DynamicBuffer.GetBuffer();
 		pMessageBuffer[0] = E_D2C_MOTOR_SPEED;

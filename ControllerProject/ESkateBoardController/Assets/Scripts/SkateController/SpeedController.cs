@@ -9,9 +9,16 @@ public class SpeedController : Singleton<SpeedController>
 {
     //挡位数
     public const int GEAR_COUNT = 4;
-    public float GEAR_POWER_BASIC = 0.25f;      //实际挡位的基数(0~1) 如果是1 太快,
+    public const float GEAR_POWER_BASIC = 0.25f;      //实际挡位的基数(0~1) 如果是1 太快,
 
     private int m_currentGear = 0;
+    private uint m_motorRoundPerSecond = 0;      //电机每秒转数
+
+    //同步齿轮齿比
+    private readonly float SYNC_GEAR_RATIO = 11.0f / 36.0f;
+
+    //轮子一圈长度
+    private readonly float WHEEL_METER_PER_ROUND = 0.2608f;
 
     public SpeedController()
     {
@@ -21,6 +28,7 @@ public class SpeedController : Singleton<SpeedController>
     public void InitSpeedController()
     {
         MessageHandler.RegisterMessageHandler((int)MessageDefine.E_D2C_MOTOR_SPEED, OnGetMotorGearResponse);
+        MessageHandler.RegisterMessageHandler((int)MessageDefine.E_D2C_MOTOR_RPS, OnGetMotorRoundPerSecondHandler);
         BluetoothEvents.OnBluetoothDeviceStateChangedEvent += OnBluetoothConnectionStateChangedHandler;
     }
 
@@ -66,6 +74,19 @@ public class SpeedController : Singleton<SpeedController>
         SetSkateBoardSpeedByGear(gear);
     }
 
+    /// <summary>
+    /// 获取滑板速度
+    /// </summary>
+    /// <param name="motorRPS"></param>
+    /// <returns></returns>
+    public float GetSkateSpeedKilometerPerHour(uint motorRPS)
+    {
+        uint motorRPH = motorRPS * 3600;
+        float wheelRoundPerHour = motorRPH * SYNC_GEAR_RATIO;
+        float wheelMeterPerHour = wheelRoundPerHour * WHEEL_METER_PER_ROUND;
+        return wheelMeterPerHour * 0.001f;
+    }
+
 
     /// <summary>
     /// 设置滑板速度
@@ -103,8 +124,17 @@ public class SpeedController : Singleton<SpeedController>
     private void OnGetMotorGearResponse(object data)
     {
         char[] gearData = (char[])data;
-        this.m_currentGear = GetGear(DigitUtility.GetUInt32(gearData) / 999.0f);
+        this.m_currentGear = GetGear(((DigitUtility.GetUInt32(gearData) + 1) * 0.001f) / GEAR_POWER_BASIC);
     }
+
+    private void OnGetMotorRoundPerSecondHandler(object recvData)
+    {
+        char[] motorRpsData = (char[])recvData;
+        uint motorRps = DigitUtility.GetUInt32(motorRpsData);
+        this.m_motorRoundPerSecond = motorRps;
+    }
+
+    public float SkateSpeed => GetSkateSpeedKilometerPerHour(this.m_motorRoundPerSecond);
 
 
     public int Gear => this.m_currentGear;

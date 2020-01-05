@@ -101,18 +101,16 @@ public class SignalPanel : UIPanelLogicBase
 
     private void OnReceiveMotorRPSHandler(object recvData)
     {
-        char[] motorRpsData = (char[])recvData;
-        uint motorRps = DigitUtility.GetUInt32(motorRpsData);
-
+        float currentSpeed = SpeedController.Instance.SkateSpeed;
         string colorFlag = string.Empty;
-        if (motorRps <= 2)
+        if (currentSpeed <= 2)
             colorFlag = "#FFFFFFFF";
-        else if (motorRps <= 5)
+        else if (currentSpeed <= 5)
             colorFlag = "#30FF00FF";
         else
-            colorFlag = "FF2A00FF";
+            colorFlag = "#FF2A00FF";
 
-        this.m_txtMotorRps.text = $"<color={colorFlag}>{motorRps} r/s</color>";
+        this.m_txtMotorRps.text = $"<color={colorFlag}>{currentSpeed.ToString("0.00")} km/h</color>";
     }
 
     private void SetBatteryLevel(int remainPowerPercentage)

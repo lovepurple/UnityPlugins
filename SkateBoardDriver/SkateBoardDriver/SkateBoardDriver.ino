@@ -16,6 +16,7 @@ void setup()
 	{
 
 	}
+
 	DriverMonitor.init();
 
 	SpeedMonitor.EnableHallSensorMonitor(true);

@@ -4,13 +4,13 @@
 #include "Utility.h"
 
  //蓝牙模块引脚
-#define BLUETOOTH_RX_PIN 5
+#define BLUETOOTH_RX_PIN 2
 #define BLUETOOTH_TX_PIN 3
 #define BLUETOOTH_BAUD 9600
 
 //电调控制引脚（使用TimerOne）
 #define ESC_A_PIN 9
-#define ESC_POWER_PIN 2
+#define ESC_POWER_PIN 4
 #define ESC_POWN_DRIVE_MODE LOW
 #define MOTOR_POWER_PIN 7               //一个引脚可以控制两个引脚
 #define MOTOR_POWER_DRIVE_MODE  HIGH     //电机电调继电器模式（低电平 还是高电平触发）
@@ -24,7 +24,7 @@
 #define WHEEL_METER_PER_ROUND 0.2608	//轮子一圈周长
 #define MOTOR_MAX_RPS 10                //电机最大转数 r/s
 
-#define BATTERY_SENSOR_PIN A6 			//电量测量PIN
+#define BATTERY_SENSOR_PIN A7 			//电量测量PIN
 
 //测距模块占用引脚
 #define SONAR_TRIG_PIN 13
@@ -34,10 +34,10 @@
 #define HALL_SENSOR_PIN 8
 
 //Debug模式,输出Log
-#define DEBUG_MODE 1
+#define DEBUG_MODE 0
 
 //是否Debug 消息与Debug普通的Log拆开
-#define DEBUG_MESSAGE 1
+#define DEBUG_MESSAGE 0
 
 //声明另一个类，include 或有循环include的问题 
 class MessageHandler;

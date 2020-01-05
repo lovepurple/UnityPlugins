@@ -105,7 +105,8 @@ void MessageHandlerClass::OnHandleMessage(Message& message)
 
 void MessageHandlerClass::SendMessage(char* messageBuffer)
 {
-	m_sendMessageQueue.push_back(messageBuffer);
+	if (messageBuffer != nullptr)
+		m_sendMessageQueue.push_back(messageBuffer);
 }
 
 void MessageHandlerClass::SendMessageInternal()
@@ -113,6 +114,10 @@ void MessageHandlerClass::SendMessageInternal()
 	while (MessageHandler.m_sendMessageQueue.size() > 0)
 	{
 		char* sendBuffer = MessageHandler.m_sendMessageQueue.front();
+
+		if (sendBuffer == nullptr)
+			continue;
+
 		char* pSendBuffer = sendBuffer;
 
 		while (*pSendBuffer)

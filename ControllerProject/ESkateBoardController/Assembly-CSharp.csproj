@@ -78,7 +78,6 @@
     <Compile Include="Assets\BLE\BLEControllerEventHandler.cs" />
     <Compile Include="Assets\BLE\BLEControllerInitializer.cs" />
     <Compile Include="Assets\BLE\Utils\MiniJSON.cs" />
-    <Compile Include="Assets\BluetoothTest.cs" />
     <Compile Include="Assets\BT_Library\Scripts\BluetoothAdapter.cs" />
     <Compile Include="Assets\BT_Library\Scripts\BluetoothDevice.cs" />
     <Compile Include="Assets\BT_Library\Scripts\CoreLibrary\BtBridge.cs" />
