@@ -5,7 +5,7 @@
 
  //蓝牙模块引脚
 #define BLUETOOTH_RX_PIN 2
-#define BLUETOOTH_TX_PIN 3
+#define BLUETOOTH_TX_PIN 5
 #define BLUETOOTH_BAUD 9600
 
 //电调控制引脚（使用TimerOne）
@@ -31,7 +31,7 @@
 #define SONAR_ECHO_PIN 12		
 
 //霍尔传感器测速数字引脚
-#define HALL_SENSOR_PIN 8
+#define HALL_SENSOR_PIN 3
 
 //Debug模式,输出Log
 #define DEBUG_MODE 0

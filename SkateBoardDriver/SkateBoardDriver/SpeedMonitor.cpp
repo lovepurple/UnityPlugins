@@ -11,21 +11,32 @@ unsigned long lastPeriodBeginTime = 0;
 unsigned int tempSignalCount = 0;
 unsigned long lastSensorSignalTime;
 
+void SpeedMonitorClass::Init()
+{
+	pinMode(HALL_SENSOR_PIN, INPUT);
+}
+
+
+void OnTrigHallSensor()
+{
+	tempSignalCount++;
+}
+
 
 bool SpeedMonitorClass::RefreshSensorValidState()
 {
-	int currentSensorState = digitalRead(HALL_SENSOR_PIN);
-
-	bool isValidState = false;
-	if (currentSensorState == LOW && currentSensorState != lastSensorState && millis() - lastSensorSignalTime > SIGNAL_DELTA_TIME)
+	if (millis() - lastPeriodBeginTime >= 1000)
 	{
-		lastSensorSignalTime = millis();
-		tempSignalCount++;
-		isValidState = true;
-	}
-	lastSensorState = currentSensorState;
+		this->SignalCountPerSecond = tempSignalCount;
 
-	return isValidState;
+		UtilityClass::DebugLog("Motor Speed :", false);
+		UtilityClass::DebugLog(String(GetMotorRoundPerSecond()), false);
+		UtilityClass::DebugLog("RPS", true);
+
+		lastPeriodBeginTime = millis();
+
+		tempSignalCount = 0;
+	}
 }
 
 int SpeedMonitorClass::GetMotorRoundPerSecond()
@@ -48,29 +59,11 @@ float SpeedMonitorClass::GetCurrentSpeedKilometerPerHour()
 	return kmPerHour;
 }
 
-void SpeedMonitorClass::Init()
-{
-	pinMode(HALL_SENSOR_PIN, INPUT);
-
-}
 
 void SpeedMonitorClass::Tick()
 {
 	if (this->isEnableMonitor)
-	{
-		if (millis() - lastPeriodBeginTime >= 1000)
-		{
-			this->SignalCountPerSecond = tempSignalCount;
-			tempSignalCount = 0;
-			lastPeriodBeginTime = millis();
-
-			UtilityClass::DebugLog("Motor Speed :", false);
-			UtilityClass::DebugLog(String(GetMotorRoundPerSecond()), false);
-			UtilityClass::DebugLog("RPS", true);
-		}
-
 		RefreshSensorValidState();
-	}
 }
 
 
@@ -79,10 +72,9 @@ void SpeedMonitorClass::EnableHallSensorMonitor(bool isEnable)
 {
 	this->isEnableMonitor = isEnable;
 	if (isEnable)
-	{
-		lastSensorSignalTime = millis();
-		lastPeriodBeginTime = millis();
-	}
+		attachInterrupt(digitalPinToInterrupt(HALL_SENSOR_PIN), OnTrigHallSensor, FALLING);
+	else
+		detachInterrupt(digitalPinToInterrupt(HALL_SENSOR_PIN));
 }
 
 char* SpeedMonitorClass::GetCurrentMotorRPSMesssage()
