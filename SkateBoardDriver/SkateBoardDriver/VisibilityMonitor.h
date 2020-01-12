@@ -13,6 +13,7 @@
 
 #include "GlobalDefine.h"
 #include "NewPing.h"
+#include "MotorController.h"
 
 class VisibilityMonitorClass
 {
@@ -25,15 +26,26 @@ private:
 	bool m_isEnableMonitor;
 
 	//超声波delta 时间
-	const unsigned int SONAR_DELTA_TIME = 50;
+	const unsigned int SONAR_DELTA_TIME = 500;
+
+	//紧急刹车距离
+	const unsigned int EMERGENCY_STOP_DISTANCE = 20;
+
 
 public:
 	void init();
 
 	void Tick();
 
-	//是否
+	/**
+	 * 是否开启距离监控
+	 */
 	void EnableVisibilityMonitor(bool isEnable);
+
+	/**
+	 * 自动减速
+	 */
+	void AutoSlowDown();
 
 	unsigned int SonarDistance;
 };

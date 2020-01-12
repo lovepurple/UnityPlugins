@@ -32,6 +32,7 @@ void MotorControllerClass::PowerOff()
 	Timer1.stop();
 
 	SpeedMonitor.EnableHallSensorMonitor(false);
+	VisibilityMonitor.EnableVisibilityMonitor(false);
 }
 
 void MotorControllerClass::InitializeESC()
@@ -56,6 +57,7 @@ void MotorControllerClass::MotorStarup()
 	PowerOn();
 
 	SpeedMonitor.EnableHallSensorMonitor(true);
+	VisibilityMonitor.EnableVisibilityMonitor(true);
 	//}
 }
 
@@ -136,6 +138,11 @@ int MotorControllerClass::ConvertPWMToGear(float pwmDuty)
 	}
 
 	return GEAR_COUNT;
+}
+
+void MotorControllerClass::Break()
+{
+	MotorMinPower();
 }
 
 char* MotorControllerClass::Handle_GetCurrentSpeedMessage()

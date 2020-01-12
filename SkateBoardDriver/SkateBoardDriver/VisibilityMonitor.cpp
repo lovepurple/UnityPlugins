@@ -7,20 +7,22 @@
 
 void VisibilityMonitorClass::init()
 {
-	m_pSonar = &NewPing(SONAR_TRIG_PIN, SONAR_ECHO_PIN, 500);
+	m_pSonar = new  NewPing(SONAR_TRIG_PIN, SONAR_ECHO_PIN, 500);
 }
 unsigned long ulSonarStartTime;
 
 
 void VisibilityMonitorClass::Tick()
 {
-	if (this->m_isEnableMonitor && (millis() - ulSonarStartTime >= SONAR_DELTA_TIME))
+	if (this->m_isEnableMonitor && (millis() - ulSonarStartTime >= SONAR_DELTA_TIME) && SpeedMonitor.GetMotorRoundPerSecond() > 0)
 	{
 		this->SonarDistance = m_pSonar->ping_cm();
 		ulSonarStartTime = millis();
 
 		UtilityClass::DebugLog("Sonar Distance :" + String(this->SonarDistance) + "cm", true);
 	}
+
+	AutoSlowDown();
 }
 
 void VisibilityMonitorClass::EnableVisibilityMonitor(bool isEnable)
@@ -28,6 +30,15 @@ void VisibilityMonitorClass::EnableVisibilityMonitor(bool isEnable)
 	this->m_isEnableMonitor = isEnable;
 	if (this->m_isEnableMonitor)
 		ulSonarStartTime = millis();
+}
+
+void VisibilityMonitorClass::AutoSlowDown()
+{
+	if (this->SonarDistance > 0)
+	{
+		if (this->SonarDistance <= EMERGENCY_STOP_DISTANCE)
+			MotorController.Break();
+	}
 }
 
 

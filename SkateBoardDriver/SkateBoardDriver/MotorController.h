@@ -14,6 +14,7 @@
 #include "MessageDefine.h"
 #include "MessageHandler.h"
 #include "SpeedMonitor.h"
+#include "VisibilityMonitor.h"
 
 
 class MotorControllerClass

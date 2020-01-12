@@ -8,12 +8,12 @@
 int lastSensorState = 0;
 unsigned long lastPeriodBeginTime = 0;
 
-unsigned int tempSignalCount = 0;
+volatile unsigned int tempSignalCount = 0;
 unsigned long lastSensorSignalTime;
 
 void SpeedMonitorClass::Init()
 {
-	pinMode(HALL_SENSOR_PIN, INPUT);
+	pinMode(HALL_SENSOR_PIN, INPUT_PULLUP);
 }
 
 
@@ -27,7 +27,7 @@ bool SpeedMonitorClass::RefreshSensorValidState()
 {
 	if (millis() - lastPeriodBeginTime >= 1000)
 	{
-		this->SignalCountPerSecond = tempSignalCount;
+		this->SignalCountPerSecond = tempSignalCount / 2;
 
 		UtilityClass::DebugLog("Motor Speed :", false);
 		UtilityClass::DebugLog(String(GetMotorRoundPerSecond()), false);
@@ -72,7 +72,7 @@ void SpeedMonitorClass::EnableHallSensorMonitor(bool isEnable)
 {
 	this->isEnableMonitor = isEnable;
 	if (isEnable)
-		attachInterrupt(digitalPinToInterrupt(HALL_SENSOR_PIN), OnTrigHallSensor, FALLING);
+		attachInterrupt(digitalPinToInterrupt(HALL_SENSOR_PIN), OnTrigHallSensor, RISING);
 	else
 		detachInterrupt(digitalPinToInterrupt(HALL_SENSOR_PIN));
 }
