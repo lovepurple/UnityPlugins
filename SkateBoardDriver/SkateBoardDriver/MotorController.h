@@ -25,7 +25,14 @@ private:
 
 	void InitializePWM();
 
+	//是否正在刹车中
+	bool m_isBraking = false;
+
+	unsigned long m_startBrakingTime = 0;
+
 	static float m_GearToPWM[5];
+
+	int (*pGetMotorPWMByDeltaTime)(unsigned long deltaTimeMill);
 
 public:
 	void init();
@@ -71,13 +78,18 @@ public:
 	 */
 	int ConvertPWMToGear(float pwmDuty);
 
-	//刹车
-	void Break();
+	/**
+	 * 刹车
+	 */
+	void Brake();
+
+	/**
+	 * 立即刹停
+	 */
+	void BrakeImmediately();
+
 
 	/**************消息处理************************/
-	//todo:之后用(void*)
-	//处理获取当前速度消息
-	//C++常用的方式，对象内存传入，不在函数内分配新的堆内容
 	char* Handle_GetCurrentSpeedMessage();
 
 	//设置速度处理

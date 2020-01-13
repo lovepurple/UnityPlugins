@@ -140,9 +140,15 @@ int MotorControllerClass::ConvertPWMToGear(float pwmDuty)
 	return GEAR_COUNT;
 }
 
-void MotorControllerClass::Break()
+void MotorControllerClass::Brake()
+{
+	
+}
+
+void MotorControllerClass::BrakeImmediately()
 {
 	MotorMinPower();
+	m_isBraking = false;
 }
 
 char* MotorControllerClass::Handle_GetCurrentSpeedMessage()

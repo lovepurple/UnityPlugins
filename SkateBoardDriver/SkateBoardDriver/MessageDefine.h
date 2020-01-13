@@ -28,6 +28,10 @@ enum EMessageDefine
 
 	E_C2D_MOTOR_RPS = 121,			//获取电机每秒转数
 	E_D2C_MOTOR_RPS = 122,			//返回电机每秒转数
+	E_C2D_BRAKE_LINEAR = 123,        //柔和刹车
+	E_C2D_BRAKE_FORCE = 124         //强制刹车
+
+	//accelerator
 };
 
 

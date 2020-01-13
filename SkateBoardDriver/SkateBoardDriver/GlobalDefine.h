@@ -23,6 +23,7 @@
 #define SYNC_GEAR_RATIO 11.0f/36.0f		//todo :同步轮的比例 需要确定小齿与大齿的比值
 #define WHEEL_METER_PER_ROUND 0.2608	//轮子一圈周长
 #define MOTOR_MAX_RPS 10                //电机最大转数 r/s
+#define MOTOR_BRAKE_DELTA_TIME 10      //刹车deltaTime
 
 #define BATTERY_SENSOR_PIN A7 			//电量测量PIN
 
