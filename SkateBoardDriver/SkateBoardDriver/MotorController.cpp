@@ -11,6 +11,7 @@ void MotorControllerClass::init()
 	pinMode(ESC_POWER_PIN, OUTPUT);
 	PowerOff();
 
+	
 }
 
 bool MotorControllerClass::IsPowerOn()

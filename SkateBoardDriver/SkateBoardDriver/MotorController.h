@@ -32,9 +32,12 @@ private:
 
 	static float m_GearToPWM[5];
 
+
 	int (*pGetMotorPWMByDeltaTime)(unsigned long deltaTimeMill);
 
 public:
+	float m_skateMaxAccelerator;			//滑板运行时最大油门(后续可以由手机端直接设置)
+
 	void init();
 
 	bool IsPowerOn();
