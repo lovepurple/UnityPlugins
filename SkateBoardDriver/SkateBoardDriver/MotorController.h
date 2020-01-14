@@ -33,10 +33,16 @@ private:
 	static float m_GearToPWM[5];
 
 
-	int (*pGetMotorPWMByDeltaTime)(unsigned long deltaTimeMill);
+	//float (*pGetMotorPWMByDeltaTime)(unsigned long deltaTimeMill);
+
+	/**
+	 * 根据刹车时间，获取归一化的PWM（使用抛物线模型）
+	 */
+	float GetNormalizePWMByDeltaTime(unsigned long deltaTimeMill);
 
 public:
 	float m_skateMaxAccelerator;			//滑板运行时最大油门(后续可以由手机端直接设置)
+	unsigned int m_maxSpeedBrakeMillTime = 4500;		//最大油门的刹车时间
 
 	void init();
 

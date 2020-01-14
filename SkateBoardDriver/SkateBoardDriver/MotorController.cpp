@@ -5,13 +5,18 @@ void MotorControllerClass::InitializePWM()
 	Timer1.initialize(1000000 / ECS_FREQUENCY);		//在MotorController构造里init 不执行，不确定是否是有延迟或其它位置有更改
 }
 
+float MotorControllerClass::GetNormalizePWMByDeltaTime(unsigned long deltaTimeMill)
+{
+	 float normalizeMotorPWM = 
+}
+
 void MotorControllerClass::init()
 {
 	pinMode(MOTOR_POWER_PIN, OUTPUT);
 	pinMode(ESC_POWER_PIN, OUTPUT);
 	PowerOff();
 
-	
+	/*this->pGetMotorPWMByDeltaTime = &MotorControllerClass::GetMotorPWMByDelta;*/
 }
 
 bool MotorControllerClass::IsPowerOn()
@@ -143,7 +148,7 @@ int MotorControllerClass::ConvertPWMToGear(float pwmDuty)
 
 void MotorControllerClass::Brake()
 {
-	
+
 }
 
 void MotorControllerClass::BrakeImmediately()
