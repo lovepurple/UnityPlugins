@@ -27,6 +27,11 @@
 
 #define BATTERY_SENSOR_PIN A7 			//电量测量PIN
 
+#define ACCELERATOR_FACTOR 0.25
+
+#define BRAKE_IMMEDIATELY_ACCELERATOR 0.25      //当油门小于这个值时可以直接刹停
+#define BRAKE_INTERVAL_MILLS 20         //刹车减一级持续的时间
+
 //测距模块占用引脚
 #define SONAR_TRIG_PIN 13
 #define SONAR_ECHO_PIN 12		

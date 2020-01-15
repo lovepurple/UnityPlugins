@@ -8,7 +8,6 @@
 #include "DynamicBuffer.h"
 #include "MessageHandler.h"
 
-long last;
 void setup()
 {
 	Serial.begin(9600);
@@ -18,18 +17,16 @@ void setup()
 
 	}
 
-	DriverMonitor.init();
+	DriverController.init();
 
 	//SpeedMonitor.EnableHallSensorMonitor(true);
 	//VisibilityMonitor.EnableVisibilityMonitor(true);
-
-	last = millis();
 }
 
 void loop() {
 
-	DriverMonitor.Tick();
+	DriverController.Tick();
 
 	MessageHandler.Tick();
-	
+
 }

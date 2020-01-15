@@ -22,7 +22,8 @@ void VisibilityMonitorClass::Tick()
 		UtilityClass::DebugLog("Sonar Distance :" + String(this->SonarDistance) + "cm", true);
 	}
 
-	AutoSlowDown();
+	if (SpeedMonitor.GetMotorRoundPerSecond() > 0)
+		AutoSlowDown();
 }
 
 void VisibilityMonitorClass::EnableVisibilityMonitor(bool isEnable)
@@ -37,7 +38,12 @@ void VisibilityMonitorClass::AutoSlowDown()
 	if (this->SonarDistance > 0)
 	{
 		if (this->SonarDistance <= EMERGENCY_STOP_DISTANCE)
+			MotorController.BrakeImmediately();
+
+		//todoÆäËü¾àÀë¼õËÙ
+		else if (this->SonarDistance <= 50)
 			MotorController.Brake();
+
 	}
 }
 

@@ -4,20 +4,24 @@
 
 #include "DriverMonitor.h"
 
-void DriverMonitorClass::init()
+void DriverControllerClass::init()
 {
+	MotorController.init();
+
 	VisibilityMonitor.init();
 
 	SpeedMonitor.Init();
 }
 
-void DriverMonitorClass::Tick()
+void DriverControllerClass::Tick()
 {
+	MotorController.Tick();
+
 	VisibilityMonitor.Tick();
 
 	SpeedMonitor.Tick();
 }
 
 
-DriverMonitorClass DriverMonitor;
+DriverControllerClass DriverController;
 

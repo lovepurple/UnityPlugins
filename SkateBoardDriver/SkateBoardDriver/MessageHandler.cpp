@@ -5,8 +5,6 @@ MessageHandlerClass::MessageHandlerClass()
 	MessageHandler.m_pBluetooth = new NeoSWSerial(BLUETOOTH_RX_PIN, BLUETOOTH_TX_PIN);
 	MessageHandler.m_pBluetooth->begin(BLUETOOTH_BAUD);
 	MessageHandler.m_pBluetooth->listen();
-
-	MotorController.init();
 }
 
 MessageHandlerClass::~MessageHandlerClass()

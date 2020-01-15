@@ -29,9 +29,12 @@ bool SpeedMonitorClass::RefreshSensorValidState()
 	{
 		this->SignalCountPerSecond = tempSignalCount / 2;
 
-		UtilityClass::DebugLog("Motor Speed :", false);
-		UtilityClass::DebugLog(String(GetMotorRoundPerSecond()), false);
-		UtilityClass::DebugLog("RPS", true);
+		if (GetMotorRoundPerSecond() > 0)
+		{
+			UtilityClass::DebugLog("Motor Speed :", false);
+			UtilityClass::DebugLog(String(GetMotorRoundPerSecond()), false);
+			UtilityClass::DebugLog("RPS", true);
+		}
 
 		lastPeriodBeginTime = millis();
 

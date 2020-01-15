@@ -28,7 +28,8 @@ private:
 	//是否正在刹车中
 	bool m_isBraking = false;
 
-	unsigned long m_startBrakingTime = 0;
+	float m_brakingNormalizedTime = 0;
+	unsigned long m_lastSlowMill;
 
 	static float m_GearToPWM[5];
 
@@ -36,9 +37,11 @@ private:
 	//float (*pGetMotorPWMByDeltaTime)(unsigned long deltaTimeMill);
 
 	/**
-	 * 根据刹车时间，获取归一化的PWM（使用抛物线模型）
+	 * 根据刹车时间，获取归一化的油门大小（使用抛物线模型）
+
 	 */
-	float GetNormalizePWMByDeltaTime(unsigned long deltaTimeMill);
+	float GetNormalizeAcceleratorByDeltaTime(unsigned long deltaTimeMill);
+
 
 public:
 	float m_skateMaxAccelerator;			//滑板运行时最大油门(后续可以由手机端直接设置)
@@ -51,6 +54,8 @@ public:
 	void PowerOn();
 
 	void PowerOff();
+
+	void Tick();
 
 	//初始化电调
 	void InitializeESC();
@@ -68,8 +73,13 @@ public:
 	//使用百分比设置速度
 	bool SetMotorPower(const float percentage01);
 
-	//获取当前百分比的速度
-	float GetMotorPower();
+	//获取当前百分比的油门大小
+	float GetMotorNormalizedAccelerator();
+
+	/**
+	 * 设置油门大小
+	 */
+	void SetMotorByNormalizedAccelerator(const float normalizedAccelerator);
 
 	//使用占空比设置速度
 	void SetSpeedByDuty(float pwmDuty);

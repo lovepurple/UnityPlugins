@@ -9,10 +9,11 @@
 #include "WProgram.h"
 #endif
 
+#include "MotorController.h"
 #include "VisibilityMonitor.h"
 #include "SpeedMonitor.h"
 
-class DriverMonitorClass
+class DriverControllerClass
 {
 protected:
 
@@ -24,7 +25,7 @@ public:
 	void Tick();
 };
 
-extern DriverMonitorClass DriverMonitor;
+extern DriverControllerClass DriverController;
 
 #endif
 
