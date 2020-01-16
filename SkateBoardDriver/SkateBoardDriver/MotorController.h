@@ -29,7 +29,7 @@ private:
 	float m_brakingNormalizedTimeMill = 0;
 
 	//减速的目标油门, 0表示刹停
-	float m_breakingEndNormalizedAccelerator = 0f;
+	float m_breakingEndNormalizedAccelerator = 0.0f;
 
 	unsigned long m_lastSlowMill;
 
@@ -42,7 +42,6 @@ private:
 
 public:
 	float m_skateMaxAccelerator;			//滑板运行时最大油门(后续可以由手机端直接设置)
-	unsigned int m_maxSpeedBrakeMillTime = 4500;		//最大油门的刹车时间
 
 	void init();
 

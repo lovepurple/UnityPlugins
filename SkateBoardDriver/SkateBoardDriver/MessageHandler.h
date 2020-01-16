@@ -17,6 +17,7 @@
 #include "Utility.h"
 #include "MotorController.h"
 #include "SystemController.h"
+#include "DriverMonitor.h"
 
 /**
  * Arduino 消息处理类

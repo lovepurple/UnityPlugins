@@ -8,7 +8,7 @@ void MotorControllerClass::InitializePWM()
 float MotorControllerClass::GetNormalizeAcceleratorByDeltaTime(unsigned long deltaTimeMill)
 {
 	//y = 1 - (1/maxTime*maxTime)*x *x
-	float a = (float)deltaTimeMill / this->m_maxSpeedBrakeMillTime;
+	float a = (float)deltaTimeMill / BRAKE_TOTAL_TIME_MILL;
 	float normalizeAccelerator = 1.0 - a * a;
 	return normalizeAccelerator;
 }
@@ -98,7 +98,7 @@ void MotorControllerClass::MotorStarup()
 	PowerOn();
 
 	DriverController.IsEnable(true);
-	
+
 	//}
 }
 
@@ -130,8 +130,6 @@ bool MotorControllerClass::SetMotorPower(const float percentage01)
 float MotorControllerClass::GetMotorNormalizedAccelerator()
 {
 	float normalizedAccelerator = Utility.Remap(this->m_currentMotorDuty, MOTOR_MIN_DUTY, this->m_skateMaxAccelerator, 0.0, 1.0);
-	Serial.println(this->m_currentMotorDuty);
-	Serial.println(this->m_skateMaxAccelerator);
 
 	return normalizedAccelerator;
 }
@@ -149,8 +147,6 @@ void MotorControllerClass::SetSpeedByDuty(float pwmDuty)
 		duty = MOTOR_MAX_DUTY;
 	else if (pwmDuty < MOTOR_MIN_DUTY)
 		duty = MOTOR_MIN_DUTY;
-
-	Utility.DebugLog(String(pwmDuty), true);
 
 	this->m_currentMotorDuty = duty;
 	Timer1.pwm(ESC_A_PIN, duty * 1023);

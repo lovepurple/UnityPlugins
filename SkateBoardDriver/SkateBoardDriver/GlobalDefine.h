@@ -27,10 +27,11 @@
 
 #define BATTERY_SENSOR_PIN A7 			//电量测量PIN
 
-#define ACCELERATOR_FACTOR 0.25
+#define ACCELERATOR_FACTOR 0.25     //油门与实际PWM的系数，(档位与实际电机PWM的转换)
 
 #define BRAKE_IMMEDIATELY_ACCELERATOR 0.25      //当油门小于这个值时可以直接刹停
-#define BRAKE_INTERVAL_MILLS 20         //刹车减一级持续的时间
+#define BRAKE_INTERVAL_MILLS 100         //刹车减一级持续的时间
+#define BRAKE_TOTAL_TIME_MILL 4000          //最大速度刹车时间
 
 //测距模块占用引脚
 #define SONAR_TRIG_PIN 13
