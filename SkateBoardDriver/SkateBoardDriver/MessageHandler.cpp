@@ -98,6 +98,12 @@ void MessageHandlerClass::OnHandleMessage(Message& message)
 		SendMessage(pMotorRPSBuffer);
 		break;
 	}
+	case  E_C2D_BRAKE_LINEAR:
+		MotorController.Brake();
+		break;
+	case  E_C2D_BRAKE_FORCE:
+		MotorController.BrakeImmediately();
+		break;
 	}
 }
 

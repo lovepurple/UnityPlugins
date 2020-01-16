@@ -20,6 +20,8 @@ protected:
 private:
 
 public:
+	void IsEnable(bool isEnable);
+
 	void init();
 
 	void Tick();

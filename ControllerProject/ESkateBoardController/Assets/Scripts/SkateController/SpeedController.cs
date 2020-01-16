@@ -11,6 +11,8 @@ public class SpeedController : Singleton<SpeedController>
     public const int GEAR_COUNT = 4;
     public const float GEAR_POWER_BASIC = 0.25f;      //实际挡位的基数(0~1) 如果是1 太快,
 
+    public const float BRAKE_FORCE_SPEED = 5.0f;       //这个速度可以直接刹停
+
     private int m_currentGear = 0;
     private uint m_motorRoundPerSecond = 0;      //电机每秒转数
 
@@ -132,6 +134,26 @@ public class SpeedController : Singleton<SpeedController>
         char[] motorRpsData = (char[])recvData;
         uint motorRps = DigitUtility.GetUInt32(motorRpsData);
         this.m_motorRoundPerSecond = motorRps;
+    }
+
+    /// <summary>
+    /// 直接刹停
+    /// </summary>
+    public void BrakeImmediately()
+    {
+        List<byte> messageBuffer = SkateMessageHandler.GetSkateMessage(MessageDefine.E_C2D_BRAKE_FORCE);
+
+        BluetoothProxy.Intance.SendData(messageBuffer);
+    }
+
+    /// <summary>
+    /// 柔和刹车
+    /// </summary>
+    public void BrakeSoftly()
+    {
+        List<byte> messageBuffer = SkateMessageHandler.GetSkateMessage(MessageDefine.E_C2D_BRAKE_LINEAR);
+
+        BluetoothProxy.Intance.SendData(messageBuffer);
     }
 
     public float SkateSpeed => GetSkateSpeedKilometerPerHour(this.m_motorRoundPerSecond);

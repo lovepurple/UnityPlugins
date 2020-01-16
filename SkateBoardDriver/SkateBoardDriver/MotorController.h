@@ -13,9 +13,6 @@
 #include "Utility.h"
 #include "MessageDefine.h"
 #include "MessageHandler.h"
-#include "SpeedMonitor.h"
-#include "VisibilityMonitor.h"
-
 
 class MotorControllerClass
 {
@@ -28,20 +25,20 @@ private:
 	//是否正在刹车中
 	bool m_isBraking = false;
 
-	float m_brakingNormalizedTime = 0;
+	//刹车期间内的时间
+	float m_brakingNormalizedTimeMill = 0;
+
+	//减速的目标油门, 0表示刹停
+	float m_breakingEndNormalizedAccelerator = 0f;
+
 	unsigned long m_lastSlowMill;
 
 	static float m_GearToPWM[5];
 
-
-	//float (*pGetMotorPWMByDeltaTime)(unsigned long deltaTimeMill);
-
 	/**
 	 * 根据刹车时间，获取归一化的油门大小（使用抛物线模型）
-
 	 */
 	float GetNormalizeAcceleratorByDeltaTime(unsigned long deltaTimeMill);
-
 
 public:
 	float m_skateMaxAccelerator;			//滑板运行时最大油门(后续可以由手机端直接设置)
@@ -107,7 +104,6 @@ public:
 	 */
 	void BrakeImmediately();
 
-
 	/**************消息处理************************/
 	char* Handle_GetCurrentSpeedMessage();
 
@@ -118,4 +114,3 @@ public:
 extern MotorControllerClass MotorController;
 
 #endif
-

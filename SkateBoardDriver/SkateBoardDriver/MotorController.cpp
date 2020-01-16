@@ -42,8 +42,7 @@ void MotorControllerClass::PowerOff()
 	MotorMinPower();
 	Timer1.stop();
 
-	SpeedMonitor.EnableHallSensorMonitor(false);
-	VisibilityMonitor.EnableVisibilityMonitor(false);
+	DriverController.IsEnable(false);
 }
 
 void MotorControllerClass::Tick()
@@ -64,8 +63,8 @@ void MotorControllerClass::Tick()
 		{
 			if (millis() - this->m_lastSlowMill >= BRAKE_INTERVAL_MILLS)
 			{
-				this->m_brakingNormalizedTime += BRAKE_INTERVAL_MILLS;
-				float normalizedAccelerator = GetNormalizeAcceleratorByDeltaTime(this->m_brakingNormalizedTime);
+				this->m_brakingNormalizedTimeMill += BRAKE_INTERVAL_MILLS;
+				float normalizedAccelerator = GetNormalizeAcceleratorByDeltaTime(this->m_brakingNormalizedTimeMill);
 
 				Utility.DebugLog("Braking,normalized accelerator", false);
 				Utility.DebugLog(String(normalizedAccelerator), true);
@@ -98,8 +97,8 @@ void MotorControllerClass::MotorStarup()
 	delay(500);
 	PowerOn();
 
-	SpeedMonitor.EnableHallSensorMonitor(true);
-	VisibilityMonitor.EnableVisibilityMonitor(true);
+	DriverController.IsEnable(true);
+	
 	//}
 }
 
@@ -196,13 +195,13 @@ void MotorControllerClass::Brake()
 	if (!this->m_isBraking)		//todo:是否打断一上一个
 	{
 		Utility.DebugLog("Start Soft Brake:", false);
-		Utility.DebugLog("current NormalizedAccelerator :" + String(GetMotorNormalizedAccelerator()), true);
-		this->m_brakingNormalizedTime = sqrt(1.0f - GetMotorNormalizedAccelerator()) * m_maxSpeedBrakeMillTime;
+		this->m_brakingNormalizedTimeMill = sqrt(1.0f - GetMotorNormalizedAccelerator()) * m_maxSpeedBrakeMillTime;
 
+		this->m_breakingEndNormalizedAccelerator = 0.0f;
 		this->m_isBraking = true;
 		this->m_lastSlowMill = millis();
 
-		Utility.DebugLog(String(this->m_brakingNormalizedTime), true);
+		Utility.DebugLog(String(this->m_brakingNormalizedTimeMill), true);
 
 	}
 }
@@ -237,15 +236,15 @@ void MotorControllerClass::Handle_SetPercentageSpeedMessage(Message& message)
 {
 	//滤掉错包
 	if (message.messageBodySize != 3)
-	{
-		Serial.print("--------------");
 		return;
-	}
+
 	char* pSpeedBuffer = message.messageBody;
 	int speedThousand = atoi(pSpeedBuffer);
 
 	Utility.DebugLog("C2D_MOTOR_DRIVE", false);
 	Utility.DebugLog(String(speedThousand / 999.0f), true);
+
+	this->m_isBraking = false;
 
 	this->m_hasChangedPower = this->SetMotorPower(speedThousand / 999.0f);
 }

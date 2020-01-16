@@ -115,9 +115,15 @@ public class SkateOperatorPanel : UIPanelLogicBase
 
     }
 
+    /// <summary>
+    /// 手指抬起，缓慢刹车
+    /// </summary>
     private void OnJoyStickMoveEnd()
     {
+        if (SpeedController.Instance.SkateSpeed > 0)
+            SpeedController.Instance.BrakeSoftly();
     }
+
 
     private void OnJoyStickMoveStart()
     {

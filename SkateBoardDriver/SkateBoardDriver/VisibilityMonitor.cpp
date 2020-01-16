@@ -43,7 +43,6 @@ void VisibilityMonitorClass::AutoSlowDown()
 		//todoÆäËü¾àÀë¼õËÙ
 		else if (this->SonarDistance <= 50)
 			MotorController.Brake();
-
 	}
 }
 

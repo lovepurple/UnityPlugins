@@ -4,6 +4,12 @@
 
 #include "DriverMonitor.h"
 
+void DriverControllerClass::IsEnable(bool isEnable)
+{
+	SpeedMonitor.EnableHallSensorMonitor(isEnable);
+	VisibilityMonitor.EnableVisibilityMonitor(isEnable);
+}
+
 void DriverControllerClass::init()
 {
 	MotorController.init();
