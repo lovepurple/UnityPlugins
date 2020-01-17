@@ -20,6 +20,12 @@ private:
 	float m_currentMotorDuty = 0.0;
 	bool m_hasChangedPower = true;
 
+
+	float m_skateMaxAccelerator;					//滑板运行时最大油门(后续可以由手机端直接设置)
+	unsigned int m_maxSpeedBrakeMillTime;			//滑板最大速度的刹车时间
+	unsigned int m_gearCount = GEAR_COUNT;
+
+
 	void InitializePWM();
 
 	//是否正在刹车中
@@ -33,16 +39,19 @@ private:
 
 	unsigned long m_lastSlowMill;
 
-	static float m_GearToPWM[5];
+	float m_GearToPWM[GEAR_COUNT];
+
 
 	/**
 	 * 根据刹车时间，获取归一化的油门大小（使用抛物线模型）
 	 */
 	float GetNormalizeAcceleratorByDeltaTime(unsigned long deltaTimeMill);
 
+	/**
+	 * 根据当前最大油门刷新档位信息
+	 */
+	void RefreshSkateGearByCurrentAccelerator();
 public:
-	float m_skateMaxAccelerator;			//滑板运行时最大油门(后续可以由手机端直接设置)
-
 	void init();
 
 	bool IsPowerOn();
@@ -108,6 +117,21 @@ public:
 
 	//设置速度处理
 	void Handle_SetPercentageSpeedMessage(Message& message);
+
+	/**
+	 * 设置滑板最大油门
+	 */
+	void SetSkateMaxAccelerator(Message& message);
+
+	/**
+	 * 设置滑板挡位个数
+	 */
+	void SetSkateGearCount(Message& message);
+
+	/**
+	 * 设置滑板最大油门的刹车时间
+	 */
+	void SetSkateMaxAcceleratorBrakeTime(Message& message);
 };
 
 extern MotorControllerClass MotorController;

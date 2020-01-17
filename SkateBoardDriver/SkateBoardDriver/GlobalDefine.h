@@ -18,19 +18,18 @@
 
 #define MOTOR_MIN_DUTY 0.05             //电机最小速度的占空比
 #define MOTOR_MAX_DUTY 0.1              //电机最大速度的占空比
-#define GEAR_COUNT 5                    //速度档数量
+#define GEAR_COUNT 5                    //默认档位数量
 
-#define SYNC_GEAR_RATIO 11.0f/36.0f		//todo :同步轮的比例 需要确定小齿与大齿的比值
+#define SYNC_GEAR_RATIO 11.0f/36.0f		//同步轮的比例小齿与大齿的比值
 #define WHEEL_METER_PER_ROUND 0.2608	//轮子一圈周长
 #define MOTOR_MAX_RPS 10                //电机最大转数 r/s
-#define MOTOR_BRAKE_DELTA_TIME 10      //刹车deltaTime
 
 #define BATTERY_SENSOR_PIN A7 			//电量测量PIN
 
-#define ACCELERATOR_FACTOR 0.25     //油门与实际PWM的系数，(档位与实际电机PWM的转换)
+#define ACCELERATOR_FACTOR 0.25     //默认油门与实际PWM的系数，(档位与实际电机PWM的转换)
 
-#define BRAKE_IMMEDIATELY_ACCELERATOR 0.25      //当油门小于这个值时可以直接刹停
-#define BRAKE_INTERVAL_MILLS 100         //刹车减一级持续的时间
+#define BRAKE_IMMEDIATELY_ACCELERATOR 0.25  //当油门小于这个值时可以直接刹停
+#define BRAKE_INTERVAL_MILLS 100            //刹车减一级持续的时间
 #define BRAKE_TOTAL_TIME_MILL 4000          //最大速度刹车时间
 
 //测距模块占用引脚
@@ -48,6 +47,3 @@
 
 //声明另一个类，include 或有循环include的问题 
 class MessageHandler;
-
-//需要加上域
-typedef void (MessageHandler::* SendMessageDelegate)(byte*);

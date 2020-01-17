@@ -104,6 +104,15 @@ void MessageHandlerClass::OnHandleMessage(Message& message)
 	case  E_C2D_BRAKE_FORCE:
 		MotorController.BrakeImmediately();
 		break;
+	case E_C2D_SETTING_SKATE_MAX_ACCLERATOR:
+		MotorController.SetSkateMaxAccelerator(message);
+		break;
+	case E_C2D_SETTING_SKATE_MAX_ACCLERATOR_BRAKE_TIME:
+		MotorController.SetSkateMaxAcceleratorBrakeTime(message);
+		break;
+	case E_C2D_SETTING_SKATE_GEAR_COUNT:
+		MotorController.SetSkateGearCount(message);
+		break;
 	}
 }
 

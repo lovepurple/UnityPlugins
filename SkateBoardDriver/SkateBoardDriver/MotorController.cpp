@@ -13,6 +13,12 @@ float MotorControllerClass::GetNormalizeAcceleratorByDeltaTime(unsigned long del
 	return normalizeAccelerator;
 }
 
+void MotorControllerClass::RefreshSkateGearByCurrentAccelerator()
+{
+	for (unsigned int i = 0; i < this->m_gearCount; ++i)
+		this->m_GearToPWM[i] = Utility.Lerp(MOTOR_MIN_DUTY, m_skateMaxAccelerator, (float)i / this->m_gearCount);
+}
+
 void MotorControllerClass::init()
 {
 	pinMode(MOTOR_POWER_PIN, OUTPUT);
@@ -20,6 +26,9 @@ void MotorControllerClass::init()
 	PowerOff();
 
 	this->m_skateMaxAccelerator = Utility.Lerp(MOTOR_MIN_DUTY, MOTOR_MAX_DUTY, ACCELERATOR_FACTOR);
+	this->m_maxSpeedBrakeMillTime = BRAKE_TOTAL_TIME_MILL;
+
+	RefreshSkateGearByCurrentAccelerator();
 }
 
 bool MotorControllerClass::IsPowerOn()
@@ -245,7 +254,62 @@ void MotorControllerClass::Handle_SetPercentageSpeedMessage(Message& message)
 	this->m_hasChangedPower = this->SetMotorPower(speedThousand / 999.0f);
 }
 
-float MotorControllerClass::m_GearToPWM[5] = { 0.05f,0.055f,0.06f,0.065f,0.07f };
+//消息格式  油门大小 例如: 255  ,0.25油门
+void MotorControllerClass::SetSkateMaxAccelerator(Message& message)
+{
+	//油门设置是个缩放值 例如25转换到实际电机的PWM 就是 Lerp(PWM_MIN,PWM_MAX,25 /100) 为最大油门
+	//因为不经过转换太快了
+	//比例不能超过0.3 否则太快
+	if (message.messageBodySize != 2)
+		return;
+
+	char* pAcceleratorMessage = message.messageBody;
+	int iAcceleratorMessage = atoi(pAcceleratorMessage);
+	float acceleratorFactor = iAcceleratorMessage * 0.01f;
+
+	Utility.DebugLog("E_C2D_SETTING_SKATE_MAX_ACCLERATOR:", false);
+	Utility.DebugLog("MaxAccelerator:" + String(acceleratorFactor), false);
+
+	this->m_skateMaxAccelerator = Utility.Lerp(MOTOR_MIN_DUTY, MOTOR_MAX_DUTY, acceleratorFactor);
+
+	RefreshSkateGearByCurrentAccelerator();
+}
+
+//消息格式  挡位个数 例如：5 5个挡位
+void MotorControllerClass::SetSkateGearCount(Message& message)
+{
+	if (message.messageBodySize != 1)
+		return;
+
+	char* pGearMessage = message.messageBody;
+	int iGearCount = atoi(pGearMessage);
+
+	if (iGearCount > GEAR_COUNT)
+		return;
+
+	Utility.DebugLog("E_C2D_SETTING_SKATE_GEAR_COUNT:", false);
+	Utility.DebugLog(String(iGearCount), true);
+
+	this->m_gearCount = iGearCount;
+
+	RefreshSkateGearByCurrentAccelerator();
+}
+
+//消息格式  刹车时间(4个字节) 例如： 4000  4000毫秒刹停
+void MotorControllerClass::SetSkateMaxAcceleratorBrakeTime(Message& message)
+{
+	if (message.messageBodySize != 4)
+		return;
+
+	char* pBrakeTimeMill = message.messageBody;
+	int brakeTime = atoi(pBrakeTimeMill);
+
+	Utility.DebugLog("E_C2D_SETTING_SKATE_MAX_ACCLERATOR_BRAKE_TIME:", false);
+	Utility.DebugLog(String(brakeTime), true);
+
+	this->m_maxSpeedBrakeMillTime = brakeTime;
+}
+
 
 
 MotorControllerClass MotorController;
