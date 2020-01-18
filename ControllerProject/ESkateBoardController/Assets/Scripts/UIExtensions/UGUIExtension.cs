@@ -39,6 +39,27 @@ public static class UGUIExtension
     }
 
 
+    public static void AddOnDragStartCallback(this Selectable selectable, VectorDelegate callback)
+    {
+        EventTriggerListener.Get(selectable.gameObject).onDragStart += callback;
+    }
+
+    public static void RemoveDragStartCallback(this Selectable selectable, VectorDelegate callback)
+    {
+        EventTriggerListener.Get(selectable.gameObject).onDragStart -= callback;
+    }
+
+    public static void AddOnDragEndCallback(this Selectable selectable, VectorDelegate callback)
+    {
+        EventTriggerListener.Get(selectable.gameObject).onDragEnd += callback;
+    }
+
+    public static void RemoveDragEndCallback(this Selectable selectable, VectorDelegate callback)
+    {
+        EventTriggerListener.Get(selectable.gameObject).onDragEnd -= callback;
+    }
+
+
 
     public static void RemoveClickCallback(this MaskableGraphic graphicWithRayCast, VoidDelegate callback)
     {

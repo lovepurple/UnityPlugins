@@ -4,7 +4,7 @@ using UnityEngine.EventSystems;
 
 namespace GOGUI
 {
-    public class EventTriggerListener : UIBehaviour, IPointerDownHandler, IPointerEnterHandler, IPointerExitHandler, IPointerUpHandler,ISelectHandler,IDeselectHandler
+    public class EventTriggerListener : UIBehaviour, IPointerDownHandler, IPointerEnterHandler, IPointerExitHandler, IPointerUpHandler, ISelectHandler, IDeselectHandler, IDragHandler, IBeginDragHandler, IEndDragHandler
     {
         private const float DURATION_THRESHOLD = 0.5f;
 
@@ -30,6 +30,9 @@ namespace GOGUI
         public VectorDelegate onClickPosition;
         public VectorDelegate OnLongPress;
         public VoidDelegate OnLongPressEnd;
+        public Vector2Delegate onDrag;
+        public VectorDelegate onDragStart;
+        public VectorDelegate onDragEnd;
 
         public FloatDelegate onLongClick;
 
@@ -58,10 +61,10 @@ namespace GOGUI
         }
         //public void OnPointerClick(PointerEventData eventData)
         //{
-            //PointerEventData = eventData;
-            //if (GlobalClickCallback != null) GlobalClickCallback(go);
-            //if (onClick != null) onClick(go);
-            //if (onClickPosition != null) onClickPosition(go, eventData.position);
+        //PointerEventData = eventData;
+        //if (GlobalClickCallback != null) GlobalClickCallback(go);
+        //if (onClick != null) onClick(go);
+        //if (onClickPosition != null) onClickPosition(go, eventData.position);
         //}
 
 
@@ -95,7 +98,7 @@ namespace GOGUI
             if (onUpAndState != null)
                 onUpAndState(go, eventData.pointerCurrentRaycast.gameObject == eventData.pointerPressRaycast.gameObject);
             if (this.m_onPressing)
-            {            
+            {
                 if (OnLongPressEnd != null && this.m_onPressEventTriggered)
                     OnLongPressEnd.Invoke(go);
 
@@ -109,7 +112,7 @@ namespace GOGUI
             this.m_onPressEventTriggered = false;
 
         }
-        
+
         public void OnSelect(BaseEventData eventData)
         {
             PointerEventData = null;
@@ -197,8 +200,23 @@ namespace GOGUI
                     m_curPressTime = 0f;
                 }
             }
-            
+        }
+        public void OnDrag(PointerEventData eventData)
+        {
+            if (onDrag != null)
+                onDrag(go, eventData.delta, eventData.position);
         }
 
+        public void OnBeginDrag(PointerEventData eventData)
+        {
+            if (onDragStart != null)
+                onDragStart(go, eventData.position);
+        }
+
+        public void OnEndDrag(PointerEventData eventData)
+        {
+            if (onDragEnd != null)
+                onDragEnd(go, eventData.position);
+        }
     }
 }

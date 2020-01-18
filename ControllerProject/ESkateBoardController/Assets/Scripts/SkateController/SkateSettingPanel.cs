@@ -1,5 +1,8 @@
 using EngineCore;
+using EngineCore.Utility;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -12,6 +15,10 @@ public class SkateSettingPanel : UIPanelLogicBase
     private MaskableGraphic m_btnPowerOff = null;
 
     private MaskableGraphic m_btnRefreshBattery = null;
+
+    private SliderSettingComponent m_maxAccelerationSettingComponent;
+    private SliderSettingComponent m_gearSettingComponent;
+    private SliderSettingComponent m_brakeTimeSettingComponent;
 
     public SkateSettingPanel(RectTransform uiPanelRootTransfrom) : base(uiPanelRootTransfrom)
     {
@@ -26,6 +33,22 @@ public class SkateSettingPanel : UIPanelLogicBase
         m_btnDown = m_panelRootObject.GetComponent<MaskableGraphic>("ButtonGroup/Button (3)");
         m_btnUp = m_panelRootObject.GetComponent<MaskableGraphic>("ButtonGroup/Button (4)");
         m_btnRefreshBattery = m_panelRootObject.GetComponent<MaskableGraphic>("ButtonGroup/Button (6)");
+
+        m_maxAccelerationSettingComponent = new SliderSettingComponent(m_panelRootObject.Find("SkateSettingGroup/setting_accelerator_factor").gameObject);
+        m_gearSettingComponent = new SliderSettingComponent(m_panelRootObject.Find("SkateSettingGroup/setting_accelerator_gear").gameObject);
+        m_brakeTimeSettingComponent = new SliderSettingComponent(m_panelRootObject.Find("SkateSettingGroup/setting_brake_time").gameObject);
+
+        m_maxAccelerationSettingComponent.SliderComponent.maxValue = GlobalDefine.MAX_ACCELERATOR;
+        m_gearSettingComponent.SliderComponent.maxValue = GlobalDefine.MAX_GEAR_COUNT;
+        m_brakeTimeSettingComponent.SliderComponent.maxValue = GlobalDefine.MAX_BRAKE_TIME;
+
+        m_brakeTimeSettingComponent.SetActive(true);
+        m_maxAccelerationSettingComponent.SetActive(true);
+        m_gearSettingComponent.SetActive(true);
+
+        m_brakeTimeSettingComponent.SetValue(LocalStorage.GetFloat(LocalSetting.E_SKATE_MAX_BRAKE_TIME));
+        m_maxAccelerationSettingComponent.SetValue(LocalStorage.GetFloat(LocalSetting.E_SKATE_MAX_ACCELERATOR));
+        m_gearSettingComponent.SetValue(LocalStorage.GetFloat(LocalSetting.E_SKATE_GEAR_COUNT));
     }
 
     public override void OnEnter(params object[] onEnterParams)
@@ -37,6 +60,12 @@ public class SkateSettingPanel : UIPanelLogicBase
         m_btnUp.AddClickCallback(OnBtnUpClick);
         m_btnPowerOff.AddClickCallback(OnBtnPowerOffClick);
         m_btnRefreshBattery.AddClickCallback(OnBtnRefreshBatteryClick);
+
+     
+
+        m_brakeTimeSettingComponent.AddOnSliderDragEndCallback(OnBrakeTimeSettingFinishCallback);
+        m_maxAccelerationSettingComponent.AddOnSliderDragEndCallback(OnAcceleratorSettingFinishCallback);
+        m_gearSettingComponent.AddOnSliderDragEndCallback(OnGearCountSettingFinishCallback);
     }
 
 
@@ -83,6 +112,26 @@ public class SkateSettingPanel : UIPanelLogicBase
         BluetoothProxy.Intance.SendData(messageBuffer);
     }
 
+    private void OnBrakeTimeSettingFinishCallback(float brakeTime)
+    {
+        int brakeTimeMill = (int)(brakeTime * 1000);
+
+        SpeedController.Instance.SetSkateBrakeTime(brakeTimeMill);
+    }
+
+    private void OnGearCountSettingFinishCallback(float gearCount)
+    {
+        int iGearCount = (int)gearCount;
+
+        SpeedController.Instance.SetSkateGearCount(iGearCount);
+    }
+
+    private void OnAcceleratorSettingFinishCallback(float maxAccelerator)
+    {
+        SpeedController.Instance.SetSkateAccelerator(maxAccelerator);
+    }
+
+
     public override void OnExit()
     {
         base.OnExit();
@@ -92,6 +141,10 @@ public class SkateSettingPanel : UIPanelLogicBase
         m_btnDown.RemoveClickCallback(OnBtnDownClick);
         m_btnUp.RemoveClickCallback(OnBtnUpClick);
         m_btnRefreshBattery.RemoveClickCallback(OnBtnRefreshBatteryClick);
+
+        m_brakeTimeSettingComponent.RemoveOnSliderDragEndCallback(OnBrakeTimeSettingFinishCallback);
+        m_maxAccelerationSettingComponent.RemoveOnSliderDragEndCallback(OnAcceleratorSettingFinishCallback);
+        m_gearSettingComponent.RemoveOnSliderDragEndCallback(OnGearCountSettingFinishCallback);
     }
 
 }

@@ -1,5 +1,6 @@
 ﻿using EngineCore;
 using EngineCore.Utility;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -7,10 +8,6 @@ using UnityEngine;
 
 public class SpeedController : Singleton<SpeedController>
 {
-    //挡位数
-    public const int GEAR_COUNT = 4;
-    public const float GEAR_POWER_BASIC = 0.25f;      //实际挡位的基数(0~1) 如果是1 太快,
-
     public const float BRAKE_FORCE_SPEED = 5.0f;       //这个速度可以直接刹停
 
     private int m_currentGear = 0;
@@ -29,6 +26,9 @@ public class SpeedController : Singleton<SpeedController>
 
     public void InitSpeedController()
     {
+        if (GearCount == 0)
+            GearCount = (int)LocalStorage.GetFloat(LocalSetting.E_SKATE_GEAR_COUNT);
+
         MessageHandler.RegisterMessageHandler((int)MessageDefine.E_D2C_MOTOR_SPEED, OnGetMotorGearResponse);
         MessageHandler.RegisterMessageHandler((int)MessageDefine.E_D2C_MOTOR_RPS, OnGetMotorRoundPerSecondHandler);
         BluetoothEvents.OnBluetoothDeviceStateChangedEvent += OnBluetoothConnectionStateChangedHandler;
@@ -49,7 +49,7 @@ public class SpeedController : Singleton<SpeedController>
         {
             normalizdPower = Mathf.Clamp01(normalizdPower);
             //四舍五入
-            int gear = Mathf.RoundToInt(MathUtil.Remap(normalizdPower, 0, 1.0f, 0, GEAR_COUNT));
+            int gear = Mathf.RoundToInt(MathUtil.Remap(normalizdPower, 0, 1.0f, 0, GearCount));
 
             return gear;
         }
@@ -66,7 +66,7 @@ public class SpeedController : Singleton<SpeedController>
         if (gear <= 0)
             gear = 0;
 
-        if (gear > GEAR_COUNT)
+        if (gear > GearCount)
             return;
 
         //不能跳档
@@ -96,10 +96,10 @@ public class SpeedController : Singleton<SpeedController>
     /// <param name="gear"></param>
     private void SetSkateBoardSpeedByGear(int gear)
     {
-        int speedTemp = (int)MathUtil.Remap(gear, 0, GEAR_COUNT, 0, 999);
-        int speedThoudsand = (int)(speedTemp * GEAR_POWER_BASIC);
+        int speedTemp = (int)MathUtil.Remap(gear, 0, GearCount, 0, 999);
+        //int speedThoudsand = (int)(speedTemp * GEAR_POWER_BASIC);
 
-        List<byte> speedBuffer = DigitUtility.GetFixedLengthBufferList(Encoding.ASCII.GetBytes(speedThoudsand.ToString()).ToList(), 3, (byte)'0');
+        List<byte> speedBuffer = DigitUtility.GetFixedLengthBufferList(Encoding.ASCII.GetBytes(speedTemp.ToString()).ToList(), 3, (byte)'0');
 
         List<byte> messageBuffer = SkateMessageHandler.GetSkateMessage(MessageDefine.E_C2D_MOTOR_DRIVE);
 
@@ -111,7 +111,15 @@ public class SpeedController : Singleton<SpeedController>
     private void OnBluetoothConnectionStateChangedHandler(int bluetoothState)
     {
         if ((BluetoothStatus)bluetoothState == BluetoothStatus.CONNECTED)
+        {
             TimeModule.Instance.SetTimeInterval(RequstMotorRPS, 1);
+            TimeModule.Instance.SetTimeout(() =>
+            {
+                SetSkateAccelerator(LocalStorage.GetFloat(LocalSetting.E_SKATE_MAX_ACCELERATOR));
+                SetSkateBrakeTime(LocalStorage.GetInt(LocalSetting.E_SKATE_MAX_BRAKE_TIME));
+                SetSkateGearCount(LocalStorage.GetInt(LocalSetting.E_SKATE_GEAR_COUNT));
+            }, 1f);
+        }
         else
             TimeModule.Instance.RemoveTimeaction(RequstMotorRPS);
     }
@@ -126,7 +134,47 @@ public class SpeedController : Singleton<SpeedController>
     private void OnGetMotorGearResponse(object data)
     {
         char[] gearData = (char[])data;
-        this.m_currentGear = GetGear(((DigitUtility.GetUInt32(gearData) + 1) * 0.001f) / GEAR_POWER_BASIC);
+        this.m_currentGear = GetGear(((DigitUtility.GetUInt32(gearData) + 1) * 0.001f));
+    }
+
+    public void SetSkateGearCount(int gearCount)
+    {
+        List<byte> messageBuffer = SkateMessageHandler.GetSkateMessage(MessageDefine.E_C2D_SETTING_SKATE_GEAR_COUNT);
+
+        messageBuffer.AddRange(Encoding.ASCII.GetBytes(gearCount.ToString()));
+
+        BluetoothProxy.Intance.SendData(messageBuffer);
+
+        LocalStorage.SaveSetting(LocalSetting.E_SKATE_GEAR_COUNT, gearCount.ToString());
+
+        GearCount = gearCount;
+    }
+
+    public void SetSkateAccelerator(float accelerator01)
+    {
+        List<byte> messageBuffer = SkateMessageHandler.GetSkateMessage(MessageDefine.E_C2D_SETTING_SKATE_MAX_ACCLERATOR);
+        int iMaxAccelerator = (int)(accelerator01 * 100);
+
+        List<byte> acceleratorBuffer = DigitUtility.GetFixedLengthBufferList(Encoding.ASCII.GetBytes(iMaxAccelerator.ToString()).ToList(), 2, (byte)'0');
+
+        messageBuffer.AddRange(acceleratorBuffer);
+
+        BluetoothProxy.Intance.SendData(messageBuffer);
+
+        LocalStorage.SaveSetting(LocalSetting.E_SKATE_MAX_ACCELERATOR, accelerator01.ToString());
+    }
+
+    public void SetSkateBrakeTime(int brakeTimeMill)
+    {
+        List<byte> messageBuffer = SkateMessageHandler.GetSkateMessage(MessageDefine.E_C2D_SETTING_SKATE_MAX_ACCLERATOR_BRAKE_TIME);
+
+        List<byte> brakeTimeBuffer = DigitUtility.GetFixedLengthBufferList(Encoding.ASCII.GetBytes(brakeTimeMill.ToString()).ToList(), 4, (byte)'0');
+
+        messageBuffer.AddRange(brakeTimeBuffer);
+
+        BluetoothProxy.Intance.SendData(messageBuffer);
+
+        LocalStorage.SaveSetting(LocalSetting.E_SKATE_MAX_BRAKE_TIME, brakeTimeMill.ToString());
     }
 
     private void OnGetMotorRoundPerSecondHandler(object recvData)
@@ -157,6 +205,11 @@ public class SpeedController : Singleton<SpeedController>
     }
 
     public float SkateSpeed => GetSkateSpeedKilometerPerHour(this.m_motorRoundPerSecond);
+
+    public int GearCount
+    {
+        get; set;
+    }
 
 
     public int Gear => this.m_currentGear;

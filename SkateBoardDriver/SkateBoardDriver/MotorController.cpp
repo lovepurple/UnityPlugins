@@ -143,10 +143,18 @@ float MotorControllerClass::GetMotorNormalizedAccelerator()
 	return normalizedAccelerator;
 }
 
-void MotorControllerClass::SetMotorByNormalizedAccelerator(const float normalizedAccelerator)
+bool MotorControllerClass::SetMotorByNormalizedAccelerator(const float normalizedAccelerator)
 {
 	float motorDuty = Utility.Remap(normalizedAccelerator, 0, 1, MOTOR_MIN_DUTY, this->m_skateMaxAccelerator);
-	SetSpeedByDuty(motorDuty);
+	bool isDutyChanged = this->m_currentMotorDuty != motorDuty;
+	3
+	Serial.println("=========");
+	Serial.println(motorDuty);
+	Serial.println(m_skateMaxAccelerator);
+	//if (isDutyChanged)
+		SetSpeedByDuty(motorDuty);
+
+	return isDutyChanged;
 }
 
 void MotorControllerClass::SetSpeedByDuty(float pwmDuty)
@@ -221,7 +229,8 @@ char* MotorControllerClass::Handle_GetCurrentSpeedMessage()
 {
 	if (m_hasChangedPower)
 	{
-		int speedThousands = int(GetMotorNormalizedAccelerator() * 1000 - 1);
+		int speedThousands = max(0, int(GetMotorNormalizedAccelerator() * 1000 - 1));
+
 
 		char* pMessageBuffer = DynamicBuffer.GetBuffer();
 		pMessageBuffer[0] = E_D2C_MOTOR_SPEED;
@@ -246,12 +255,12 @@ void MotorControllerClass::Handle_SetPercentageSpeedMessage(Message& message)
 	char* pSpeedBuffer = message.messageBody;
 	int speedThousand = atoi(pSpeedBuffer);
 
-	Utility.DebugLog("C2D_MOTOR_DRIVE", false);
+	Utility.DebugLog("C2D_MOTOR_DRIVE:", false);
 	Utility.DebugLog(String(speedThousand / 999.0f), true);
 
 	this->m_isBraking = false;
 
-	this->m_hasChangedPower = this->SetMotorPower(speedThousand / 999.0f);
+	this->m_hasChangedPower = this->SetMotorByNormalizedAccelerator(speedThousand / 999.0f);
 }
 
 //消息格式  油门大小 例如: 255  ,0.25油门
@@ -268,9 +277,10 @@ void MotorControllerClass::SetSkateMaxAccelerator(Message& message)
 	float acceleratorFactor = iAcceleratorMessage * 0.01f;
 
 	Utility.DebugLog("E_C2D_SETTING_SKATE_MAX_ACCLERATOR:", false);
-	Utility.DebugLog("MaxAccelerator:" + String(acceleratorFactor), false);
 
 	this->m_skateMaxAccelerator = Utility.Lerp(MOTOR_MIN_DUTY, MOTOR_MAX_DUTY, acceleratorFactor);
+
+	Utility.DebugLog("MaxAccelerator:" + String(m_skateMaxAccelerator), true);
 
 	RefreshSkateGearByCurrentAccelerator();
 }

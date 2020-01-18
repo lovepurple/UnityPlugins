@@ -82,9 +82,9 @@ public:
 	float GetMotorNormalizedAccelerator();
 
 	/**
-	 * 设置油门大小
+	 * 通过油门大小设置速度
 	 */
-	void SetMotorByNormalizedAccelerator(const float normalizedAccelerator);
+	bool SetMotorByNormalizedAccelerator(const float normalizedAccelerator);
 
 	//使用占空比设置速度
 	void SetSpeedByDuty(float pwmDuty);
