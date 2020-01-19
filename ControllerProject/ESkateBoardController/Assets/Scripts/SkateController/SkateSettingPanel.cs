@@ -34,9 +34,9 @@ public class SkateSettingPanel : UIPanelLogicBase
         m_btnUp = m_panelRootObject.GetComponent<MaskableGraphic>("ButtonGroup/Button (4)");
         m_btnRefreshBattery = m_panelRootObject.GetComponent<MaskableGraphic>("ButtonGroup/Button (6)");
 
-        m_maxAccelerationSettingComponent = new SliderSettingComponent(m_panelRootObject.Find("SkateSettingGroup/setting_accelerator_factor").gameObject);
-        m_gearSettingComponent = new SliderSettingComponent(m_panelRootObject.Find("SkateSettingGroup/setting_accelerator_gear").gameObject);
-        m_brakeTimeSettingComponent = new SliderSettingComponent(m_panelRootObject.Find("SkateSettingGroup/setting_brake_time").gameObject);
+        m_maxAccelerationSettingComponent = new SliderSettingComponent(m_panelRootObject.Find("SkateSettingGroup/Viewport/Content/setting_accelerator_factor").gameObject);
+        m_gearSettingComponent = new SliderSettingComponent(m_panelRootObject.Find("SkateSettingGroup/Viewport/Content/setting_accelerator_gear").gameObject);
+        m_brakeTimeSettingComponent = new SliderSettingComponent(m_panelRootObject.Find("SkateSettingGroup/Viewport/Content/setting_brake_time").gameObject);
 
         m_maxAccelerationSettingComponent.SliderComponent.maxValue = GlobalDefine.MAX_ACCELERATOR;
         m_gearSettingComponent.SliderComponent.maxValue = GlobalDefine.MAX_GEAR_COUNT;
@@ -61,7 +61,7 @@ public class SkateSettingPanel : UIPanelLogicBase
         m_btnPowerOff.AddClickCallback(OnBtnPowerOffClick);
         m_btnRefreshBattery.AddClickCallback(OnBtnRefreshBatteryClick);
 
-     
+
 
         m_brakeTimeSettingComponent.AddOnSliderDragEndCallback(OnBrakeTimeSettingFinishCallback);
         m_maxAccelerationSettingComponent.AddOnSliderDragEndCallback(OnAcceleratorSettingFinishCallback);
