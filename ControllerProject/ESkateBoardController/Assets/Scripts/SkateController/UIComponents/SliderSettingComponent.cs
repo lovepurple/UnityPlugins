@@ -1,7 +1,4 @@
-﻿using GOGUI;
-using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -10,8 +7,8 @@ public class SliderSettingComponent : UIComponentBase
     private Slider m_sliderComponent;
     private Text m_sliderValueText;
 
-    private Action<float> m_onSliderValueChangedCallback;
-    private Action<float> m_onDragEndCallback;
+    private Action<SliderSettingComponent, float> m_onSliderValueChangedCallback;
+    private Action<SliderSettingComponent, float> m_onDragEndCallback;
 
     public SliderSettingComponent(GameObject gameObject) : base(gameObject) { }
 
@@ -29,41 +26,45 @@ public class SliderSettingComponent : UIComponentBase
 
     private void OnSliderValueChanged(float value)
     {
-        this.m_onSliderValueChangedCallback?.Invoke(value);
-        this.m_sliderValueText.text = String.Format("{0:F}", value);
+        this.m_onSliderValueChangedCallback?.Invoke(this, value);
+        this.m_sliderValueText.text = value.ToString("0.00");
     }
 
-    public void AddOnSliderValueChangedCallback(Action<float> callback)
+    public void AddOnSliderValueChangedCallback(Action<SliderSettingComponent, float> callback)
     {
         m_onSliderValueChangedCallback += callback;
     }
 
-    public void RemoveOnSliderValueChangedCallback(Action<float> callback)
+    public void RemoveOnSliderValueChangedCallback(Action<SliderSettingComponent, float> callback)
     {
         m_onSliderValueChangedCallback -= callback;
     }
 
-    public void AddOnSliderDragEndCallback(Action<float> callback)
+    public void AddOnSliderDragEndCallback(Action<SliderSettingComponent, float> callback)
     {
         m_onDragEndCallback += callback;
     }
-    public void RemoveOnSliderDragEndCallback(Action<float> callback)
+    public void RemoveOnSliderDragEndCallback(Action<SliderSettingComponent, float> callback)
     {
         m_onDragEndCallback -= callback;
     }
 
     private void OnDragEndCallbackInternal(GameObject go, Vector2 delta)
     {
-        m_onDragEndCallback?.Invoke(SliderComponent.value);
+        m_onDragEndCallback?.Invoke(this, SliderComponent.value);
     }
-
-
-
 
     public void SetValue(float value)
     {
         this.m_sliderComponent.value = value;
-        this.m_sliderValueText.text = value.ToString();
+        this.m_sliderValueText.text = value.ToString("0.00");
+    }
+
+    public void SetSliderMin(float minValue)
+    {
+        this.m_sliderComponent.minValue = minValue;
+
+        SetValue(Mathf.Max(minValue, this.SliderComponent.value));
     }
 
     protected override void OnUIComponentInvisible()
@@ -73,4 +74,5 @@ public class SliderSettingComponent : UIComponentBase
     }
 
     public Slider SliderComponent => this.m_sliderComponent;
+
 }

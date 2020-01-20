@@ -39,8 +39,8 @@ private:
 
 	unsigned long m_lastSlowMill;
 
-	float m_GearToPWM[GEAR_COUNT];
-
+	//档位对应的油门
+	float m_gearAccelerator[GEAR_COUNT];
 
 	/**
 	 * 根据刹车时间，获取归一化的油门大小（使用抛物线模型）
@@ -103,6 +103,11 @@ public:
 	int ConvertPWMToGear(float pwmDuty);
 
 	/**
+	 * 转换电机PWM到实际油门大小
+	 */
+	float ConvertPWMToAccelerator(const float pwmDuty);
+
+	/**
 	 * 刹车
 	 */
 	void Brake();
@@ -127,6 +132,11 @@ public:
 	 * 设置滑板挡位个数
 	 */
 	void SetSkateGearCount(Message& message);
+
+	/**
+	 * 设置挡位油门大小
+	 */
+	void SetSkateGearAccelerator(Message& message);
 
 	/**
 	 * 设置滑板最大油门的刹车时间

@@ -16,7 +16,7 @@ float MotorControllerClass::GetNormalizeAcceleratorByDeltaTime(unsigned long del
 void MotorControllerClass::RefreshSkateGearByCurrentAccelerator()
 {
 	for (unsigned int i = 0; i < this->m_gearCount; ++i)
-		this->m_GearToPWM[i] = Utility.Lerp(MOTOR_MIN_DUTY, m_skateMaxAccelerator, (float)i / this->m_gearCount);
+		this->m_gearAccelerator[i] = (float)i / this->m_gearCount;
 }
 
 void MotorControllerClass::init()
@@ -147,12 +147,11 @@ bool MotorControllerClass::SetMotorByNormalizedAccelerator(const float normalize
 {
 	float motorDuty = Utility.Remap(normalizedAccelerator, 0, 1, MOTOR_MIN_DUTY, this->m_skateMaxAccelerator);
 	bool isDutyChanged = this->m_currentMotorDuty != motorDuty;
-	3
 	Serial.println("=========");
 	Serial.println(motorDuty);
 	Serial.println(m_skateMaxAccelerator);
 	//if (isDutyChanged)
-		SetSpeedByDuty(motorDuty);
+	SetSpeedByDuty(motorDuty);
 
 	return isDutyChanged;
 }
@@ -180,27 +179,36 @@ void MotorControllerClass::SetSpeedByGear(unsigned int gearID)
 	if (gearID - currentGear > 1)
 		return;
 
-	SetSpeedByDuty(m_GearToPWM[gearID]);
+	SetSpeedByDuty(ConvertGearToPWMDuty(gearID));
 }
 
 
 float MotorControllerClass::ConvertGearToPWMDuty(unsigned int gearID)
 {
+	float gearAccelerator = 0.f;
 	if (gearID > GEAR_COUNT)
-		return m_GearToPWM[GEAR_COUNT - 1];
+		m_gearAccelerator[GEAR_COUNT - 1];
+	else
+		m_gearAccelerator[gearID];
 
-	return m_GearToPWM[gearID];
+	return Utility.Lerp(MOTOR_MIN_DUTY, this->m_skateMaxAccelerator, gearAccelerator);
 }
 
 int MotorControllerClass::ConvertPWMToGear(float pwmDuty)
 {
+	float accelerator = ConvertPWMToAccelerator(pwmDuty);
 	for (int i = 0; i < 5; ++i)
 	{
-		if (pwmDuty <= m_GearToPWM[i])
+		if (accelerator <= m_gearAccelerator[i])
 			return i;
 	}
 
 	return GEAR_COUNT;
+}
+
+float MotorControllerClass::ConvertPWMToAccelerator(const float pwmDuty)
+{
+	return Utility.Remap(pwmDuty, MOTOR_MIN_DUTY, this->m_skateMaxAccelerator, 0, 1);
 }
 
 void MotorControllerClass::Brake()
@@ -281,8 +289,6 @@ void MotorControllerClass::SetSkateMaxAccelerator(Message& message)
 	this->m_skateMaxAccelerator = Utility.Lerp(MOTOR_MIN_DUTY, MOTOR_MAX_DUTY, acceleratorFactor);
 
 	Utility.DebugLog("MaxAccelerator:" + String(m_skateMaxAccelerator), true);
-
-	RefreshSkateGearByCurrentAccelerator();
 }
 
 //消息格式  挡位个数 例如：5 5个挡位
@@ -303,6 +309,24 @@ void MotorControllerClass::SetSkateGearCount(Message& message)
 	this->m_gearCount = iGearCount;
 
 	RefreshSkateGearByCurrentAccelerator();
+}
+
+//消息格式  挡位ID 油门大小 例如： 110 ，挡位1 0.1的油门大小
+void MotorControllerClass::SetSkateGearAccelerator(Message& message)
+{
+	if (message.messageBodySize != 3)
+		return;
+
+	char* pGearAcceleratorMessage = message.messageBody;
+	int gearID = (int)pGearAcceleratorMessage[0];
+	int acceleator = atoi(pGearAcceleratorMessage + 1);
+
+	if (gearID > GEAR_COUNT || gearID < 1)
+		return;
+
+	this->m_gearAccelerator[gearID] = acceleator * 0.01f;
+
+	Utility.DebugLog("E_C2D_SETTING_SKATE_GEAR_ACCELETOR: GearID:" + String(gearID) + ",acceletator:" + String(this->m_gearAccelerator[gearID]), true);
 }
 
 //消息格式  刹车时间(4个字节) 例如： 4000  4000毫秒刹停

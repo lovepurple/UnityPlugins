@@ -19,6 +19,9 @@ public class SpeedController : Singleton<SpeedController>
     //轮子一圈长度
     private readonly float WHEEL_METER_PER_ROUND = 0.2608f;
 
+    //挡位对应的油门信息
+    private float[] m_gearAcceleratorInfos = new float[GlobalDefine.GEAR_COUNT];
+
     public SpeedController()
     {
 
@@ -117,7 +120,7 @@ public class SpeedController : Singleton<SpeedController>
             {
                 SetSkateAccelerator(LocalStorage.GetFloat(LocalSetting.E_SKATE_MAX_ACCELERATOR));
                 SetSkateBrakeTime(LocalStorage.GetInt(LocalSetting.E_SKATE_MAX_BRAKE_TIME));
-                SetSkateGearCount(LocalStorage.GetInt(LocalSetting.E_SKATE_GEAR_COUNT));
+                SendGearAcceleratorToSkate();
             }, 1f);
         }
         else
@@ -137,18 +140,18 @@ public class SpeedController : Singleton<SpeedController>
         this.m_currentGear = GetGear(((DigitUtility.GetUInt32(gearData) + 1) * 0.001f));
     }
 
-    public void SetSkateGearCount(int gearCount)
-    {
-        List<byte> messageBuffer = SkateMessageHandler.GetSkateMessage(MessageDefine.E_C2D_SETTING_SKATE_GEAR_COUNT);
+    //public void SetSkateGearCount(int gearCount)
+    //{
+    //    List<byte> messageBuffer = SkateMessageHandler.GetSkateMessage(MessageDefine.E_C2D_SETTING_SKATE_GEAR_COUNT);
 
-        messageBuffer.AddRange(Encoding.ASCII.GetBytes(gearCount.ToString()));
+    //    messageBuffer.AddRange(Encoding.ASCII.GetBytes(gearCount.ToString()));
 
-        BluetoothProxy.Intance.SendData(messageBuffer);
+    //    BluetoothProxy.Intance.SendData(messageBuffer);
 
-        LocalStorage.SaveSetting(LocalSetting.E_SKATE_GEAR_COUNT, gearCount.ToString());
+    //    LocalStorage.SaveSetting(LocalSetting.E_SKATE_GEAR_COUNT, gearCount.ToString());
 
-        GearCount = gearCount;
-    }
+    //    GearCount = gearCount;
+    //}
 
     public void SetSkateAccelerator(float accelerator01)
     {
@@ -202,6 +205,55 @@ public class SpeedController : Singleton<SpeedController>
         List<byte> messageBuffer = SkateMessageHandler.GetSkateMessage(MessageDefine.E_C2D_BRAKE_LINEAR);
 
         BluetoothProxy.Intance.SendData(messageBuffer);
+    }
+
+    public void SetGearAccelerator(int gearID, float accelerator)
+    {
+        float oldAccelerator = this.m_gearAcceleratorInfos[gearID];
+        if (accelerator != oldAccelerator)
+        {
+            this.m_gearAcceleratorInfos[gearID] = accelerator;
+
+            SendGearAcceleratorToSkate(gearID);
+
+
+        }
+
+    }
+
+    public float GetGearAccelerator(int gearID)
+    {
+        return this.m_gearAcceleratorInfos[gearID];
+    }
+
+    /// <summary>
+    /// 发送
+    /// </summary>
+    public void SendGearAcceleratorToSkate()
+    {
+        for (int i = 1; i < this.m_gearAcceleratorInfos.Length; ++i)
+        {
+            this.m_gearAcceleratorInfos[i] = LocalStorage.GetFloat((LocalSetting)i);
+
+            SendGearAcceleratorToSkate(i);
+        }
+    }
+
+    public void SendGearAcceleratorToSkate(int gearID)
+    {
+        List<byte> messageBuffer = SkateMessageHandler.GetSkateMessage(MessageDefine.E_C2D_SETTING_SKATE_GEAR_ACCELETOR);
+        StringBuilder strGearInfo = new StringBuilder(gearID.ToString());
+        strGearInfo.Append((int)(m_gearAcceleratorInfos[gearID] * 100));
+
+        List<byte> gearInfoBuffer = DigitUtility.GetFixedLengthBufferList(Encoding.ASCII.GetBytes(strGearInfo.ToString()).ToList(), 3, (byte)'0');
+        messageBuffer.AddRange(gearInfoBuffer);
+
+        BluetoothProxy.Intance.SendData(messageBuffer);
+    }
+
+    private void SaveGearAcceleratorInfo(int gearID, float accelerator)
+    {
+        LocalStorage.SaveSetting((LocalSetting)gearID, accelerator.ToString("{0:F}"));
     }
 
     public float SkateSpeed => GetSkateSpeedKilometerPerHour(this.m_motorRoundPerSecond);

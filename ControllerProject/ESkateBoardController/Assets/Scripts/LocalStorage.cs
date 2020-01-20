@@ -4,7 +4,6 @@ using UnityEngine;
 
 public static class LocalStorage
 {
-
     public static void SaveSetting(LocalSetting localSetting, string settingValue)
     {
         PlayerPrefs.SetString(localSetting.ToString(), settingValue);
@@ -37,6 +36,13 @@ public static class LocalStorage
 
 public enum LocalSetting
 {
+    //五个挡位对应的油门大小
+    E_SKATE_GEAR1_ACCELERATOR = 1,
+    E_SKATE_GEAR2_ACCELERATOR,
+    E_SKATE_GEAR3_ACCELERATOR,
+    E_SKATE_GEAR4_ACCELERATOR,
+    E_SKATE_GEAR5_ACCELERATOR,
+
     E_BLUETOOTH_DEVICE_TYPE,    //蓝牙类型
 
     E_SKATE_GEAR_COUNT,          //挡位个数

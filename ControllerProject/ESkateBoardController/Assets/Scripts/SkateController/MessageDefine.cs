@@ -5,7 +5,7 @@ public enum MessageDefine
 {
     E_C2D_SETTING_SKATE_MAX_ACCLERATOR = 95,                //设置滑板最大速度
     E_C2D_SETTING_SKATE_MAX_ACCLERATOR_BRAKE_TIME = 96,		//设置最大速度时的总刹车时间
-    E_C2D_SETTING_SKATE_GEAR_COUNT = 97,					//设置滑板档位数量
+    E_C2D_SETTING_SKATE_GEAR_ACCELETOR = 97,                //设置档位的油门大小
 
     E_C2D_MOTOR_POWERON = 110,      //电机开机
     E_C2D_MOTOR_POWEROFF = 111,    //电机关机

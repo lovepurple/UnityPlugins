@@ -18,7 +18,7 @@
 
 #define MOTOR_MIN_DUTY 0.05             //电机最小速度的占空比
 #define MOTOR_MAX_DUTY 0.1              //电机最大速度的占空比
-#define GEAR_COUNT 5                    //默认档位数量
+#define GEAR_COUNT 6                    //默认档位数量
 
 #define SYNC_GEAR_RATIO 11.0f/36.0f		//同步轮的比例小齿与大齿的比值
 #define WHEEL_METER_PER_ROUND 0.2608	//轮子一圈周长

@@ -31,6 +31,9 @@ public abstract class UIComponentBase
     protected abstract void OnUIComponentInvisible();
 
 
+    public string UIComponentName => UIComponentObject.name;
+
+
     public RectTransform UIRectTransform
     {
         get;
@@ -39,4 +42,8 @@ public abstract class UIComponentBase
 
     public GameObject UIComponentObject => this.m_componentObject;
 
+    public System.Object CustomData
+    {
+        get; set;
+    }
 }
