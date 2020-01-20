@@ -99,8 +99,7 @@ public class SpeedController : Singleton<SpeedController>
     /// <param name="gear"></param>
     private void SetSkateBoardSpeedByGear(int gear)
     {
-        int speedTemp = (int)MathUtil.Remap(gear, 0, GearCount, 0, 999);
-        //int speedThoudsand = (int)(speedTemp * GEAR_POWER_BASIC);
+        int speedTemp = (int)(this.m_gearAcceleratorInfos[gear] * 1000);
 
         List<byte> speedBuffer = DigitUtility.GetFixedLengthBufferList(Encoding.ASCII.GetBytes(speedTemp.ToString()).ToList(), 3, (byte)'0');
 
@@ -216,7 +215,7 @@ public class SpeedController : Singleton<SpeedController>
 
             SendGearAcceleratorToSkate(gearID);
 
-
+            SaveGearAcceleratorInfo(gearID, accelerator);
         }
 
     }
@@ -253,7 +252,7 @@ public class SpeedController : Singleton<SpeedController>
 
     private void SaveGearAcceleratorInfo(int gearID, float accelerator)
     {
-        LocalStorage.SaveSetting((LocalSetting)gearID, accelerator.ToString("{0:F}"));
+        LocalStorage.SaveSetting((LocalSetting)gearID, accelerator.ToString("0.00"));
     }
 
     public float SkateSpeed => GetSkateSpeedKilometerPerHour(this.m_motorRoundPerSecond);

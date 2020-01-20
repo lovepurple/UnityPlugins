@@ -147,9 +147,7 @@ bool MotorControllerClass::SetMotorByNormalizedAccelerator(const float normalize
 {
 	float motorDuty = Utility.Remap(normalizedAccelerator, 0, 1, MOTOR_MIN_DUTY, this->m_skateMaxAccelerator);
 	bool isDutyChanged = this->m_currentMotorDuty != motorDuty;
-	Serial.println("=========");
-	Serial.println(motorDuty);
-	Serial.println(m_skateMaxAccelerator);
+
 	//if (isDutyChanged)
 	SetSpeedByDuty(motorDuty);
 
@@ -318,15 +316,21 @@ void MotorControllerClass::SetSkateGearAccelerator(Message& message)
 		return;
 
 	char* pGearAcceleratorMessage = message.messageBody;
-	int gearID = (int)pGearAcceleratorMessage[0];
-	int acceleator = atoi(pGearAcceleratorMessage + 1);
+	int acceleatorInfo = atoi(pGearAcceleratorMessage);
+	int gearID = acceleatorInfo / 100;
+	int accelerator = acceleatorInfo % 100;
 
 	if (gearID > GEAR_COUNT || gearID < 1)
 		return;
 
-	this->m_gearAccelerator[gearID] = acceleator * 0.01f;
+	this->m_gearAccelerator[gearID] = accelerator * 0.01f;
 
-	Utility.DebugLog("E_C2D_SETTING_SKATE_GEAR_ACCELETOR: GearID:" + String(gearID) + ",acceletator:" + String(this->m_gearAccelerator[gearID]), true);
+	Utility.DebugLog("E_C2D_SETTING_SKATE_GEAR_ACCELETOR: GearID:", false);
+	Utility.DebugLog(String(gearID), false);
+	Utility.DebugLog(", Accelerator:", false);
+	Utility.DebugLog(String(this->m_gearAccelerator[gearID]), true);
+
+
 }
 
 //消息格式  刹车时间(4个字节) 例如： 4000  4000毫秒刹停

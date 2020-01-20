@@ -137,6 +137,7 @@ public class SkateSettingPanel : UIPanelLogicBase
     private void OnSettingGearAcceleratorCallback(SliderSettingComponent sliderSetting, float accelerator)
     {
         int gearID = (int)sliderSetting.CustomData;
+
         SpeedController.Instance.SetGearAccelerator(gearID, accelerator);
 
         RefreshGearAcceleratorUI(gearID);
@@ -149,13 +150,8 @@ public class SkateSettingPanel : UIPanelLogicBase
         for (int i = Mathf.Min(gearID, GlobalDefine.GEAR_COUNT); i < GlobalDefine.GEAR_COUNT - 1; i++)
         {
             this.m_gearAccelerationSettingComponents[i].SetSliderMin(this.m_gearAccelerationSettingComponents[i - 1].SliderComponent.value);
-            SpeedController.Instance.SetGearAccelerator(gearID, this.m_gearAccelerationSettingComponents[i - 1].SliderComponent.value);
+            SpeedController.Instance.SetGearAccelerator(i + 1, this.m_gearAccelerationSettingComponents[i - 1].SliderComponent.value);
         }
-    }
-
-    private void SettingGearAccelerator(int gearID, float accelerator)
-    {
-
     }
 
 
@@ -175,6 +171,7 @@ public class SkateSettingPanel : UIPanelLogicBase
         for (int i = 0; i < m_gearAccelerationSettingComponents.Count; ++i)
         {
             m_gearAccelerationSettingComponents[i].RemoveOnSliderDragEndCallback(OnSettingGearAcceleratorCallback);
+            m_gearAccelerationSettingComponents[i].SetActive(false);
         }
     }
 
