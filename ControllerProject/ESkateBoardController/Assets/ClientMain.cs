@@ -18,6 +18,12 @@ public class ClientMain : MonoSingleton<ClientMain>
         mainPanel.OnEnter();
     }
 
+    private void OnApplicationPause(bool pause)
+    {
+        if (pause)
+            SpeedController.Instance.BrakeSoftly();
+    }
+
 
     private void Update()
     {

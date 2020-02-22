@@ -73,6 +73,7 @@ public class SkateSettingPanel : UIPanelLogicBase
         {
             m_gearAccelerationSettingComponents[i].SetActive(true);
             m_gearAccelerationSettingComponents[i].CustomData = i + 1;
+            m_gearAccelerationSettingComponents[i].SetValue(LocalStorage.GetFloat((LocalSetting)(i + 1)));
             m_gearAccelerationSettingComponents[i].AddOnSliderDragEndCallback(OnSettingGearAcceleratorCallback);
         }
     }
