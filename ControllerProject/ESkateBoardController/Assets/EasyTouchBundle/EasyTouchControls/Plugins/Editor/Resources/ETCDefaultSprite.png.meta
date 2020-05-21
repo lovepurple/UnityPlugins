@@ -1,25 +1,57 @@
 fileFormatVersion: 2
 guid: becfdeef1534456438d787466a94d207
 TextureImporter:
-  fileIDToRecycleName:
-    21300000: ETCArea
-    21300002: ETCThumb
-    21300004: ETCFrame
-    21300006: ETCButtonNormal
-    21300008: ETCButtonPressed
-    21300010: EasyDefaultControl2_5
-    21300012: EasyDefaultControl2_6
-    21300014: EasyDefaultControl2_7
-    21300016: ETCThumb
-    21300018: ETCFrame
-    21300020: ETCArrow
-    21300022: ETCCircle
-    21300024: ETCButtonNormal
-    21300026: ETCButtonPressed
-    21300028: ETCDPad
-    21300030: ETCArea
+  internalIDToNameTable:
+  - first:
+      213: 21300000
+    second: ETCArea
+  - first:
+      213: 21300002
+    second: ETCThumb
+  - first:
+      213: 21300004
+    second: ETCFrame
+  - first:
+      213: 21300006
+    second: ETCButtonNormal
+  - first:
+      213: 21300008
+    second: ETCButtonPressed
+  - first:
+      213: 21300010
+    second: EasyDefaultControl2_5
+  - first:
+      213: 21300012
+    second: EasyDefaultControl2_6
+  - first:
+      213: 21300014
+    second: EasyDefaultControl2_7
+  - first:
+      213: 21300016
+    second: ETCThumb
+  - first:
+      213: 21300018
+    second: ETCFrame
+  - first:
+      213: 21300020
+    second: ETCArrow
+  - first:
+      213: 21300022
+    second: ETCCircle
+  - first:
+      213: 21300024
+    second: ETCButtonNormal
+  - first:
+      213: 21300026
+    second: ETCButtonPressed
+  - first:
+      213: 21300028
+    second: ETCDPad
+  - first:
+      213: 21300030
+    second: ETCArea
   externalObjects: {}
-  serializedVersion: 9
+  serializedVersion: 11
   mipmaps:
     mipMapMode: 0
     enableMipMap: 0
@@ -73,8 +105,9 @@ TextureImporter:
   maxTextureSizeSet: 0
   compressionQualitySet: 0
   textureFormatSet: 0
+  applyGammaDecoding: 1
   platformSettings:
-  - serializedVersion: 2
+  - serializedVersion: 3
     buildTarget: DefaultTexturePlatform
     maxTextureSize: 1024
     resizeAlgorithm: 0
@@ -85,6 +118,7 @@ TextureImporter:
     allowsAlphaSplitting: 0
     overridden: 0
     androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 1
   spriteSheet:
     serializedVersion: 2
     sprites:
@@ -104,6 +138,7 @@ TextureImporter:
       tessellationDetail: -1
       bones: []
       spriteID: 018b439af7f25084ea8480baa112874d
+      internalID: 21300002
       vertices: []
       indices: 
       edges: []
@@ -124,6 +159,7 @@ TextureImporter:
       tessellationDetail: -1
       bones: []
       spriteID: 5bcb8b55e57ac6a4daa384b08380fae2
+      internalID: 21300004
       vertices: []
       indices: 
       edges: []
@@ -144,6 +180,7 @@ TextureImporter:
       tessellationDetail: -1
       bones: []
       spriteID: ab163a1363df5634d943b06a06403212
+      internalID: 21300020
       vertices: []
       indices: 
       edges: []
@@ -164,6 +201,7 @@ TextureImporter:
       tessellationDetail: -1
       bones: []
       spriteID: 4eb48041bec84874bbf8736dd1b75058
+      internalID: 21300022
       vertices: []
       indices: 
       edges: []
@@ -184,6 +222,7 @@ TextureImporter:
       tessellationDetail: -1
       bones: []
       spriteID: 27f459f886b113e409d864d2962a9b74
+      internalID: 21300006
       vertices: []
       indices: 
       edges: []
@@ -204,6 +243,7 @@ TextureImporter:
       tessellationDetail: -1
       bones: []
       spriteID: 20ac7d4c52c74954ba455e1408a1fdab
+      internalID: 21300008
       vertices: []
       indices: 
       edges: []
@@ -224,6 +264,7 @@ TextureImporter:
       tessellationDetail: -1
       bones: []
       spriteID: 73289aeb1f5e04f4a8a535807126cf08
+      internalID: 21300028
       vertices: []
       indices: 
       edges: []
@@ -244,6 +285,7 @@ TextureImporter:
       tessellationDetail: -1
       bones: []
       spriteID: e1bcd5c5ba726fa408ca7a2d20e45ca0
+      internalID: 21300000
       vertices: []
       indices: 
       edges: []
@@ -252,10 +294,12 @@ TextureImporter:
     physicsShape: []
     bones: []
     spriteID: 
+    internalID: 0
     vertices: []
     indices: 
     edges: []
     weights: []
+    secondaryTextures: []
   spritePackingTag: ETCSprites
   pSDRemoveMatte: 0
   pSDShowRemoveMatteOption: 0
