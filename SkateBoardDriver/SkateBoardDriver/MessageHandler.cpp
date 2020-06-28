@@ -59,7 +59,7 @@ void MessageHandlerClass::OnHandleMessage(Message& message)
 {
 	switch (message.messageID)
 	{
-	case E_C2D_MOTOR_POWERON: //C++Ã¶¾Ù²»ÓÃĞ´È«Ãû
+	case E_C2D_MOTOR_POWERON: //C++æšä¸¾ä¸ç”¨å†™å…¨å
 		MotorController.PowerOn();
 		break;
 	case E_C2D_MOTOR_POWEROFF:
@@ -154,4 +154,4 @@ void MessageHandlerClass::SendMessageInternal()
 
 char MessageHandlerClass::Message_End_Flag = '\n';
 
-MessageHandlerClass MessageHandler;		//ÔÚCPPÀïĞèÒªÔÙÉùÃ÷Ò»ÏÂ
+MessageHandlerClass MessageHandler;		//åœ¨CPPé‡Œéœ€è¦å†å£°æ˜ä¸€ä¸‹

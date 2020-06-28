@@ -20,7 +20,7 @@
 #include "DriverMonitor.h"
 
 /**
- * Arduino ÏûÏ¢´¦ÀíÀà
+ * Arduino æ¶ˆæ¯å¤„ç†ç±»
  */
 class MessageHandlerClass
 {

@@ -55,7 +55,6 @@ public:
 	//使用占空比设置速度
 	void SetSpeedByDuty(float pwmDuty);
 
-<<<<<<< HEAD
 	//使用档位设置速度
 	void SetSpeedByGear(unsigned int gearID);
 
@@ -68,10 +67,6 @@ public:
 	 * 转换当PWM到档数位
 	 */
 	int ConvertPWMToGear(float pwmDuty);
-=======
-	//刹车
-	void Break();
->>>>>>> c614be853b210331b78117f9cd9ab0e7d9cc9883
 
 	/**************消息处理************************/
 	//todo:之后用(void*)

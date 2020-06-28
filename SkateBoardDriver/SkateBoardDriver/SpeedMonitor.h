@@ -1,5 +1,5 @@
 /**
- * »ùÓÚ»ô¶û´«¸ĞÆ÷£¬¼ì²âµç»ú×ªÊı£¬¼ÆËãËÙ¶È
+ * åŸºäºéœå°”ä¼ æ„Ÿå™¨ï¼Œæ£€æµ‹ç”µæœºè½¬æ•°ï¼Œè®¡ç®—é€Ÿåº¦
  */
 
 #ifndef _SPEEDMONITOR_h
@@ -18,28 +18,28 @@
 class SpeedMonitorClass
 {
 private:
-	//µç»úÒ»È¦´ÅÌúÊıÁ¿
+	//ç”µæœºä¸€åœˆç£é“æ•°é‡
 	const unsigned int MAGNET_COUNT = 2;
 
-	//Ã¿Á½¸öĞÅºÅÖ®Ç°µÄDelta×îĞ¡Öµ
+	//æ¯ä¸¤ä¸ªä¿¡å·ä¹‹å‰çš„Deltaæœ€å°å€¼
 	const unsigned int SIGNAL_DELTA_TIME = 10;
 
 	bool isEnableMonitor = false;
 
-	//Ë¢ĞÂ´«¸ĞÆ÷×´Ì¬
+	//åˆ·æ–°ä¼ æ„Ÿå™¨çŠ¶æ€
 	bool RefreshSensorValidState();
 
 	float m_kilometersPerHour;
 
 
 public:
-	//Ã¿ÃëĞÅºÅÊıÁ¿
+	//æ¯ç§’ä¿¡å·æ•°é‡
 	unsigned int SignalCountPerSecond;
 
-	//µç»úÃ¿Ãë×ªÊı
+	//ç”µæœºæ¯ç§’è½¬æ•°
 	int GetMotorRoundPerSecond();
 
-	//µ±Ç°ËÙ¶È km/h
+	//å½“å‰é€Ÿåº¦ km/h
 	float GetCurrentSpeedKilometerPerHour();
 
 	void Init();
@@ -49,12 +49,12 @@ public:
 	void EnableHallSensorMonitor(bool isEnable);
 
 	/**
-	 * »ñÈ¡µ±Ç°µç»úµÄ×ªÊı
+	 * è·å–å½“å‰ç”µæœºçš„è½¬æ•°
 	 */
 	char* GetCurrentMotorRPSMesssage();
 
 	/**
-	 * ×ª»»km/hµ½Êµ¼Êµç»ú×ªÊı
+	 * è½¬æ¢km/håˆ°å®é™…ç”µæœºè½¬æ•°
 	 */
 	static int ConvertKilometerPerHourToRPS(float kilometerPerHour);
 

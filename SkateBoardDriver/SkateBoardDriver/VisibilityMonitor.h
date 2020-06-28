@@ -1,5 +1,5 @@
 /**
- * ¾àÀë¼ì²â
+ * è·ç¦»æ£€æµ‹
  */
 
 #ifndef _VISIBILITYMONITOR_h
@@ -25,10 +25,10 @@ private:
 
 	bool m_isEnableMonitor;
 
-	//³¬Éù²¨delta Ê±¼ä
+	//è¶…å£°æ³¢delta æ—¶é—´
 	const unsigned int SONAR_DELTA_TIME = 500;
 
-	//½ô¼±É²³µ¾àÀë
+	//ç´§æ€¥åˆ¹è½¦è·ç¦»
 	const unsigned int EMERGENCY_STOP_DISTANCE = 20;
 
 
@@ -38,12 +38,12 @@ public:
 	void Tick();
 
 	/**
-	 * ÊÇ·ñ¿ªÆô¾àÀë¼à¿Ø
+	 * æ˜¯å¦å¼€å¯è·ç¦»ç›‘æ§
 	 */
 	void EnableVisibilityMonitor(bool isEnable);
 
 	/**
-	 * ×Ô¶¯¼õËÙ
+	 * è‡ªåŠ¨å‡é€Ÿ
 	 */
 	void AutoSlowDown();
 

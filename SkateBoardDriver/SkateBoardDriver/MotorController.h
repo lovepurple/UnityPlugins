@@ -21,34 +21,34 @@ private:
 	bool m_hasChangedPower = true;
 
 
-	float m_skateMaxAccelerator;					//»¬°åÔËĞĞÊ±×î´óÓÍÃÅ(ºóĞø¿ÉÒÔÓÉÊÖ»ú¶ËÖ±½ÓÉèÖÃ)
-	unsigned int m_maxSpeedBrakeMillTime;			//»¬°å×î´óËÙ¶ÈµÄÉ²³µÊ±¼ä
+	float m_skateMaxAccelerator;					//æ»‘æ¿è¿è¡Œæ—¶æœ€å¤§æ²¹é—¨(åç»­å¯ä»¥ç”±æ‰‹æœºç«¯ç›´æ¥è®¾ç½®)
+	unsigned int m_maxSpeedBrakeMillTime;			//æ»‘æ¿æœ€å¤§é€Ÿåº¦çš„åˆ¹è½¦æ—¶é—´
 	unsigned int m_gearCount = GEAR_COUNT;
 
 
 	void InitializePWM();
 
-	//ÊÇ·ñÕıÔÚÉ²³µÖĞ
+	//æ˜¯å¦æ­£åœ¨åˆ¹è½¦ä¸­
 	bool m_isBraking = false;
 
-	//É²³µÆÚ¼äÄÚµÄÊ±¼ä
+	//åˆ¹è½¦æœŸé—´å†…çš„æ—¶é—´
 	float m_brakingNormalizedTimeMill = 0;
 
-	//¼õËÙµÄÄ¿±êÓÍÃÅ, 0±íÊ¾É²Í£
+	//å‡é€Ÿçš„ç›®æ ‡æ²¹é—¨, 0è¡¨ç¤ºåˆ¹åœ
 	float m_breakingEndNormalizedAccelerator = 0.0f;
 
 	unsigned long m_lastSlowMill;
 
-	//µµÎ»¶ÔÓ¦µÄÓÍÃÅ
+	//æ¡£ä½å¯¹åº”çš„æ²¹é—¨
 	float m_gearAccelerator[GEAR_COUNT];
 
 	/**
-	 * ¸ù¾İÉ²³µÊ±¼ä£¬»ñÈ¡¹éÒ»»¯µÄÓÍÃÅ´óĞ¡£¨Ê¹ÓÃÅ×ÎïÏßÄ£ĞÍ£©
+	 * æ ¹æ®åˆ¹è½¦æ—¶é—´ï¼Œè·å–å½’ä¸€åŒ–çš„æ²¹é—¨å¤§å°ï¼ˆä½¿ç”¨æŠ›ç‰©çº¿æ¨¡å‹ï¼‰
 	 */
 	float GetNormalizeAcceleratorByDeltaTime(unsigned long deltaTimeMill);
 
 	/**
-	 * ¸ù¾İµ±Ç°×î´óÓÍÃÅË¢ĞÂµµÎ»ĞÅÏ¢
+	 * æ ¹æ®å½“å‰æœ€å¤§æ²¹é—¨åˆ·æ–°æ¡£ä½ä¿¡æ¯
 	 */
 	void RefreshSkateGearByCurrentAccelerator();
 public:
@@ -62,84 +62,84 @@ public:
 
 	void Tick();
 
-	//³õÊ¼»¯µçµ÷
+	//åˆå§‹åŒ–ç”µè°ƒ
 	void InitializeESC();
 
-	//µç»úÕı³£Æô¶¯
+	//ç”µæœºæ­£å¸¸å¯åŠ¨
 	void MotorStarup();
 
 	void MotorMinPower();
 
 	/**
-	 * ÉèÖÃ×î´óÓÍÃÅ£¨Ö»ÓĞÔÚÉèÖÃµçµ÷Ê±ÉúĞ§£©
+	 * è®¾ç½®æœ€å¤§æ²¹é—¨ï¼ˆåªæœ‰åœ¨è®¾ç½®ç”µè°ƒæ—¶ç”Ÿæ•ˆï¼‰
 	 */
 	void MotorMaxPower();
 
-	//Ê¹ÓÃ°Ù·Ö±ÈÉèÖÃËÙ¶È
+	//ä½¿ç”¨ç™¾åˆ†æ¯”è®¾ç½®é€Ÿåº¦
 	bool SetMotorPower(const float percentage01);
 
-	//»ñÈ¡µ±Ç°°Ù·Ö±ÈµÄÓÍÃÅ´óĞ¡
+	//è·å–å½“å‰ç™¾åˆ†æ¯”çš„æ²¹é—¨å¤§å°
 	float GetMotorNormalizedAccelerator();
 
 	/**
-	 * Í¨¹ıÓÍÃÅ´óĞ¡ÉèÖÃËÙ¶È
+	 * é€šè¿‡æ²¹é—¨å¤§å°è®¾ç½®é€Ÿåº¦
 	 */
 	bool SetMotorByNormalizedAccelerator(const float normalizedAccelerator);
 
-	//Ê¹ÓÃÕ¼¿Õ±ÈÉèÖÃËÙ¶È
+	//ä½¿ç”¨å ç©ºæ¯”è®¾ç½®é€Ÿåº¦
 	void SetSpeedByDuty(float pwmDuty);
 
-	//Ê¹ÓÃµµÎ»ÉèÖÃËÙ¶È
+	//ä½¿ç”¨æ¡£ä½è®¾ç½®é€Ÿåº¦
 	void SetSpeedByGear(unsigned int gearID);
 
 	/**
-	 * ×ª»»µµÎ»Êıµ½PWM
+	 * è½¬æ¢æ¡£ä½æ•°åˆ°PWM
 	 */
 	float ConvertGearToPWMDuty(unsigned int gearID);
 
 	/**
-	 * ×ª»»µ±PWMµ½µµÊıÎ»
+	 * è½¬æ¢å½“PWMåˆ°æ¡£æ•°ä½
 	 */
 	int ConvertPWMToGear(float pwmDuty);
 
 	/**
-	 * ×ª»»µç»úPWMµ½Êµ¼ÊÓÍÃÅ´óĞ¡
+	 * è½¬æ¢ç”µæœºPWMåˆ°å®é™…æ²¹é—¨å¤§å°
 	 */
 	float ConvertPWMToAccelerator(const float pwmDuty);
 
 	/**
-	 * É²³µ
+	 * åˆ¹è½¦
 	 */
 	void Brake();
 
 	/**
-	 * Á¢¼´É²Í£
+	 * ç«‹å³åˆ¹åœ
 	 */
 	void BrakeImmediately();
 
-	/**************ÏûÏ¢´¦Àí************************/
+	/**************æ¶ˆæ¯å¤„ç†************************/
 	char* Handle_GetCurrentSpeedMessage();
 
-	//ÉèÖÃËÙ¶È´¦Àí
+	//è®¾ç½®é€Ÿåº¦å¤„ç†
 	void Handle_SetPercentageSpeedMessage(Message& message);
 
 	/**
-	 * ÉèÖÃ»¬°å×î´óÓÍÃÅ
+	 * è®¾ç½®æ»‘æ¿æœ€å¤§æ²¹é—¨
 	 */
 	void SetSkateMaxAccelerator(Message& message);
 
 	/**
-	 * ÉèÖÃ»¬°åµ²Î»¸öÊı
+	 * è®¾ç½®æ»‘æ¿æŒ¡ä½ä¸ªæ•°
 	 */
 	void SetSkateGearCount(Message& message);
 
 	/**
-	 * ÉèÖÃµ²Î»ÓÍÃÅ´óĞ¡
+	 * è®¾ç½®æŒ¡ä½æ²¹é—¨å¤§å°
 	 */
 	void SetSkateGearAccelerator(Message& message);
 
 	/**
-	 * ÉèÖÃ»¬°å×î´óÓÍÃÅµÄÉ²³µÊ±¼ä
+	 * è®¾ç½®æ»‘æ¿æœ€å¤§æ²¹é—¨çš„åˆ¹è½¦æ—¶é—´
 	 */
 	void SetSkateMaxAcceleratorBrakeTime(Message& message);
 };

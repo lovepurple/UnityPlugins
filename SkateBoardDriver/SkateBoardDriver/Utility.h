@@ -16,29 +16,29 @@ protected:
 
 
 public:
-	//Clamp µ½01
+	//Clamp åˆ°01
 	float Clamp01(const float val);
 
 	float Clamp(float val, float minVal, float maxVal);
 
-	//ÏßĞÔ²åÖµ
+	//çº¿æ€§æ’å€¼
 	float Lerp(float minVal, float maxVal, float lerpFactor01);
 
-	//Çø¼äÓ³Éä
+	//åŒºé—´æ˜ å°„
 	float Remap(float val, float inputMin, float inputMax, float outMin, float outMax);
 
 	/**
-	 * ´òÓ¡Õı³£Log
+	 * æ‰“å°æ­£å¸¸Log
 	 */
 	static void DebugLog(String logContent, bool isNewLine);
 
 	/**
-	 * ´òÓ¡ÏûÏ¢
+	 * æ‰“å°æ¶ˆæ¯
 	 */
 	static void DebugMessage(String logContent, bool isNewLine);
 
 	/**
-	 * ´òÓ¡ÏûÏ¢ ÏûÏ¢½áÎ²ÒªÓĞ\0
+	 * æ‰“å°æ¶ˆæ¯ æ¶ˆæ¯ç»“å°¾è¦æœ‰\0
 	 */
 	static void DebugMessage(char* pMessage);
 };

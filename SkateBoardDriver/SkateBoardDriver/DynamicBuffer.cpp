@@ -21,7 +21,7 @@ char* DynamicBufferClass::GetBuffer()
 		pBuffer = m_bufferQueue.front();
 		m_bufferQueue.pop_front();
 	}
-	return pBuffer;			//如果是个空Buffer 直接崩溃
+	return pBuffer;			//濡傛灉鏄釜绌築uffer 鐩存帴宕╂簝
 }
 
 void DynamicBufferClass::RecycleBuffer(char* recycleBuffer)

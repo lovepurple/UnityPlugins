@@ -14,7 +14,7 @@
 #include "NewPing.h"
 
 /**
- *ÏµÍ³¿ØÖÆ
+ *ç³»ç»Ÿæ§åˆ¶
  */
 class SystemControllerClass
 {
@@ -26,13 +26,13 @@ public:
 	void init();
 
 	/**
-	 * ´¦Àí»ñÈ¡Ê£ÓàµçÁ¿ÏûÏ¢
+	 * å¤„ç†è·å–å‰©ä½™ç”µé‡æ¶ˆæ¯
 	 */
 	char* Handle_GetSystemRemainingPower();
 	//Handle_GetCurrentSpeedMessage
 
 		/**
-	 * »ñÈ¡µç³ØÊ£ÓàµÄµçÑ¹
+	 * è·å–ç”µæ± å‰©ä½™çš„ç”µå‹
 	 */
 	float GetBatteryVolt();
 

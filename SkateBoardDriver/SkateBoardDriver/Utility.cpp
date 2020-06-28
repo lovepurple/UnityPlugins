@@ -32,7 +32,7 @@ float UtilityClass::Remap(float val, float inputMin, float inputMax, float outMi
 
 void UtilityClass::DebugLog(String logContent, bool isNewLine)
 {
-	//使用宏时，虽然编译器没提示错误，也需要include global.h
+	//浣跨敤瀹忔椂锛岃櫧鐒剁紪璇戝櫒娌℃彁绀洪敊璇紝涔熼渶瑕乮nclude global.h
 #if DEBUG_MODE
 	Serial.print(logContent);
 	if (isNewLine)

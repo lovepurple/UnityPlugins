@@ -8,32 +8,32 @@
 #else
 #include "WProgram.h"
 #endif
-//C2D  Client To Driver ¿Í»§¶Ë->Çý¶¯Æ÷
+//C2D  Client To Driver å®¢æˆ·ç«¯->é©±åŠ¨å™¨
 
 enum EMessageDefine
 {
-	E_C2D_SETTING_SKATE_MAX_ACCLERATOR = 95,				//ÉèÖÃ»¬°å×î´óËÙ¶È
-	E_C2D_SETTING_SKATE_MAX_ACCLERATOR_BRAKE_TIME = 96,		//ÉèÖÃ×î´óËÙ¶ÈÊ±µÄ×ÜÉ²³µÊ±¼ä
-	E_C2D_SETTING_SKATE_GEAR_ACCELETOR = 97,                //ÉèÖÃµµÎ»µÄÓÍÃÅ´óÐ¡
+	E_C2D_SETTING_SKATE_MAX_ACCLERATOR = 95,				//è®¾ç½®æ»‘æ¿æœ€å¤§é€Ÿåº¦
+	E_C2D_SETTING_SKATE_MAX_ACCLERATOR_BRAKE_TIME = 96,		//è®¾ç½®æœ€å¤§é€Ÿåº¦æ—¶çš„æ€»åˆ¹è½¦æ—¶é—´
+	E_C2D_SETTING_SKATE_GEAR_ACCELETOR = 97,                //è®¾ç½®æ¡£ä½çš„æ²¹é—¨å¤§å°
 
-	E_C2D_MOTOR_POWERON = 110,      //µç»ú¿ª»ú
-	E_C2D_MOTOR_POWEROFF = 111,     //µç»ú¹Ø»ú
-	E_C2D_MOTOR_MAX_POWER = 112,    //Ð£Õý×î´óÓÍÃÅ
-	E_C2D_MOTOR_MIN_POWER = 113,    //Ð£Õý×îÐ¡ÓÍÃÅ
-	E_C2D_MOTOR_DRIVE = 114,        //µç»úµ÷ËÙ
-	E_C2D_MOTOR_INITIALIZE = 115,   //µçµ÷³õÊ¼»¯
-	E_C2D_MOTOR_NORMAL_START = 116, //µç»úÕý³£Æô¶¯
+	E_C2D_MOTOR_POWERON = 110,      //ç”µæœºå¼€æœº
+	E_C2D_MOTOR_POWEROFF = 111,     //ç”µæœºå…³æœº
+	E_C2D_MOTOR_MAX_POWER = 112,    //æ ¡æ­£æœ€å¤§æ²¹é—¨
+	E_C2D_MOTOR_MIN_POWER = 113,    //æ ¡æ­£æœ€å°æ²¹é—¨
+	E_C2D_MOTOR_DRIVE = 114,        //ç”µæœºè°ƒé€Ÿ
+	E_C2D_MOTOR_INITIALIZE = 115,   //ç”µè°ƒåˆå§‹åŒ–
+	E_C2D_MOTOR_NORMAL_START = 116, //ç”µæœºæ­£å¸¸å¯åŠ¨
 
-	E_C2D_MOTOR_GET_SPEED = 117, //»ñÈ¡µç»úµ±Ç°ËÙ¶È
-	E_D2C_MOTOR_SPEED = 118,     //·µ»Øµç»úµ±Ç°ËÙ¶È
+	E_C2D_MOTOR_GET_SPEED = 117, //èŽ·å–ç”µæœºå½“å‰é€Ÿåº¦
+	E_D2C_MOTOR_SPEED = 118,     //è¿”å›žç”µæœºå½“å‰é€Ÿåº¦
 
-	E_C2D_REMAINING_POWER = 119,	//»ñÈ¡Ê£ÓàµçÁ¿
-	E_D2C_REMAINING_POWER = 120,	//·µ»ØÊ£ÓàµçÁ¿
+	E_C2D_REMAINING_POWER = 119,	//èŽ·å–å‰©ä½™ç”µé‡
+	E_D2C_REMAINING_POWER = 120,	//è¿”å›žå‰©ä½™ç”µé‡
 
-	E_C2D_MOTOR_RPS = 121,			//»ñÈ¡µç»úÃ¿Ãë×ªÊý
-	E_D2C_MOTOR_RPS = 122,			//·µ»Øµç»úÃ¿Ãë×ªÊý
-	E_C2D_BRAKE_LINEAR = 123,        //ÈáºÍÉ²³µ
-	E_C2D_BRAKE_FORCE = 124,         //Ç¿ÖÆÉ²³µ
+	E_C2D_MOTOR_RPS = 121,			//èŽ·å–ç”µæœºæ¯ç§’è½¬æ•°
+	E_D2C_MOTOR_RPS = 122,			//è¿”å›žç”µæœºæ¯ç§’è½¬æ•°
+	E_C2D_BRAKE_LINEAR = 123,        //æŸ”å’Œåˆ¹è½¦
+	E_C2D_BRAKE_FORCE = 124,         //å¼ºåˆ¶åˆ¹è½¦
 
 	//accelerator
 };

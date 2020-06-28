@@ -40,7 +40,7 @@ void VisibilityMonitorClass::AutoSlowDown()
 		if (this->SonarDistance <= EMERGENCY_STOP_DISTANCE)
 			MotorController.BrakeImmediately();
 
-		//todoÆäËü¾àÀë¼õËÙ
+		//todoå…¶å®ƒè·ç¦»å‡é€Ÿ
 		else if (this->SonarDistance <= 50)
 			MotorController.Brake();
 	}
