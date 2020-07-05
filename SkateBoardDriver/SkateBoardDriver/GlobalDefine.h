@@ -40,10 +40,10 @@
 #define HALL_SENSOR_PIN 3
 
 //Debug模式,输出Log
-#define DEBUG_MODE 0
+#define DEBUG_MODE 1
 
 //是否Debug 消息与Debug普通的Log拆开
-#define DEBUG_MESSAGE 0
+#define DEBUG_MESSAGE 1
 
 //声明另一个类，include 或有循环include的问题 
 class MessageHandler;

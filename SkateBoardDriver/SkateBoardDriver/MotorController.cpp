@@ -2,7 +2,7 @@
 
 void MotorControllerClass::InitializePWM()
 {
-	Timer1.initialize(1000000 / ECS_FREQUENCY);		//在MotorController构造里init 不执行，不确定是否是有延迟或其它位置有更改
+	Timer1.initialize(1000000 / ECS_FREQUENCY);
 }
 
 float MotorControllerClass::GetNormalizeAcceleratorByDeltaTime(unsigned long deltaTimeMill)
@@ -173,7 +173,6 @@ void MotorControllerClass::SetSpeedByGear(unsigned int gearID)
 
 	int currentGear = ConvertPWMToGear(this->m_currentMotorDuty);
 
-	//不能跳档
 	if (gearID - currentGear > 1)
 		return;
 
@@ -211,7 +210,7 @@ float MotorControllerClass::ConvertPWMToAccelerator(const float pwmDuty)
 
 void MotorControllerClass::Brake()
 {
-	if (!this->m_isBraking)		//todo:是否打断一上一个
+	if (!this->m_isBraking)		 
 	{
 		Utility.DebugLog("Start Soft Brake:", false);
 		this->m_brakingNormalizedTimeMill = sqrt(1.0f - GetMotorNormalizedAccelerator()) * m_maxSpeedBrakeMillTime;
@@ -237,7 +236,6 @@ char* MotorControllerClass::Handle_GetCurrentSpeedMessage()
 	{
 		int speedThousands = max(0, int(GetMotorNormalizedAccelerator() * 1000 - 1));
 
-
 		char* pMessageBuffer = DynamicBuffer.GetBuffer();
 		pMessageBuffer[0] = E_D2C_MOTOR_SPEED;
 		itoa(speedThousands, pMessageBuffer + 1, 10);
@@ -254,7 +252,6 @@ char* MotorControllerClass::Handle_GetCurrentSpeedMessage()
 
 void MotorControllerClass::Handle_SetPercentageSpeedMessage(Message& message)
 {
-	//滤掉错包
 	if (message.messageBodySize != 3)
 		return;
 
@@ -269,12 +266,8 @@ void MotorControllerClass::Handle_SetPercentageSpeedMessage(Message& message)
 	this->m_hasChangedPower = this->SetMotorByNormalizedAccelerator(speedThousand / 999.0f);
 }
 
-//消息格式  油门大小 例如: 255  ,0.25油门
 void MotorControllerClass::SetSkateMaxAccelerator(Message& message)
 {
-	//油门设置是个缩放值 例如25转换到实际电机的PWM 就是 Lerp(PWM_MIN,PWM_MAX,25 /100) 为最大油门
-	//因为不经过转换太快了
-	//比例不能超过0.3 否则太快
 	if (message.messageBodySize != 2)
 		return;
 
@@ -289,7 +282,6 @@ void MotorControllerClass::SetSkateMaxAccelerator(Message& message)
 	Utility.DebugLog("MaxAccelerator:" + String(m_skateMaxAccelerator), true);
 }
 
-//消息格式  挡位个数 例如：5 5个挡位
 void MotorControllerClass::SetSkateGearCount(Message& message)
 {
 	if (message.messageBodySize != 1)
@@ -309,7 +301,6 @@ void MotorControllerClass::SetSkateGearCount(Message& message)
 	RefreshSkateGearByCurrentAccelerator();
 }
 
-//消息格式  挡位ID 油门大小 例如： 110 ，挡位1 0.1的油门大小
 void MotorControllerClass::SetSkateGearAccelerator(Message& message)
 {
 	if (message.messageBodySize != 3)
@@ -333,7 +324,6 @@ void MotorControllerClass::SetSkateGearAccelerator(Message& message)
 
 }
 
-//消息格式  刹车时间(4个字节) 例如： 4000  4000毫秒刹停
 void MotorControllerClass::SetSkateMaxAcceleratorBrakeTime(Message& message)
 {
 	if (message.messageBodySize != 4)

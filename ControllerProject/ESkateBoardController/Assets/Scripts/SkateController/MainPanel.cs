@@ -1,4 +1,4 @@
-﻿using DG.Tweening;
+using DG.Tweening;
 using EngineCore;
 using System;
 using UnityEngine;
@@ -9,9 +9,9 @@ public class MainPanel : UIPanelLogicBase
     private UIPanelLogicBase[] m_panelGroup = new UIPanelLogicBase[3];
     private const int Panel_WIDTH = 1080;
 
-    private Image m_btnESCSetting = null;
-    private Image m_btnOperate = null;
-    private Image m_btnBluetoothSetting = null;
+    private MaskableGraphic m_btnESCSetting = null;
+    private MaskableGraphic m_btnOperate = null;
+    private MaskableGraphic m_btnBluetoothSetting = null;
 
     private RectTransform m_functionPanelRootTransform = null;
     private Text m_panelTitle = null;
@@ -40,9 +40,9 @@ public class MainPanel : UIPanelLogicBase
         m_panelGroup[2] = new BluetoothPanel(m_panelRootObject.Find("PanelScrollRect/Viewport/Content/Connection").GetComponent<RectTransform>());
         m_panelGroup[2].OnCreate();
 
-        this.m_btnESCSetting = m_panelRootObject.GetComponent<Image>("Menu/MenuItem/Toggle/Background");
-        this.m_btnOperate = m_panelRootObject.GetComponent<Image>("Menu/MenuItem/Toggle (1)/Background");
-        this.m_btnBluetoothSetting = m_panelRootObject.GetComponent<Image>("Menu/MenuItem/Toggle (2)/Background");
+        this.m_btnESCSetting = m_panelRootObject.GetComponent<MaskableGraphic>("Menu/MenuItem/Toggle/Background");
+        this.m_btnOperate = m_panelRootObject.GetComponent<MaskableGraphic>("Menu/MenuItem/Toggle (1)/Background");
+        this.m_btnBluetoothSetting = m_panelRootObject.GetComponent<MaskableGraphic>("Menu/MenuItem/Toggle (2)/Background");
         m_panelTitle = m_panelRootObject.GetComponent<Text>("Text_PageTitle");
         m_functionPanelRootTransform = m_panelRootObject.Find("PanelScrollRect/Viewport/Content").GetComponent<RectTransform>();
 
@@ -80,19 +80,15 @@ public class MainPanel : UIPanelLogicBase
     private void SetToPanel(int panelIndex)
     {
         float moveDistanceX = Panel_WIDTH;
-        float moveDuration = 0.01f;
 
         if (m_currentPanelIndex == -1)
             moveDistanceX *= -panelIndex;
         else
-        {
             moveDistanceX *= m_currentPanelIndex - panelIndex;
-            moveDuration = Math.Abs(m_currentPanelIndex - panelIndex) * 0.3f;
-        }
 
         float currentX = this.m_functionPanelRootTransform.anchoredPosition.x;
 
-        this.m_functionPanelRootTransform.DOAnchorPosX(moveDistanceX + currentX, moveDuration).OnComplete(() =>
+        this.m_functionPanelRootTransform.DOAnchorPosX(moveDistanceX + currentX, 0.05f).OnComplete(() =>
         {
             if (this.m_currentPanelIndex != -1)
                 this.m_panelGroup[this.m_currentPanelIndex].OnExit();

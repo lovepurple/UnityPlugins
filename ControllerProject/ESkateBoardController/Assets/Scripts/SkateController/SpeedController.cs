@@ -1,4 +1,4 @@
-﻿using EngineCore;
+using EngineCore;
 using EngineCore.Utility;
 using System;
 using System.Collections.Generic;
@@ -19,8 +19,8 @@ public class SpeedController : Singleton<SpeedController>
     //轮子一圈长度
     private readonly float WHEEL_METER_PER_ROUND = 0.2608f;
 
-    //挡位对应的油门信息
-    private float[] m_gearAcceleratorInfos = new float[GlobalDefine.GEAR_COUNT];
+    //挡位对应的油门信息(0档为刹车)
+    private float[] m_gearAcceleratorInfos = new float[GlobalDefine.GEAR_COUNT + 1];
 
     public SpeedController()
     {
@@ -29,9 +29,6 @@ public class SpeedController : Singleton<SpeedController>
 
     public void InitSpeedController()
     {
-        if (GearCount == 0)
-            GearCount = (int)LocalStorage.GetFloat(LocalSetting.E_SKATE_GEAR_COUNT);
-
         MessageHandler.RegisterMessageHandler((int)MessageDefine.E_D2C_MOTOR_SPEED, OnGetMotorGearResponse);
         MessageHandler.RegisterMessageHandler((int)MessageDefine.E_D2C_MOTOR_RPS, OnGetMotorRoundPerSecondHandler);
         BluetoothEvents.OnBluetoothDeviceStateChangedEvent += OnBluetoothConnectionStateChangedHandler;
@@ -51,10 +48,14 @@ public class SpeedController : Singleton<SpeedController>
         else
         {
             normalizdPower = Mathf.Clamp01(normalizdPower);
-            //四舍五入
-            int gear = Mathf.RoundToInt(MathUtil.Remap(normalizdPower, 0, 1.0f, 0, GearCount));
+            for (int i = 0; i < m_gearAcceleratorInfos.Length - 1; ++i)
+            {
+                if (normalizdPower >= m_gearAcceleratorInfos[i] && normalizdPower < m_gearAcceleratorInfos[i + 1])
+                    return i;
+            }
+            //int gear = Mathf.RoundToInt(MathUtil.Remap(normalizdPower, 0, 1.0f, 0, GlobalDefine.GEAR_COUNT));
 
-            return gear;
+            return 0;
         }
     }
 
@@ -69,14 +70,14 @@ public class SpeedController : Singleton<SpeedController>
         if (gear <= 0)
             gear = 0;
 
-        if (gear > GearCount)
-            return;
-
         //不能跳档
-        if (Mathf.Abs(m_currentGear - gear) > 1)
-            return;
+        //if (Mathf.Abs(m_currentGear - gear) > 1)
+        //    return;
 
         SetSkateBoardSpeedByGear(gear);
+
+
+        TimeModule.Instance.SetTimeout(RequestMotorGear, 0.1f);
     }
 
     /// <summary>
@@ -126,11 +127,23 @@ public class SpeedController : Singleton<SpeedController>
             TimeModule.Instance.RemoveTimeaction(RequstMotorRPS);
     }
 
+    /// <summary>
+    /// 获取电机实时转数
+    /// </summary>
     private void RequstMotorRPS()
     {
-        List<byte> messageBuffer = SkateMessageHandler.GetSkateMessage(MessageDefine.E_C2D_MOTOR_RPS);
+        if (this.m_currentGear > 0)
+        {
+            List<byte> messageBuffer = SkateMessageHandler.GetSkateMessage(MessageDefine.E_C2D_MOTOR_RPS);
 
-        BluetoothProxy.Intance.SendData(messageBuffer);
+            BluetoothProxy.Intance.SendData(messageBuffer);
+        }
+    }
+
+    private void RequestMotorGear()
+    {
+        List<byte> sendMsgBuffer = SkateMessageHandler.GetSkateMessage(MessageDefine.E_C2D_MOTOR_GET_SPEED);
+        BluetoothProxy.Intance.SendData(sendMsgBuffer);
     }
 
     private void OnGetMotorGearResponse(object data)
@@ -138,6 +151,8 @@ public class SpeedController : Singleton<SpeedController>
         char[] gearData = (char[])data;
         this.m_currentGear = GetGear(((DigitUtility.GetUInt32(gearData) + 1) * 0.001f));
     }
+
+
 
     //public void SetSkateGearCount(int gearCount)
     //{
@@ -250,18 +265,13 @@ public class SpeedController : Singleton<SpeedController>
         BluetoothProxy.Intance.SendData(messageBuffer);
     }
 
+
     private void SaveGearAcceleratorInfo(int gearID, float accelerator)
     {
         LocalStorage.SaveSetting((LocalSetting)gearID, accelerator.ToString("0.00"));
     }
 
     public float SkateSpeed => GetSkateSpeedKilometerPerHour(this.m_motorRoundPerSecond);
-
-    public int GearCount
-    {
-        get; set;
-    }
-
 
     public int Gear => this.m_currentGear;
 }

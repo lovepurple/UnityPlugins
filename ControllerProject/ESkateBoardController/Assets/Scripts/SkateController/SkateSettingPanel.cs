@@ -23,7 +23,7 @@ public class SkateSettingPanel : UIPanelLogicBase
 
     public SkateSettingPanel(RectTransform uiPanelRootTransfrom) : base(uiPanelRootTransfrom)
     {
-        PanelName = "ÏµÍ³ÉèÖÃ";
+        PanelName = "ç³»ç»Ÿè®¾ç½®";
     }
 
     public override void OnCreate()
@@ -45,7 +45,6 @@ public class SkateSettingPanel : UIPanelLogicBase
         m_gearAccelerationSettingComponents.Add(new SliderSettingComponent(m_panelRootObject.Find("SkateSettingGroup/Viewport/Content/setting_gear5_accelerator").gameObject));
 
         m_maxAccelerationSettingComponent.SliderComponent.maxValue = GlobalDefine.MAX_ACCELERATOR;
-        //m_gearSettingComponent.SliderComponent.maxValue = GlobalDefine.MAX_GEAR_COUNT;
         m_brakeTimeSettingComponent.SliderComponent.maxValue = GlobalDefine.MAX_BRAKE_TIME;
 
         m_brakeTimeSettingComponent.SetActive(true);

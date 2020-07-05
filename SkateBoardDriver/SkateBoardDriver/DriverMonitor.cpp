@@ -7,14 +7,14 @@
 void DriverControllerClass::IsEnable(bool isEnable)
 {
 	SpeedMonitor.EnableHallSensorMonitor(isEnable);
-	VisibilityMonitor.EnableVisibilityMonitor(isEnable);
+	//VisibilityMonitor.EnableVisibilityMonitor(isEnable);
 }
 
 void DriverControllerClass::init()
 {
 	MotorController.init();
 
-	VisibilityMonitor.init();
+	//VisibilityMonitor.init();
 
 	SpeedMonitor.Init();
 }
@@ -23,7 +23,7 @@ void DriverControllerClass::Tick()
 {
 	MotorController.Tick();
 
-	VisibilityMonitor.Tick();
+	//VisibilityMonitor.Tick();
 
 	SpeedMonitor.Tick();
 }
