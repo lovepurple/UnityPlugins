@@ -1,8 +1,9 @@
-﻿/**
+/**
  *  Android 经典蓝牙2。0通讯
  */
 
 using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -47,7 +48,7 @@ public class AndroidBluetoothClassicDevice : IBluetoothDevice
 
     public void SendData(List<byte> sendBuffer)
     {
-        AndroidBridgeInstance.Call("sendMessage", sendBuffer.ToArray());
+        AndroidBridgeInstance.Call("sendMessage", Array.ConvertAll(sendBuffer.ToArray(), b => unchecked((sbyte)b)));
     }
 
     public BluetoothStatus GetBluetoothDeviceStatus()

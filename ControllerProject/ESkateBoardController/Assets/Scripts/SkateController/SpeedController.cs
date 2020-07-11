@@ -65,6 +65,15 @@ public class SpeedController : Singleton<SpeedController>
         SetGear(powerToGear);
     }
 
+    public void SetDeltaGear(int deltaGear)
+    {
+        int dstGear = m_currentGear + deltaGear;
+        if (dstGear < 0 || dstGear > GlobalDefine.GEAR_COUNT - 1)
+            return;
+
+        SetGear(dstGear);
+    }
+
     public void SetGear(int gear)
     {
         if (gear <= 0)

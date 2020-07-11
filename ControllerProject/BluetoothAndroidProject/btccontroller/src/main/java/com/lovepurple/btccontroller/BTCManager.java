@@ -35,6 +35,8 @@ import java.util.concurrent.LinkedTransferQueue;
 public class BTCManager {
     private static BTCManager _instance;
 
+    public static final String VOLUME_KEY_EVENT = "VOLUME_KEY_EVENT";
+
     //蓝牙连接用到的UUID
     public static String STR_UUID = "00001101-0000-1000-8000-00805F9B34FB";
 
@@ -76,16 +78,35 @@ public class BTCManager {
     public void initialBTCManager(UnityStringCallback onSendMessageToUnityCallback) {
         this.OnSendMessageToUnityHandler = onSendMessageToUnityCallback;
 
-        this._systemBroadcastReceiver = new BluetoothReceiver();
+        if (this._systemBroadcastReceiver == null) {
+            this._systemBroadcastReceiver = new BluetoothReceiver();
 
-        //注册IntentFilter
-        //Android坑爹 ACTION_CONNECTION)STATE_CHANGE 不好用
-        IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_ACL_CONNECTED);
-        filter.addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED);
-//        filter.addAction(BluetoothDevice.ACTION_ACL_DISCONNECT_REQUESTED);        //远程设备请求断开，不需要
+            //注册IntentFilter
+            //Android坑爹 ACTION_CONNECTION)STATE_CHANGE 不好用
+            IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_ACL_CONNECTED);
+            filter.addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED);
+            //        filter.addAction(BluetoothDevice.ACTION_ACL_DISCONNECT_REQUESTED);        //远程设备请求断开，不需要
 
-        _applicationContext.registerReceiver(_systemBroadcastReceiver, filter);      //Receiver里可进入的事件
+            _applicationContext.registerReceiver(_systemBroadcastReceiver, filter);      //Receiver里可进入的事件
+
+            IntentFilter volumeEventFilter = new IntentFilter(VOLUME_KEY_EVENT);
+            volumeEventFilter.addAction(VOLUME_KEY_EVENT);
+            _applicationContext.registerReceiver(new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    if (intent.getAction().equals(VOLUME_KEY_EVENT)) {
+                        int volumeKeyFlag = intent.getIntExtra("VOLUMEKEY", 0);
+                        UnityMessageAdapter unityMessageAdapter = new UnityMessageAdapter();
+                        unityMessageAdapter.mMessageID = UnityMessageDefine.VOLUME_KEY_PRESSED;
+                        unityMessageAdapter.mMessageBody = volumeKeyFlag;
+
+                        sendMessageToUnity(unityMessageAdapter);
+                    }
+                }
+            }, volumeEventFilter);
+        }
     }
+
 
     /**
      * 蓝牙是否开启
@@ -162,6 +183,12 @@ public class BTCManager {
     private void sendMessageToUnity(String jsonMessage) {
         if (OnSendMessageToUnityHandler != null)
             OnSendMessageToUnityHandler.sendMessage(jsonMessage);
+    }
+
+    private void sendMessageToUnity(UnityMessageAdapter messageToAdapter) {
+        Gson gson = new Gson();
+        String strMessage = gson.toJson(messageToAdapter);
+        sendMessageToUnity(strMessage);
     }
 
     /**

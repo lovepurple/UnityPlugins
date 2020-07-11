@@ -54,6 +54,7 @@ public class SkateOperatorPanel : UIPanelLogicBase
         m_btnGear4.AddClickCallback(OnSetGear4Click);
 
         //MessageHandler.RegisterMessageHandler((int)MessageDefine., OnGetMotorGearResponse);
+        BluetoothEvents.OnVolumeKeyEvent += OnVolumeKeyEventHandler;
     }
 
     private void OnSetGear1Click(GameObject obj)
@@ -88,12 +89,10 @@ public class SkateOperatorPanel : UIPanelLogicBase
         SpeedController.Instance.SetGear(0);
     }
 
-    private void OnJoyStickMove(Vector2 delta)
+    private void OnVolumeKeyEventHandler(int keyFlag)
     {
-        SpeedController.Instance.SetSpeedByNormalizedPower(delta.y);
+        SpeedController.Instance.SetDeltaGear(keyFlag);
     }
-
-
 
     /// <summary>
     /// 手指抬起，缓慢刹车
@@ -115,7 +114,7 @@ public class SkateOperatorPanel : UIPanelLogicBase
 
     public override void OnExit()
     {
-        base.OnExit();
+        BluetoothEvents.OnVolumeKeyEvent -= OnVolumeKeyEventHandler;
 
         m_btnStartup.RemoveClickCallback(OnBtnStartUpClick);
         m_btnStop.RemoveClickCallback(OnBtnStopClick);

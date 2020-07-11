@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -49,6 +49,9 @@ public class AndroidBluetoothMessageHandler : AndroidStringCallback
             case UnityAndroidMessageDefine.SEND_MESSAGE_BUFFER:
                 BluetoothEvents.OnReceiveDataEvent.SafeInvoke(Encoding.ASCII.GetBytes(messageBody));
                 break;
+            case UnityAndroidMessageDefine.VOLUME_KEY_PRESSED:
+                BluetoothEvents.OnVolumeKeyEvent.SafeInvoke(Convert.ToInt32(messageBody));
+                break;
             default:
                 break;
         }
@@ -57,12 +60,13 @@ public class AndroidBluetoothMessageHandler : AndroidStringCallback
 
     public enum UnityAndroidMessageDefine
     {
-        SEND_LOG = 0,                     //发送LOG
-        SEND_ERROR = 1,                 //发送ERROR
-        BLUETOOTH_STATE_CHANGED = 2,      //蓝牙状态改变
-        SEARCHED_DEVICE = 3,              //蓝牙搜索到设备
-        SEARCHED_DEVICE_FINISH,       //蓝牙搜索结束
-        SEND_MESSAGE_BUFFER,          //发送Buffer到Unity
+        SEND_LOG = 0,                       //发送LOG
+        SEND_ERROR = 1,                     //发送ERROR
+        BLUETOOTH_STATE_CHANGED = 2,        //蓝牙状态改变
+        SEARCHED_DEVICE = 3,                //蓝牙搜索到设备
+        SEARCHED_DEVICE_FINISH,             //蓝牙搜索结束
+        SEND_MESSAGE_BUFFER,                //发送Buffer到Unity
+        VOLUME_KEY_PRESSED,                 //音量键事件
     }
 
     private class UnityAndroidMessageAdapter

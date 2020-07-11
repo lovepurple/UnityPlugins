@@ -1,4 +1,4 @@
-﻿using EngineCore;
+using EngineCore;
 using System;
 using System.Collections.Generic;
 
@@ -41,4 +41,9 @@ public static class BluetoothEvents
     /// 扫描结束事件
     /// </summary>
     public static SafeAction<List<BluetoothDeviceInfo>> OnSearchFinishEvent;
+
+    /// <summary>
+    /// 音量键事件
+    /// </summary>
+    public static SafeAction<int> OnVolumeKeyEvent;
 }

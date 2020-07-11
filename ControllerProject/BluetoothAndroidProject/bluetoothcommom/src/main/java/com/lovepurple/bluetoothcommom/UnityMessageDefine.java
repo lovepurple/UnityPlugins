@@ -12,6 +12,7 @@ public final class UnityMessageDefine {
     public final static int SEARCHED_DEVICE = 3;              //蓝牙搜索到设备
     public final static int SEARCHED_DEVICE_FINISH = 4;       //蓝牙搜索结束
     public final static int SEND_MESSAGE_BUFFER = 5;          //发送Buffer到Unity
+    public final static int VOLUME_KEY_PRESSED = 6;           //音量按键按下
 
 
     /**
