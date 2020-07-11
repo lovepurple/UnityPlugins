@@ -48,12 +48,15 @@ public class SpeedController : Singleton<SpeedController>
         else
         {
             normalizdPower = Mathf.Clamp01(normalizdPower);
+            int intNormalizePower = Mathf.CeilToInt(normalizdPower * 1000);
+
             for (int i = 0; i < m_gearAcceleratorInfos.Length - 1; ++i)
             {
-                if (normalizdPower >= m_gearAcceleratorInfos[i] && normalizdPower < m_gearAcceleratorInfos[i + 1])
+                int intGearPower = Mathf.CeilToInt(m_gearAcceleratorInfos[i] * 1000);
+
+                if (Math.Abs(intNormalizePower - intGearPower) <= 10)
                     return i;
             }
-            //int gear = Mathf.RoundToInt(MathUtil.Remap(normalizdPower, 0, 1.0f, 0, GlobalDefine.GEAR_COUNT));
 
             return 0;
         }
@@ -68,8 +71,10 @@ public class SpeedController : Singleton<SpeedController>
     public void SetDeltaGear(int deltaGear)
     {
         int dstGear = m_currentGear + deltaGear;
-        if (dstGear < 0 || dstGear > GlobalDefine.GEAR_COUNT - 1)
+        if (dstGear > GlobalDefine.GEAR_COUNT - 1)
             return;
+
+        dstGear = Mathf.Max(dstGear, 0);
 
         SetGear(dstGear);
     }
@@ -235,6 +240,9 @@ public class SpeedController : Singleton<SpeedController>
         float oldAccelerator = this.m_gearAcceleratorInfos[gearID];
         if (accelerator != oldAccelerator)
         {
+            //保留两位小数
+            accelerator = float.Parse(accelerator.ToString("0.00"));
+
             this.m_gearAcceleratorInfos[gearID] = accelerator;
 
             SendGearAcceleratorToSkate(gearID);

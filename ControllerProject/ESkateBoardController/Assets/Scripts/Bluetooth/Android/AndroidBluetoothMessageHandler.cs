@@ -71,8 +71,8 @@ public class AndroidBluetoothMessageHandler : AndroidStringCallback
 
     private class UnityAndroidMessageAdapter
     {
-        public int mMessageID;
-        public object mMessageBody;
+        public int mMessageID = 0;
+        public object mMessageBody = null;
     }
 }
 

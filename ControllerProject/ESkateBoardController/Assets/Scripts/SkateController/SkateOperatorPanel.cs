@@ -1,13 +1,10 @@
 using EngineCore;
 using System.Collections.Generic;
-using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class SkateOperatorPanel : UIPanelLogicBase
 {
-    private const int GearCount = 5; //档位数量
-
     private MaskableGraphic m_btnStartup;
     private MaskableGraphic m_btnStop;
 
@@ -16,11 +13,7 @@ public class SkateOperatorPanel : UIPanelLogicBase
     private MaskableGraphic m_btnGear3;
     private MaskableGraphic m_btnGear4;
 
-
     private Text m_txtMotorPower = null;
-
-    private bool m_isStarpup = true;
-
 
     public SkateOperatorPanel(RectTransform uiPanelRootTransfrom) : base(uiPanelRootTransfrom)
     {
@@ -53,7 +46,7 @@ public class SkateOperatorPanel : UIPanelLogicBase
         m_btnGear3.AddClickCallback(OnSetGear3Click);
         m_btnGear4.AddClickCallback(OnSetGear4Click);
 
-        //MessageHandler.RegisterMessageHandler((int)MessageDefine., OnGetMotorGearResponse);
+        MessageHandler.RegisterMessageHandler((int)MessageDefine.E_D2C_MOTOR_SPEED, OnGetMotorGearResponse);
         BluetoothEvents.OnVolumeKeyEvent += OnVolumeKeyEventHandler;
     }
 
@@ -115,6 +108,7 @@ public class SkateOperatorPanel : UIPanelLogicBase
     public override void OnExit()
     {
         BluetoothEvents.OnVolumeKeyEvent -= OnVolumeKeyEventHandler;
+        MessageHandler.UnRegisterMessageHandler((int)MessageDefine.E_D2C_MOTOR_SPEED, OnGetMotorGearResponse);
 
         m_btnStartup.RemoveClickCallback(OnBtnStartUpClick);
         m_btnStop.RemoveClickCallback(OnBtnStopClick);
